@@ -94,32 +94,45 @@ export async function getTopProducts(
     return [];
   }
 
-  // Group line items by product
-  const lineItems = await prisma.lineItem.groupBy({
-    by: ["productId"],
+  // Fetch line items to calculate revenue correctly (price * quantity)
+  const lineItems = await prisma.lineItem.findMany({
     where: {
       orderId: { in: orderIds },
       productId: { not: null },
     },
-    _sum: {
+    select: {
+      productId: true,
       price: true,
       quantity: true,
-    },
-    _count: {
       orderId: true,
     },
-    orderBy: {
-      _sum: {
-        price: "desc",
-      },
-    },
-    take: limit,
   });
 
-  // Get product details
-  const productIds = lineItems
-    .map((li) => li.productId)
-    .filter((id): id is string => id !== null);
+  // Aggregate by product with correct revenue calculation
+  const productAggregates = new Map<
+    string,
+    { revenue: number; unitsSold: number; orderIds: Set<string> }
+  >();
+
+  for (const item of lineItems) {
+    if (!item.productId) continue;
+    const existing = productAggregates.get(item.productId) || {
+      revenue: 0,
+      unitsSold: 0,
+      orderIds: new Set<string>(),
+    };
+    existing.revenue += Number(item.price || 0) * (item.quantity || 1);
+    existing.unitsSold += item.quantity || 0;
+    existing.orderIds.add(item.orderId);
+    productAggregates.set(item.productId, existing);
+  }
+
+  // Sort by revenue descending and take top N
+  const sortedProducts = Array.from(productAggregates.entries())
+    .sort((a, b) => b[1].revenue - a[1].revenue)
+    .slice(0, limit);
+
+  const productIds = sortedProducts.map(([id]) => id);
 
   const products = await prisma.product.findMany({
     where: { id: { in: productIds } },
@@ -127,14 +140,14 @@ export async function getTopProducts(
 
   const productMap = new Map(products.map((p) => [p.id, p]));
 
-  return lineItems.map((li) => {
-    const product = productMap.get(li.productId!);
+  return sortedProducts.map(([productId, aggregate]) => {
+    const product = productMap.get(productId);
     return {
-      productId: li.productId!,
+      productId,
       title: product?.title || "Unknown Product",
-      revenue: Number(li._sum.price || 0),
-      unitsSold: li._sum.quantity || 0,
-      orderCount: li._count.orderId,
+      revenue: aggregate.revenue,
+      unitsSold: aggregate.unitsSold,
+      orderCount: aggregate.orderIds.size,
     };
   });
 }
@@ -160,16 +173,18 @@ export async function getTopCustomers(
 
 export async function getDailyRevenue(
   storeId: string,
-  days = 30
+  startDate?: Date,
+  endDate?: Date
 ): Promise<{ date: string; revenue: number; orders: number }[]> {
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - days);
-  startDate.setHours(0, 0, 0, 0);
+  const end = endDate || new Date();
+  const start = startDate || new Date(new Date().setDate(new Date().getDate() - 30));
+  start.setHours(0, 0, 0, 0);
+  end.setHours(23, 59, 59, 999);
 
   const orders = await prisma.order.findMany({
     where: {
       storeId,
-      shopifyCreatedAt: { gte: startDate },
+      shopifyCreatedAt: { gte: start, lte: end },
       financialStatus: { not: "refunded" },
       cancelledAt: null,
     },
@@ -193,10 +208,9 @@ export async function getDailyRevenue(
 
   // Fill in missing dates
   const result: { date: string; revenue: number; orders: number }[] = [];
-  const currentDate = new Date(startDate);
-  const today = new Date();
+  const currentDate = new Date(start);
 
-  while (currentDate <= today) {
+  while (currentDate <= end) {
     const dateStr = currentDate.toISOString().split("T")[0];
     result.push({
       date: dateStr,

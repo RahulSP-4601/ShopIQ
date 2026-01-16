@@ -10,6 +10,7 @@ interface ReportContent {
   type: string;
   title: string;
   generatedAt: string;
+  currency?: string;
   dateRange?: {
     start: string;
     end: string;
@@ -32,7 +33,7 @@ export function ReportView({ report }: ReportViewProps) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "USD",
+      currency: content?.currency || "USD",
     }).format(amount);
   };
 

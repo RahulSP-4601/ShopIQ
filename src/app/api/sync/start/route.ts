@@ -6,7 +6,18 @@ export async function POST() {
   try {
     const store = await requireAuth();
 
+    // Prevent concurrent syncs
+    if (store.syncStatus === "SYNCING") {
+      return NextResponse.json({
+        status: "syncing",
+        message: "Sync already in progress",
+      });
+    }
+
     // Start sync in background (don't await)
+    // NOTE: In serverless environments (e.g., Vercel), this fire-and-forget pattern
+    // may cause incomplete syncs if the function instance is recycled. Consider using
+    // a background job queue (Inngest, QStash) or Next.js unstable_after for production.
     startFullSync(store).catch((error) => {
       console.error("Sync error:", error);
     });

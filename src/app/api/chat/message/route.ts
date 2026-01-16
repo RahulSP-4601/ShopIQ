@@ -29,11 +29,15 @@ export async function POST(request: NextRequest) {
         where: { id: conversationId, storeId: store.id },
         include: {
           messages: {
-            orderBy: { createdAt: "asc" },
+            orderBy: { createdAt: "desc" },
             take: 20, // Last 20 messages for context
           },
         },
       });
+      // Reverse to get chronological order (oldest first)
+      if (conversation) {
+        conversation.messages.reverse();
+      }
     }
 
     if (!conversation) {

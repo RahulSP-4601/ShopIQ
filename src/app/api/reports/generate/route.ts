@@ -40,46 +40,55 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Generate report data
-    let reportData;
-    const start = startDate ? new Date(startDate) : undefined;
-    const end = endDate ? new Date(endDate) : undefined;
+    try {
+      // Generate report data
+      let reportData;
+      const start = startDate ? new Date(startDate) : undefined;
+      const end = endDate ? new Date(endDate) : undefined;
 
-    switch (type) {
-      case "REVENUE_SUMMARY":
-        reportData = await generateRevenueSummaryData(store.id, start, end);
-        break;
-      case "PRODUCT_ANALYSIS":
-        reportData = await generateProductAnalysisData(store.id, start, end);
-        break;
-      case "CUSTOMER_INSIGHTS":
-        reportData = await generateCustomerInsightsData(store.id);
-        break;
-      case "FULL_ANALYSIS":
-        reportData = await generateFullAnalysisData(store.id);
-        break;
-      default:
-        throw new Error("Invalid report type");
+      switch (type) {
+        case "REVENUE_SUMMARY":
+          reportData = await generateRevenueSummaryData(store.id, start, end);
+          break;
+        case "PRODUCT_ANALYSIS":
+          reportData = await generateProductAnalysisData(store.id, start, end);
+          break;
+        case "CUSTOMER_INSIGHTS":
+          reportData = await generateCustomerInsightsData(store.id);
+          break;
+        case "FULL_ANALYSIS":
+          reportData = await generateFullAnalysisData(store.id);
+          break;
+        default:
+          throw new Error("Invalid report type");
+      }
+
+      // Generate AI summary
+      const summary = await generateReport(
+        type,
+        JSON.stringify(reportData.metrics, null, 2),
+        store.name
+      );
+
+      // Update report with data and summary
+      const updatedReport = await prisma.report.update({
+        where: { id: report.id },
+        data: {
+          content: reportData,
+          summary,
+          status: "COMPLETED",
+        },
+      });
+
+      return NextResponse.json(updatedReport);
+    } catch (generationError) {
+      // Mark report as failed to prevent orphan reports
+      await prisma.report.update({
+        where: { id: report.id },
+        data: { status: "FAILED" },
+      });
+      throw generationError;
     }
-
-    // Generate AI summary
-    const summary = await generateReport(
-      type,
-      JSON.stringify(reportData.metrics, null, 2),
-      store.name
-    );
-
-    // Update report with data and summary
-    const updatedReport = await prisma.report.update({
-      where: { id: report.id },
-      data: {
-        content: reportData,
-        summary,
-        status: "COMPLETED",
-      },
-    });
-
-    return NextResponse.json(updatedReport);
   } catch (error) {
     console.error("Report generation error:", error);
     return NextResponse.json(

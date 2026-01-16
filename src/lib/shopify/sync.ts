@@ -416,57 +416,60 @@ async function upsertOrder(storeId: string, order: ShopifyOrder) {
     },
   });
 
-  // Delete existing line items and recreate
-  await prisma.lineItem.deleteMany({
-    where: { orderId: dbOrder.id },
-  });
+  // Delete existing line items and recreate in a transaction
+  // to keep the delete+recreate atomic
+  await prisma.$transaction(async (tx) => {
+    await tx.lineItem.deleteMany({
+      where: { orderId: dbOrder.id },
+    });
 
-  // Create line items
-  for (const item of order.line_items) {
-    // Find product and variant if they exist
-    let productId: string | null = null;
-    let variantId: string | null = null;
+    // Create line items
+    for (const item of order.line_items) {
+      // Find product and variant if they exist
+      let productId: string | null = null;
+      let variantId: string | null = null;
 
-    if (item.product_id) {
-      const product = await prisma.product.findUnique({
-        where: {
-          storeId_shopifyId: {
-            storeId,
-            shopifyId: String(item.product_id),
-          },
-        },
-      });
-      productId = product?.id || null;
-
-      if (product && item.variant_id) {
-        const variant = await prisma.productVariant.findUnique({
+      if (item.product_id) {
+        const product = await tx.product.findUnique({
           where: {
-            productId_shopifyId: {
-              productId: product.id,
-              shopifyId: String(item.variant_id),
+            storeId_shopifyId: {
+              storeId,
+              shopifyId: String(item.product_id),
             },
           },
         });
-        variantId = variant?.id || null;
-      }
-    }
+        productId = product?.id || null;
 
-    await prisma.lineItem.create({
-      data: {
-        order: { connect: { id: dbOrder.id } },
-        productId,
-        variantId,
-        shopifyProductId: item.product_id ? String(item.product_id) : null,
-        shopifyVariantId: item.variant_id ? String(item.variant_id) : null,
-        title: item.title,
-        variantTitle: item.variant_title || null,
-        sku: item.sku || null,
-        quantity: item.quantity,
-        price: new Prisma.Decimal(item.price),
-        totalDiscount: new Prisma.Decimal(item.total_discount || "0"),
-      },
-    });
-  }
+        if (product && item.variant_id) {
+          const variant = await tx.productVariant.findUnique({
+            where: {
+              productId_shopifyId: {
+                productId: product.id,
+                shopifyId: String(item.variant_id),
+              },
+            },
+          });
+          variantId = variant?.id || null;
+        }
+      }
+
+      await tx.lineItem.create({
+        data: {
+          order: { connect: { id: dbOrder.id } },
+          productId,
+          variantId,
+          shopifyProductId: item.product_id ? String(item.product_id) : null,
+          shopifyVariantId: item.variant_id ? String(item.variant_id) : null,
+          title: item.title,
+          variantTitle: item.variant_title || null,
+          sku: item.sku || null,
+          quantity: item.quantity,
+          price: new Prisma.Decimal(item.price),
+          totalDiscount: new Prisma.Decimal(item.total_discount || "0"),
+        },
+      });
+    }
+  });
 }
 
 export async function getSyncStatus(storeId: string) {
