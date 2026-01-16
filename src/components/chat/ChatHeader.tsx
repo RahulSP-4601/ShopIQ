@@ -2,15 +2,9 @@
 
 interface ChatHeaderProps {
   isConnected: boolean;
-  storeName?: string;
-  storeDomain?: string;
 }
 
-export function ChatHeader({
-  isConnected,
-  storeName,
-  storeDomain,
-}: ChatHeaderProps) {
+export function ChatHeader({ isConnected }: ChatHeaderProps) {
   return (
     <header className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4">
       {/* Logo */}
@@ -22,15 +16,6 @@ export function ChatHeader({
           <span className="text-lg font-bold text-slate-900">ShopIQ</span>
         </a>
 
-        {isConnected && storeName && (
-          <>
-            <span className="text-slate-300">|</span>
-            <div>
-              <p className="text-sm font-medium text-slate-700">{storeName}</p>
-              <p className="text-xs text-slate-400">{storeDomain}</p>
-            </div>
-          </>
-        )}
       </div>
 
       {/* Right side */}

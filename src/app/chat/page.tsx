@@ -26,11 +26,7 @@ export default async function ChatPage() {
       {/* Main chat area */}
       <div className="flex flex-1 flex-col">
         {/* Header with Connect button when not connected */}
-        <ChatHeader
-          isConnected={isConnected}
-          storeName={store?.name}
-          storeDomain={store?.domain}
-        />
+        <ChatHeader isConnected={isConnected} />
 
         {/* Chat container */}
         <main className="flex-1 overflow-hidden">
