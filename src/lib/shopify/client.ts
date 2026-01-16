@@ -1,6 +1,9 @@
 import { Store } from "@prisma/client";
 
-const API_VERSION = "2024-01";
+// Use a supported Shopify API version - update this periodically
+// Supported versions as of 2026: 2026-01, 2025-10, 2025-07, 2025-04
+const API_VERSION = process.env.SHOPIFY_API_VERSION || "2025-10";
+const FETCH_TIMEOUT_MS = 30000; // 30 second timeout for API calls
 
 export class ShopifyClient {
   private store: Store;
@@ -11,22 +14,29 @@ export class ShopifyClient {
 
   private async fetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const url = `https://${this.store.domain}/admin/api/${API_VERSION}${endpoint}`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        "X-Shopify-Access-Token": this.store.accessToken,
-        "Content-Type": "application/json",
-        ...options?.headers,
-      },
-    });
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+        headers: {
+          "X-Shopify-Access-Token": this.store.accessToken,
+          "Content-Type": "application/json",
+          ...options?.headers,
+        },
+      });
 
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`Shopify API error: ${response.status} - ${error}`);
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Shopify API error: ${response.status} - ${error}`);
+      }
+
+      return response.json();
+    } finally {
+      clearTimeout(timeoutId);
     }
-
-    return response.json();
   }
 
   async getShopInfo(): Promise<ShopifyShop> {
@@ -49,28 +59,36 @@ export class ShopifyClient {
       searchParams.set("page_info", params.page_info);
     }
 
-    const response = await fetch(
-      `https://${this.store.domain}/admin/api/${API_VERSION}/products.json?${searchParams}`,
-      {
-        headers: {
-          "X-Shopify-Access-Token": this.store.accessToken,
-          "Content-Type": "application/json",
-        },
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+    try {
+      const response = await fetch(
+        `https://${this.store.domain}/admin/api/${API_VERSION}/products.json?${searchParams}`,
+        {
+          signal: controller.signal,
+          headers: {
+            "X-Shopify-Access-Token": this.store.accessToken,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Shopify API error: ${response.status}`);
       }
-    );
 
-    if (!response.ok) {
-      throw new Error(`Shopify API error: ${response.status}`);
+      const data = await response.json();
+      const linkHeader = response.headers.get("Link");
+      const nextPageInfo = extractNextPageInfo(linkHeader);
+
+      return {
+        products: data.products,
+        nextPageInfo,
+      };
+    } finally {
+      clearTimeout(timeoutId);
     }
-
-    const data = await response.json();
-    const linkHeader = response.headers.get("Link");
-    const nextPageInfo = extractNextPageInfo(linkHeader);
-
-    return {
-      products: data.products,
-      nextPageInfo,
-    };
   }
 
   async getCustomersCount(): Promise<number> {
@@ -88,28 +106,36 @@ export class ShopifyClient {
       searchParams.set("page_info", params.page_info);
     }
 
-    const response = await fetch(
-      `https://${this.store.domain}/admin/api/${API_VERSION}/customers.json?${searchParams}`,
-      {
-        headers: {
-          "X-Shopify-Access-Token": this.store.accessToken,
-          "Content-Type": "application/json",
-        },
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+    try {
+      const response = await fetch(
+        `https://${this.store.domain}/admin/api/${API_VERSION}/customers.json?${searchParams}`,
+        {
+          signal: controller.signal,
+          headers: {
+            "X-Shopify-Access-Token": this.store.accessToken,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Shopify API error: ${response.status}`);
       }
-    );
 
-    if (!response.ok) {
-      throw new Error(`Shopify API error: ${response.status}`);
+      const data = await response.json();
+      const linkHeader = response.headers.get("Link");
+      const nextPageInfo = extractNextPageInfo(linkHeader);
+
+      return {
+        customers: data.customers,
+        nextPageInfo,
+      };
+    } finally {
+      clearTimeout(timeoutId);
     }
-
-    const data = await response.json();
-    const linkHeader = response.headers.get("Link");
-    const nextPageInfo = extractNextPageInfo(linkHeader);
-
-    return {
-      customers: data.customers,
-      nextPageInfo,
-    };
   }
 
   async getOrdersCount(createdAtMin?: Date): Promise<number> {
@@ -141,28 +167,36 @@ export class ShopifyClient {
       searchParams.set("created_at_min", params.created_at_min.toISOString());
     }
 
-    const response = await fetch(
-      `https://${this.store.domain}/admin/api/${API_VERSION}/orders.json?${searchParams}`,
-      {
-        headers: {
-          "X-Shopify-Access-Token": this.store.accessToken,
-          "Content-Type": "application/json",
-        },
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+    try {
+      const response = await fetch(
+        `https://${this.store.domain}/admin/api/${API_VERSION}/orders.json?${searchParams}`,
+        {
+          signal: controller.signal,
+          headers: {
+            "X-Shopify-Access-Token": this.store.accessToken,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Shopify API error: ${response.status}`);
       }
-    );
 
-    if (!response.ok) {
-      throw new Error(`Shopify API error: ${response.status}`);
+      const data = await response.json();
+      const linkHeader = response.headers.get("Link");
+      const nextPageInfo = extractNextPageInfo(linkHeader);
+
+      return {
+        orders: data.orders,
+        nextPageInfo,
+      };
+    } finally {
+      clearTimeout(timeoutId);
     }
-
-    const data = await response.json();
-    const linkHeader = response.headers.get("Link");
-    const nextPageInfo = extractNextPageInfo(linkHeader);
-
-    return {
-      orders: data.orders,
-      nextPageInfo,
-    };
   }
 }
 

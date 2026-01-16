@@ -10,6 +10,7 @@ export interface ReportData {
   type: string;
   title: string;
   generatedAt: string;
+  currency?: string;
   dateRange?: {
     start: string;
     end: string;
@@ -26,9 +27,13 @@ export async function generateRevenueSummaryData(
   const start = startDate || new Date(now.setDate(now.getDate() - 30));
   const end = endDate || new Date();
 
-  const [revenueMetrics, dailyRevenue] = await Promise.all([
+  const [revenueMetrics, dailyRevenue, store] = await Promise.all([
     getRevenueMetrics(storeId, start, end),
-    getDailyRevenue(storeId, 30),
+    getDailyRevenue(storeId, start, end),
+    prisma.store.findUnique({
+      where: { id: storeId },
+      select: { currency: true },
+    }),
   ]);
 
   // Calculate trends
@@ -47,6 +52,7 @@ export async function generateRevenueSummaryData(
     type: "REVENUE_SUMMARY",
     title: "Revenue Summary Report",
     generatedAt: new Date().toISOString(),
+    currency: store?.currency || "USD",
     dateRange: {
       start: start.toISOString(),
       end: end.toISOString(),
@@ -75,13 +81,17 @@ export async function generateProductAnalysisData(
   const start = startDate || new Date(now.setDate(now.getDate() - 30));
   const end = endDate || new Date();
 
-  const [topProducts, productStats] = await Promise.all([
+  const [topProducts, productStats, store] = await Promise.all([
     getTopProducts(storeId, 20, start, end),
     prisma.product.aggregate({
       where: { storeId },
       _count: true,
       _sum: { totalInventory: true },
       _avg: { price: true },
+    }),
+    prisma.store.findUnique({
+      where: { id: storeId },
+      select: { currency: true },
     }),
   ]);
 
@@ -104,6 +114,7 @@ export async function generateProductAnalysisData(
     type: "PRODUCT_ANALYSIS",
     title: "Product Analysis Report",
     generatedAt: new Date().toISOString(),
+    currency: store?.currency || "USD",
     dateRange: {
       start: start.toISOString(),
       end: end.toISOString(),
@@ -121,13 +132,17 @@ export async function generateProductAnalysisData(
 export async function generateCustomerInsightsData(
   storeId: string
 ): Promise<ReportData> {
-  const [topCustomers, customerStats] = await Promise.all([
+  const [topCustomers, customerStats, store] = await Promise.all([
     getTopCustomers(storeId, 20),
     prisma.customer.aggregate({
       where: { storeId },
       _count: true,
       _sum: { totalSpent: true, ordersCount: true },
       _avg: { totalSpent: true, ordersCount: true },
+    }),
+    prisma.store.findUnique({
+      where: { id: storeId },
+      select: { currency: true },
     }),
   ]);
 
@@ -148,8 +163,8 @@ export async function generateCustomerInsightsData(
   const geoDistribution = await prisma.customer.groupBy({
     by: ["country"],
     where: { storeId, country: { not: null } },
-    _count: true,
-    orderBy: { _count: { country: "desc" } },
+    _count: { _all: true },
+    orderBy: { _count: { _all: "desc" } },
     take: 10,
   });
 
@@ -157,6 +172,7 @@ export async function generateCustomerInsightsData(
     type: "CUSTOMER_INSIGHTS",
     title: "Customer Insights Report",
     generatedAt: new Date().toISOString(),
+    currency: store?.currency || "USD",
     metrics: {
       totalCustomers: customerStats._count,
       totalRevenue: Number(customerStats._sum.totalSpent || 0),
@@ -170,7 +186,7 @@ export async function generateCustomerInsightsData(
       },
       geoDistribution: geoDistribution.map((g) => ({
         country: g.country,
-        count: g._count,
+        count: g._count._all,
       })),
     },
   };
@@ -203,6 +219,7 @@ export async function generateFullAnalysisData(
     type: "FULL_ANALYSIS",
     title: "Complete Store Analysis",
     generatedAt: new Date().toISOString(),
+    currency: store?.currency || "USD",
     metrics: {
       store,
       revenue: revenueSummary.metrics,

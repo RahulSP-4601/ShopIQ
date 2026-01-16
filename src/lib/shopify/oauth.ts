@@ -37,6 +37,11 @@ export function validateHmac(query: Record<string, string>): boolean {
     .update(sortedParams)
     .digest("hex");
 
+  // timingSafeEqual throws if buffer lengths differ, so check first
+  if (hmac.length !== generatedHmac.length) {
+    return false;
+  }
+
   return crypto.timingSafeEqual(
     Buffer.from(hmac),
     Buffer.from(generatedHmac)

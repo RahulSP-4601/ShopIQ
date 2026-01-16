@@ -1,0 +1,13 @@
+# CodeRabbit Configuration
+# https://docs.coderabbit.ai/configuration
+
+reviews:
+  auto_review:
+    enabled: true
+    base_branches:
+      - main
+      - test
+  review_status: true
+
+chat:
+  auto_reply: true
