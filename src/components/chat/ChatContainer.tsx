@@ -1,14 +1,15 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ChatMessage } from "./ChatMessage";
-import { ChatInput } from "./ChatInput";
+import { ChatMessage, MessageAttachment } from "./ChatMessage";
+import { ChatInput, UploadedAttachment } from "./ChatInput";
 
 interface Message {
   id: string;
   role: "USER" | "ASSISTANT";
   content: string;
   createdAt: string;
+  attachments?: MessageAttachment[];
 }
 
 interface ChatContainerProps {
@@ -27,6 +28,7 @@ export function ChatContainer({
     initialConversationId
   );
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Load existing conversation
@@ -54,7 +56,21 @@ export function ChatContainer({
     }
   };
 
-  const sendMessage = async (content: string) => {
+  const convertAttachments = (attachments?: UploadedAttachment[]): MessageAttachment[] | undefined => {
+    if (!attachments || attachments.length === 0) return undefined;
+    return attachments.map((att, index) => ({
+      id: `att-${Date.now()}-${index}`,
+      type: att.type as "file" | "audio",
+      name: att.name,
+      size: att.size,
+      url: att.url,
+      mimeType: att.mimeType,
+    }));
+  };
+
+  const sendMessage = async (content: string, attachments?: UploadedAttachment[]) => {
+    const messageAttachments = convertAttachments(attachments);
+
     if (!isConnected) {
       // Show message prompting to connect
       setMessages([
@@ -63,12 +79,13 @@ export function ChatContainer({
           role: "USER",
           content,
           createdAt: new Date().toISOString(),
+          attachments: messageAttachments,
         },
         {
           id: `response-${Date.now()}`,
           role: "ASSISTANT",
           content:
-            "To answer questions about your store, I need access to your Shopify data. Please click the \"Connect Shopify\" button in the top right to connect your store. Once connected, I'll be able to analyze your sales, products, customers, and more!",
+            "To answer questions about your store, I need access to your data. Please click the \"Connect Store\" button in the top right to connect your store. Once connected, I'll be able to analyze your sales, products, customers, and more!",
           createdAt: new Date().toISOString(),
         },
       ]);
@@ -81,15 +98,37 @@ export function ChatContainer({
       role: "USER",
       content,
       createdAt: new Date().toISOString(),
+      attachments: messageAttachments,
     };
     setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
 
     try {
+      // Build message content including attachment info
+      let messageContent = content;
+      if (attachments && attachments.length > 0) {
+        const attachmentInfo = attachments.map((a) => {
+          if (a.type === "audio") {
+            return `[Voice Recording: ${a.name}]`;
+          }
+          return `[Attached file: ${a.name}]`;
+        }).join("\n");
+
+        if (messageContent) {
+          messageContent = `${messageContent}\n\n${attachmentInfo}`;
+        } else {
+          messageContent = attachmentInfo;
+        }
+      }
+
       const response = await fetch("/api/chat/message", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: content, conversationId }),
+        body: JSON.stringify({
+          message: messageContent,
+          conversationId,
+          attachments: attachments,
+        }),
       });
 
       if (!response.ok) {
@@ -140,7 +179,7 @@ export function ChatContainer({
               <p className="mt-1 text-sm text-slate-500">
                 {isConnected
                   ? `Ask me anything about ${storeName}`
-                  : "Your AI-powered Shopify analytics assistant"}
+                  : "Your AI-powered analytics assistant"}
               </p>
             </div>
 
@@ -165,7 +204,7 @@ export function ChatContainer({
                       Connect your store for personalized insights
                     </p>
                     <p className="mt-1 text-xs text-amber-600">
-                      Click &quot;Connect Shopify&quot; above to link your store and get
+                      Click &quot;Connect Store&quot; above to link your store and get
                       AI-powered analytics based on your real data.
                     </p>
                   </div>
@@ -189,6 +228,22 @@ export function ChatContainer({
                 ))}
               </div>
             </div>
+
+            {/* Feature hints */}
+            <div className="mt-8 flex items-center gap-4 text-xs text-slate-400">
+              <div className="flex items-center gap-1">
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                </svg>
+                <span>Attach files</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                </svg>
+                <span>Voice messages</span>
+              </div>
+            </div>
           </div>
         ) : (
           <div className="mx-auto max-w-3xl space-y-4">
@@ -197,6 +252,7 @@ export function ChatContainer({
                 key={message.id}
                 role={message.role}
                 content={message.content}
+                attachments={message.attachments}
               />
             ))}
             {isLoading && (
@@ -213,10 +269,13 @@ export function ChatContainer({
           <ChatInput
             onSend={sendMessage}
             disabled={isLoading}
+            isUploading={isUploading}
+            onUploadStart={() => setIsUploading(true)}
+            onUploadEnd={() => setIsUploading(false)}
             placeholder={
               isConnected
                 ? "Ask about your store..."
-                : "Ask a question (connect Shopify for real data)"
+                : "Ask a question (connect store for real data)"
             }
           />
         </div>
