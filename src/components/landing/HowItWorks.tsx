@@ -4,7 +4,7 @@ const steps = [
   {
     step: "1",
     title: "Connect Your Store",
-    description: "One-click Shopify integration. We securely sync your orders, products, and customer data.",
+    description: "Quick and easy setup. We securely sync your orders, products, and customer data.",
     icon: (
       <path
         strokeLinecap="round"
@@ -57,7 +57,7 @@ export function HowItWorks() {
             </span>
           </h2>
           <p className="mt-4 text-lg text-slate-600">
-            From connection to insights in under 5 minutes
+            From connection to insights in under a minute
           </p>
         </div>
 
