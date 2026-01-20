@@ -293,9 +293,29 @@ model Message {
   // For assistant messages
   queryData Json?
 
+  // Attachments (files, audio recordings)
+  attachments Attachment[]
+
   createdAt DateTime @default(now())
 
   @@index([conversationId])
+}
+
+model Attachment {
+  id        String  @id @default(cuid())
+  messageId String
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  type     String // "file" | "audio"
+  name     String
+  size     Int
+  mimeType String
+  url      String // Supabase Storage public URL
+  path     String // Storage path for deletion
+
+  createdAt DateTime @default(now())
+
+  @@index([messageId])
 }
 
 enum MessageRole {

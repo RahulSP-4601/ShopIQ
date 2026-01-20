@@ -20,6 +20,9 @@ export async function GET(
       include: {
         messages: {
           orderBy: { createdAt: "asc" },
+          include: {
+            attachments: true,
+          },
         },
       },
     });
@@ -31,7 +34,26 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(conversation);
+    // Transform messages to include formatted attachments
+    const transformedConversation = {
+      ...conversation,
+      messages: conversation.messages.map((msg) => ({
+        id: msg.id,
+        role: msg.role,
+        content: msg.content,
+        createdAt: msg.createdAt,
+        attachments: msg.attachments.map((att) => ({
+          id: att.id,
+          type: att.type,
+          name: att.name,
+          size: att.size,
+          mimeType: att.mimeType,
+          url: att.url,
+        })),
+      })),
+    };
+
+    return NextResponse.json(transformedConversation);
   } catch {
     return NextResponse.json(
       { error: "Failed to get conversation" },
