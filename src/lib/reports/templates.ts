@@ -163,8 +163,8 @@ export async function generateCustomerInsightsData(
   const geoDistribution = await prisma.customer.groupBy({
     by: ["country"],
     where: { storeId, country: { not: null } },
-    _count: { _all: true },
-    orderBy: { _count: { _all: "desc" } },
+    _count: true,
+    orderBy: { _count: { country: "desc" } },
     take: 10,
   });
 
@@ -186,7 +186,7 @@ export async function generateCustomerInsightsData(
       },
       geoDistribution: geoDistribution.map((g) => ({
         country: g.country,
-        count: g._count._all,
+        count: g._count,
       })),
     },
   };

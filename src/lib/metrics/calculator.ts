@@ -251,7 +251,7 @@ export async function getStoreContext(storeId: string): Promise<string> {
     getRevenueMetrics(storeId, last30DaysStart, now),
     getTopProducts(storeId, 5, last30DaysStart, now),
     getTopCustomers(storeId, 5),
-    getDailyRevenue(storeId, 14),
+    getDailyRevenue(storeId, new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000), now),
   ]);
 
   return `

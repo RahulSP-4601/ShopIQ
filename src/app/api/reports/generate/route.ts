@@ -8,7 +8,7 @@ import {
   generateCustomerInsightsData,
   generateFullAnalysisData,
 } from "@/lib/reports/templates";
-import { ReportType } from "@prisma/client";
+import { ReportType, Prisma } from "@prisma/client";
 
 export async function POST(request: NextRequest) {
   try {
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
       const updatedReport = await prisma.report.update({
         where: { id: report.id },
         data: {
-          content: reportData,
+          content: reportData as unknown as Prisma.InputJsonValue,
           summary,
           status: "COMPLETED",
         },

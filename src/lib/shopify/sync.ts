@@ -394,7 +394,7 @@ async function upsertOrder(storeId: string, order: ShopifyOrder) {
       currency: order.currency,
       financialStatus: order.financial_status || null,
       fulfillmentStatus: order.fulfillment_status || null,
-      customerId,
+      customer: customerId ? { connect: { id: customerId } } : undefined,
       customerEmail: order.customer?.email || null,
       sourceName: order.source_name || null,
       shippingCity: order.shipping_address?.city || null,
@@ -456,8 +456,8 @@ async function upsertOrder(storeId: string, order: ShopifyOrder) {
       await tx.lineItem.create({
         data: {
           order: { connect: { id: dbOrder.id } },
-          productId,
-          variantId,
+          product: productId ? { connect: { id: productId } } : undefined,
+          variant: variantId ? { connect: { id: variantId } } : undefined,
           shopifyProductId: item.product_id ? String(item.product_id) : null,
           shopifyVariantId: item.variant_id ? String(item.variant_id) : null,
           title: item.title,

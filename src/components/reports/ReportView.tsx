@@ -19,7 +19,7 @@ interface ReportContent {
 }
 
 export function ReportView({ report }: ReportViewProps) {
-  const content = report.content as ReportContent;
+  const content = report.content as unknown as ReportContent;
   const metrics = content?.metrics || {};
 
   const formatDate = (dateString: string) => {

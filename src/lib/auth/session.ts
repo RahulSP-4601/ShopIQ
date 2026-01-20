@@ -16,6 +16,7 @@ function getSecretKey() {
 export interface SessionPayload {
   storeId: string;
   domain: string;
+  [key: string]: unknown;
 }
 
 export async function createSession(payload: SessionPayload): Promise<string> {
