@@ -109,6 +109,12 @@ export function ChatInput({
       }
 
       const data = await response.json();
+
+      // Defensive check for successful response with attachment data
+      if (!data.success || !data.attachment) {
+        throw new Error("Invalid upload response: missing attachment data");
+      }
+
       return {
         type: data.attachment.type,
         name: data.attachment.name,
@@ -246,13 +252,39 @@ export function ChatInput({
   };
 
   const startRecording = async () => {
+    let stream: MediaStream | null = null;
+
+    // Helper to cleanup stream and reset state on error
+    const cleanupOnError = () => {
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+      mediaRecorderRef.current = null;
+      audioChunksRef.current = [];
+      isCancelledRecordingRef.current = false;
+      if (recordingIntervalRef.current) {
+        clearInterval(recordingIntervalRef.current);
+        recordingIntervalRef.current = null;
+      }
+      setIsRecording(false);
+      setRecordingTime(0);
+    };
+
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
       const mimeType = getSupportedMimeType();
       const options: MediaRecorderOptions = mimeType ? { mimeType } : {};
 
-      const mediaRecorder = new MediaRecorder(stream, options);
+      let mediaRecorder: MediaRecorder;
+      try {
+        mediaRecorder = new MediaRecorder(stream, options);
+      } catch (recorderError) {
+        // MediaRecorder construction failed, cleanup stream
+        cleanupOnError();
+        throw recorderError;
+      }
+
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
       isCancelledRecordingRef.current = false;
@@ -264,6 +296,11 @@ export function ChatInput({
         if (event.data.size > 0) {
           audioChunksRef.current.push(event.data);
         }
+      };
+
+      mediaRecorder.onerror = () => {
+        // Handle MediaRecorder errors during recording
+        cleanupOnError();
       };
 
       mediaRecorder.onstop = () => {
@@ -291,11 +328,18 @@ export function ChatInput({
         setAttachments((prev) => [...prev, attachment]);
 
         // Stop all tracks
-        stream.getTracks().forEach((track) => track.stop());
+        stream?.getTracks().forEach((track) => track.stop());
       };
 
       // Start recording with timeslice to get data chunks every 100ms
-      mediaRecorder.start(100);
+      try {
+        mediaRecorder.start(100);
+      } catch (startError) {
+        // mediaRecorder.start() failed, cleanup
+        cleanupOnError();
+        throw startError;
+      }
+
       setIsRecording(true);
       setRecordingTime(0);
 
@@ -303,6 +347,8 @@ export function ChatInput({
         setRecordingTime((prev) => prev + 1);
       }, 1000);
     } catch (error) {
+      // Ensure cleanup happens for any error after stream acquisition
+      cleanupOnError();
       console.error("Error accessing microphone:", error);
       alert(
         "Could not access microphone. Please ensure you have granted permission."
