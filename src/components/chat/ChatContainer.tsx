@@ -56,10 +56,11 @@ export function ChatContainer({
     }
   };
 
-  const convertAttachments = (attachments?: UploadedAttachment[]): MessageAttachment[] | undefined => {
+  // Convert uploaded attachments to display format with temporary IDs for optimistic UI
+  const convertAttachmentsForOptimisticUI = (attachments?: UploadedAttachment[]): MessageAttachment[] | undefined => {
     if (!attachments || attachments.length === 0) return undefined;
     return attachments.map((att, index) => ({
-      id: `att-${Date.now()}-${index}`,
+      id: `temp-att-${Date.now()}-${index}`,
       type: att.type as "file" | "audio",
       name: att.name,
       size: att.size,
@@ -69,7 +70,7 @@ export function ChatContainer({
   };
 
   const sendMessage = async (content: string, attachments?: UploadedAttachment[]) => {
-    const messageAttachments = convertAttachments(attachments);
+    const optimisticAttachments = convertAttachmentsForOptimisticUI(attachments);
 
     if (!isConnected) {
       // Show message prompting to connect
@@ -79,7 +80,7 @@ export function ChatContainer({
           role: "USER",
           content,
           createdAt: new Date().toISOString(),
-          attachments: messageAttachments,
+          attachments: optimisticAttachments,
         },
         {
           id: `response-${Date.now()}`,
@@ -92,15 +93,16 @@ export function ChatContainer({
       return;
     }
 
-    // Add user message immediately
-    const userMessage: Message = {
-      id: `temp-${Date.now()}`,
+    // Create optimistic user message with temporary ID
+    const tempMessageId = `temp-${Date.now()}`;
+    const optimisticUserMessage: Message = {
+      id: tempMessageId,
       role: "USER",
       content,
       createdAt: new Date().toISOString(),
-      attachments: messageAttachments,
+      attachments: optimisticAttachments,
     };
-    setMessages((prev) => [...prev, userMessage]);
+    setMessages((prev) => [...prev, optimisticUserMessage]);
     setIsLoading(true);
 
     try {
@@ -137,10 +139,20 @@ export function ChatContainer({
 
       const data = await response.json();
       setConversationId(data.conversationId);
-      setMessages((prev) => [...prev, data.message]);
+
+      // Replace optimistic user message with server response (with real IDs)
+      // and add the assistant message
+      setMessages((prev) => {
+        // Find and replace the optimistic message with server data
+        const updatedMessages = prev.map((msg) =>
+          msg.id === tempMessageId ? data.userMessage : msg
+        );
+        // Add the assistant response
+        return [...updatedMessages, data.message];
+      });
     } catch (error) {
       console.error("Failed to send message:", error);
-      // Add error message
+      // Add error message but keep the optimistic user message
       setMessages((prev) => [
         ...prev,
         {

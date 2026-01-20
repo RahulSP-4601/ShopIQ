@@ -92,12 +92,43 @@ export async function POST(request: NextRequest) {
     // Get store context (metrics data)
     const storeContext = await getStoreContext(store.id);
 
-    // Build conversation history for context
+    // Build conversation history for context (including attachments)
+    interface MessageWithAttachments {
+      role: string;
+      content: string;
+      attachments: Array<{
+        type: string;
+        name: string;
+        mimeType: string;
+        url: string;
+      }>;
+    }
+
     const conversationHistory = conversation.messages
-      .map(
-        (m: { role: string; content: string }) =>
-          `${m.role === "USER" ? "User" : "Assistant"}: ${m.content}`
-      )
+      .map((m: MessageWithAttachments) => {
+        const role = m.role === "USER" ? "User" : "Assistant";
+        let messageContent = m.content;
+
+        // Include attachment info in the history
+        if (m.attachments && m.attachments.length > 0) {
+          const attachmentInfo = m.attachments
+            .map((att) => {
+              if (att.type === "audio") {
+                return `[Voice recording: ${att.name}]`;
+              }
+              return `[Attached file: ${att.name} (${att.mimeType})]`;
+            })
+            .join(", ");
+
+          if (messageContent) {
+            messageContent = `${messageContent} ${attachmentInfo}`;
+          } else {
+            messageContent = attachmentInfo;
+          }
+        }
+
+        return `${role}: ${messageContent}`;
+      })
       .join("\n\n");
 
     // Build message content for AI including attachment info

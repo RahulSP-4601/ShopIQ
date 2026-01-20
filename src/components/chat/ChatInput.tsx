@@ -110,12 +110,12 @@ export function ChatInput({
 
       const data = await response.json();
       return {
-        type: attachment.type,
-        name: data.name,
-        size: data.size,
-        mimeType: data.mimeType,
-        url: data.url,
-        path: data.path,
+        type: data.attachment.type,
+        name: data.attachment.name,
+        size: data.attachment.size,
+        mimeType: data.attachment.mimeType,
+        url: data.attachment.url,
+        path: data.attachment.path,
       };
     } catch (error) {
       console.error("Failed to upload attachment:", error);
