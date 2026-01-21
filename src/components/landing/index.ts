@@ -1,6 +1,8 @@
 export { Navbar } from "./Navbar";
 export { Hero } from "./Hero";
+export { Integrations } from "./Integrations";
 export { Features } from "./Features";
+export { TrustIndicators } from "./TrustIndicators";
 export { HowItWorks } from "./HowItWorks";
 export { ExampleQuestions } from "./ExampleQuestions";
 export { CTA } from "./CTA";

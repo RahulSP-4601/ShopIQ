@@ -1,75 +1,76 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 
 export function Hero() {
   return (
-    <section className="relative mx-auto max-w-6xl px-6 pt-32 pb-20">
-      <div className="flex flex-col items-center text-center">
-        <div className="fade-up mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 px-4 py-2 text-sm text-emerald-700 shadow-sm">
-          <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
-          </span>
-          AI-Powered Store Analytics
-        </div>
-        <h1 className="fade-up max-w-4xl text-5xl font-bold leading-tight tracking-tight text-slate-900 sm:text-6xl lg:text-7xl">
-          Your AI E-commerce
-          <span className="relative">
-            <span className="bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-500 bg-clip-text text-transparent animate-gradient">
-              {" "}
-              Analyst
+    <section className="relative pt-32 pb-20 overflow-hidden">
+      {/* Minimal background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-50/50 to-white" />
+
+      <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="flex flex-col items-center text-center">
+          {/* Trust badge */}
+          <div className="fade-up mb-8 inline-flex items-center gap-3 rounded-full border border-emerald-200 bg-emerald-50 px-5 py-2.5 shadow-sm">
+            <div className="flex -space-x-2">
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 border-2 border-white flex items-center justify-center text-[10px] font-semibold text-white"
+                >
+                  {i}K
+                </div>
+              ))}
+            </div>
+            <span className="text-sm text-emerald-800">
+              Trusted by <span className="font-semibold text-emerald-900">10,000+</span> sellers worldwide
             </span>
-            <svg
-              className="absolute -bottom-2 left-0 w-full h-3 text-emerald-500/30"
-              viewBox="0 0 200 12"
-              fill="none"
+          </div>
+
+          {/* Main headline */}
+          <h1 className="fade-up max-w-4xl text-4xl font-semibold leading-[1.15] tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
+            The Analyst for{" "}
+            <span className="text-indigo-600">All Your</span>
+            <br />
+            Marketplaces
+          </h1>
+
+          {/* Subheadline */}
+          <p className="fade-up mt-6 max-w-2xl text-lg leading-relaxed text-slate-600">
+            Connect Shopify, Amazon, eBay, Flipkart, Meesho and 50+ marketplaces.
+            Get AI-powered insights across all your sales channels in one place.
+          </p>
+
+          {/* CTA buttons */}
+          <div className="fade-up mt-10 flex flex-col items-center gap-4 sm:flex-row">
+            <Link
+              href="/connect"
+              className="group flex h-12 items-center justify-center rounded-lg btn-primary px-6 text-sm font-medium text-white"
             >
-              <path
-                d="M2 8.5C50 2.5 150 2.5 198 8.5"
-                stroke="currentColor"
-                strokeWidth="4"
-                strokeLinecap="round"
-                className="animate-draw"
-              />
-            </svg>
-          </span>
-        </h1>
-        <p className="fade-up mt-8 max-w-2xl text-lg leading-relaxed text-slate-600">
-          Stop digging through dashboards and spreadsheets. Connect your
-          store and ask questions in plain English — get instant,
-          accurate answers powered by AI.
-        </p>
-        <div className="fade-up mt-10 flex flex-col items-center gap-4 sm:flex-row">
-          <a
-            href="/chat"
-            className="group relative overflow-hidden flex h-14 items-center justify-center rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 px-8 text-base font-semibold text-white shadow-xl shadow-emerald-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-500/40 hover:scale-105"
-          >
-            <span className="relative z-10 flex items-center gap-2">
-              Get Started
+              <span className="flex items-center gap-2">
+                Start Free Trial
+                <svg
+                  className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 8l4 4m0 0l-4 4m4-4H3"
+                  />
+                </svg>
+              </span>
+            </Link>
+            <a
+              href="#demo"
+              className="group flex h-12 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-6 text-sm font-medium text-slate-700 transition-all duration-200 hover:border-slate-300 hover:bg-slate-50"
+            >
               <svg
-                className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 8l4 4m0 0l-4 4m4-4H3"
-                />
-              </svg>
-            </span>
-            <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-teal-700 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-          </a>
-          <a
-            href="#demo"
-            className="group flex h-14 items-center justify-center gap-3 rounded-full border-2 border-slate-200 bg-white px-8 text-base font-semibold text-slate-700 shadow-lg shadow-slate-100 transition-all duration-300 hover:border-emerald-300 hover:shadow-xl hover:shadow-emerald-100"
-          >
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white transition-transform duration-300 group-hover:scale-110">
-              <svg
-                className="h-4 w-4 ml-0.5"
+                className="h-4 w-4 text-slate-500"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -79,88 +80,157 @@ export function Hero() {
                   clipRule="evenodd"
                 />
               </svg>
-            </div>
-            Watch Demo
-          </a>
-        </div>
-        <p className="fade-up mt-6 flex items-center gap-2 text-sm text-slate-500">
-          <svg className="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-          </svg>
-          Free to start. No credit card required.
-        </p>
-      </div>
+              Watch Demo
+            </a>
+          </div>
 
-      <HeroDemo />
-      <Stats />
+          {/* Trust indicators */}
+          <div className="fade-up mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-slate-600">
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <span>No credit card required</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <span>Setup in 2 minutes</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <span>Cancel anytime</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Marketplace logos */}
+        <MarketplaceLogos />
+
+        {/* Interactive Demo */}
+        <HeroDemo />
+
+        {/* Stats */}
+        <Stats />
+      </div>
     </section>
+  );
+}
+
+function MarketplaceLogos() {
+  return (
+    <div className="fade-up mt-16 relative">
+      <p className="text-center text-xs font-medium text-slate-400 uppercase tracking-wider mb-8">
+        Connect your marketplaces
+      </p>
+      <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10">
+        {/* Shopify - Green #95BF47 */}
+        <div className="flex items-center gap-2 group">
+          <svg className="w-7 h-7" viewBox="0 0 109 124" fill="#95BF47">
+            <path d="M95.8 23.4c-.1-.6-.6-1-1.1-1-.5-.1-10.3-.8-10.3-.8s-6.8-6.7-7.5-7.5c-.7-.7-2.1-.5-2.6-.3-.1 0-1.4.4-3.6 1.1-2.1-6.2-5.9-11.8-12.6-11.8h-.6c-1.9-2.5-4.2-3.6-6.2-3.6-15.3 0-22.6 19.1-24.9 28.8-5.9 1.8-10.1 3.1-10.6 3.3-3.3 1-3.4 1.1-3.8 4.2-.3 2.3-9 69.3-9 69.3l67.5 12.7 36.5-7.9S95.9 24 95.8 23.4z"/>
+          </svg>
+          <span className="text-sm font-medium text-[#95BF47]">Shopify</span>
+        </div>
+
+        {/* Amazon - Orange #FF9900 */}
+        <div className="flex items-center gap-2 group">
+          <svg className="w-7 h-7" viewBox="0 0 48 48" fill="#FF9900">
+            <path d="M29.4 17.5c-3.2 0-5.8.7-7.8 2.1-.5.3-.6.8-.3 1.2l1.4 2c.2.3.6.5 1 .5.2 0 .4-.1.6-.2 1.5-1 3.1-1.4 5-1.4 2.1 0 3.7.5 4.8 1.4.6.5 1 1.3 1 2.4v.7c-1.8-.3-3.4-.5-4.9-.5-2.8 0-5.1.6-6.8 1.8-1.8 1.3-2.7 3.2-2.7 5.6 0 2.2.7 3.9 2.1 5.2 1.4 1.2 3.2 1.8 5.5 1.8 2.8 0 5.1-1.1 6.9-3.4v2.4c0 .6.5 1.1 1.1 1.1h2.8c.6 0 1.1-.5 1.1-1.1V25.5c0-2.6-.8-4.6-2.3-6-1.6-1.4-3.9-2-6.5-2zm3.5 14.1c0 1.2-.5 2.3-1.4 3.2-.9.9-2.1 1.4-3.4 1.4-1 0-1.8-.3-2.3-.8-.5-.5-.8-1.2-.8-2.1 0-1 .4-1.9 1.1-2.5.8-.6 1.9-.9 3.4-.9 1.2 0 2.4.2 3.4.4v1.3zM44.3 35.6c-.3-.1-.6 0-.8.2-2.6 3-6.5 4.8-11.3 5.2-6.1.5-12.6-1.4-18.3-5.3-.2-.2-.5-.2-.8-.1-.2.1-.4.4-.4.7 0 .2.1.4.2.5 6.3 4.4 13.6 6.5 20.5 5.9 5.5-.5 10-2.6 13.1-6.1.2-.2.3-.5.2-.8-.1-.1-.2-.2-.4-.2z"/>
+          </svg>
+          <span className="text-sm font-medium text-[#FF9900]">Amazon</span>
+        </div>
+
+        {/* eBay - Multicolor, using blue #0064D2 */}
+        <div className="flex items-center gap-2 group">
+          <svg className="w-7 h-7" viewBox="0 0 48 48">
+            <path fill="#E53238" d="M8.2 22.8c0-2.9 1.7-5.2 5.1-5.2 3 0 4.7 1.8 4.7 4.8v.7H8.2v-.3z"/>
+            <path fill="#0064D2" d="M20.8 25.9v-2.8c0-4.6-2.3-8.3-7.5-8.3-5 0-8 3.5-8 8.6 0 5.4 3.2 8.4 8.3 8.4 3.2 0 5.4-.9 6.7-2.1l-1.7-2.8c-1 .8-2.4 1.4-4.5 1.4-2.5 0-4.3-1.1-4.8-3.6h11.5v.2z"/>
+            <path fill="#F5AF02" d="M22.1 31.4V10.3h3.4v8.1c1-2.1 3.2-3.6 6-3.6 4.5 0 7.3 3.5 7.3 8.4 0 5.1-3 8.6-7.5 8.6-2.7 0-4.8-1.4-5.9-3.5v3h-3.3z"/>
+            <path fill="#86B817" d="M30.4 28.9c2.6 0 4.5-2.1 4.5-5.6 0-3.4-1.8-5.5-4.4-5.5-2.6 0-4.5 2.2-4.5 5.5 0 3.5 1.9 5.6 4.4 5.6z"/>
+          </svg>
+          <span className="text-sm font-medium">
+            <span className="text-[#E53238]">e</span>
+            <span className="text-[#0064D2]">B</span>
+            <span className="text-[#F5AF02]">a</span>
+            <span className="text-[#86B817]">y</span>
+          </span>
+        </div>
+
+        {/* Etsy - Orange #F1641E */}
+        <div className="flex items-center gap-2 group">
+          <svg className="w-7 h-7" viewBox="0 0 48 48" fill="#F1641E">
+            <path d="M24 4C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm8.6 29.2c-.8.3-2.3.7-4.2.7-5.7 0-8.8-3.1-8.8-8.7V15.8h-3.4v-3.1h3.4V8.1l4.2-1.1v5.7h6.1l-.8 3.1h-5.3v8.6c0 3.8 1.5 5.7 4.8 5.7 1.3 0 2.7-.3 3.8-.7l.2 3.8z"/>
+          </svg>
+          <span className="text-sm font-medium text-[#F1641E]">Etsy</span>
+        </div>
+
+        {/* Flipkart - Yellow #F8E71C with Blue #2874F0 */}
+        <div className="flex items-center gap-2 group">
+          <div className="w-7 h-7 rounded bg-[#2874F0] flex items-center justify-center">
+            <span className="text-[#F8E71C] text-xs font-bold">F</span>
+          </div>
+          <span className="text-sm font-medium text-[#2874F0]">Flipkart</span>
+        </div>
+
+        {/* Meesho - Pink/Magenta #F43397 */}
+        <div className="flex items-center gap-2 group">
+          <div className="w-7 h-7 rounded bg-[#F43397] flex items-center justify-center">
+            <span className="text-white text-xs font-bold">M</span>
+          </div>
+          <span className="text-sm font-medium text-[#F43397]">Meesho</span>
+        </div>
+
+        {/* More */}
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100">
+          <span className="text-sm font-medium">+50 more</span>
+        </div>
+      </div>
+    </div>
   );
 }
 
 const chatConversations = [
   {
-    question: "What was my revenue last week and how does it compare to the previous week?",
+    question: "What was my total revenue across all marketplaces last week?",
     answer: (
       <>
-        Your revenue last week was{" "}
-        <span className="font-bold text-emerald-600">$12,847</span>, which is{" "}
-        <span className="inline-flex items-center gap-1 font-bold text-emerald-600">
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clipRule="evenodd" />
-          </svg>
-          23% higher
-        </span>{" "}
-        than the previous week ($10,445). The increase was primarily driven by your
-        &ldquo;Summer Collection&rdquo; products, which saw a 45% spike in orders.
+        Your combined revenue across all channels was{" "}
+        <span className="font-semibold text-slate-900">$47,382</span>. Breakdown:
+        Amazon $22,450 (47%), Shopify $14,280 (30%), Flipkart $7,890 (17%), Meesho $2,762 (6%).
+        You&apos;re up <span className="font-semibold text-emerald-600">18%</span> from last week.
       </>
     ),
   },
   {
-    question: "Which products are my best sellers this month?",
+    question: "Which products are best sellers on Amazon vs Flipkart?",
     answer: (
       <>
-        Your top 3 best sellers this month are:{" "}
-        <span className="font-bold text-emerald-600">1. Classic White Tee</span> (342 units),{" "}
-        <span className="font-bold text-emerald-600">2. Denim Jacket</span> (287 units), and{" "}
-        <span className="font-bold text-emerald-600">3. Summer Dress</span> (256 units). Together they account for{" "}
-        <span className="font-bold text-teal-600">38% of total sales</span>.
+        Your <span className="font-semibold text-slate-900">Electronics</span> sell 3x better on Amazon,
+        while <span className="font-semibold text-slate-900">Fashion items</span> outperform 2.5x on Flipkart.
+        Consider increasing Fashion inventory allocation to Flipkart by 40%.
       </>
     ),
   },
   {
-    question: "What's my customer retention rate and how can I improve it?",
+    question: "How can I optimize my inventory across channels?",
     answer: (
       <>
-        Your customer retention rate is{" "}
-        <span className="font-bold text-emerald-600">24.3%</span>, which is{" "}
-        <span className="inline-flex items-center gap-1 font-bold text-amber-600">
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z" clipRule="evenodd" />
-          </svg>
-          below average
-        </span>{" "}
-        for your industry (32%). I recommend implementing a{" "}
-        <span className="font-bold text-teal-600">loyalty program</span> and{" "}
-        <span className="font-bold text-teal-600">personalized email campaigns</span>.
+        Move <span className="font-semibold text-slate-900">200 units of Summer Collection</span> from Shopify to Amazon (selling 3x faster there).
+        Your Meesho inventory for Kids Wear is low — restocking could capture{" "}
+        <span className="font-semibold text-emerald-600">$8,400</span> in potential sales.
       </>
     ),
   },
   {
-    question: "Show me my sales by region for the last quarter",
+    question: "Show me my customer acquisition costs by marketplace",
     answer: (
       <>
-        Here&apos;s your regional breakdown:{" "}
-        <span className="font-bold text-emerald-600">California</span> leads with $45,230 (28%),
-        followed by <span className="font-bold text-emerald-600">New York</span> at $38,450 (24%),
-        and <span className="font-bold text-emerald-600">Texas</span> at $29,800 (18%).
-        International sales grew by{" "}
-        <span className="inline-flex items-center gap-1 font-bold text-emerald-600">
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clipRule="evenodd" />
-          </svg>
-          47%
-        </span>{" "}
-        this quarter!
+        CAC Analysis: Meesho <span className="font-semibold text-emerald-600">$2.40</span> (lowest),
+        Flipkart $4.80, Amazon $6.20, Shopify $8.90 (highest).
+        Meesho offers the best ROI for new customer acquisition in Tier 2/3 cities.
       </>
     ),
   },
@@ -204,13 +274,12 @@ function HeroDemo() {
         setShowAnswer(true);
       }, 1300);
       timeoutsRef.current.push(t3);
-    }, 5000);
+    }, 6000);
   };
 
   const navigateToIndex = (index: number) => {
     if (isAnimating || index === currentIndex) return;
 
-    // Clear existing interval and timeouts, then restart
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
@@ -227,14 +296,12 @@ function HeroDemo() {
     }, 600);
     const t3 = setTimeout(() => {
       setShowAnswer(true);
-      // Restart auto-rotation after manual navigation completes
       startAutoRotation();
     }, 1300);
     timeoutsRef.current.push(t1, t2, t3);
   };
 
   useEffect(() => {
-    // Initial animation
     const timer1 = setTimeout(() => setShowQuestion(true), 500);
     const timer2 = setTimeout(() => setShowAnswer(true), 1200);
     timeoutsRef.current.push(timer1, timer2);
@@ -259,91 +326,78 @@ function HeroDemo() {
 
   return (
     <div id="demo" className="fade-up relative mt-20">
-      <div className="absolute -inset-4 bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-cyan-500/20 rounded-3xl blur-2xl opacity-60 animate-pulse-slow" />
-      <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-200/80">
-        <div className="border-b border-slate-100 bg-gradient-to-r from-slate-50 to-slate-100 px-4 py-3">
-          <div className="flex items-center gap-2">
-            <div className="h-3 w-3 rounded-full bg-red-400 shadow-sm" />
-            <div className="h-3 w-3 rounded-full bg-yellow-400 shadow-sm" />
-            <div className="h-3 w-3 rounded-full bg-green-400 shadow-sm" />
-            <div className="ml-4 flex-1 h-6 rounded-md bg-white border border-slate-200 flex items-center px-3">
-              <span className="text-xs text-slate-400">shopiq.ai/chat</span>
+      <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
+        {/* Browser chrome */}
+        <div className="border-b border-slate-100 bg-slate-50 px-4 py-3">
+          <div className="flex items-center gap-3">
+            <div className="flex gap-1.5">
+              <div className="h-3 w-3 rounded-full bg-slate-200" />
+              <div className="h-3 w-3 rounded-full bg-slate-200" />
+              <div className="h-3 w-3 rounded-full bg-slate-200" />
+            </div>
+            <div className="flex-1 flex justify-center">
+              <div className="flex items-center gap-2 h-7 rounded-md bg-white border border-slate-200 px-3 w-64">
+                <svg className="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <span className="text-xs text-slate-500">app.shopiq.ai</span>
+              </div>
             </div>
           </div>
         </div>
-        <div className="p-6 md:p-8 bg-gradient-to-b from-white to-slate-50/50 min-h-[280px]">
-          {/* User Question - slides from right */}
+
+        <div className="p-6 md:p-8 bg-white min-h-[280px]">
+          {/* User Question */}
           <div
-            className={`mb-6 flex items-start gap-4 transition-all duration-500 ease-out ${
+            className={`mb-5 flex items-start gap-3 transition-all duration-400 ease-out ${
               showQuestion
                 ? 'opacity-100 translate-x-0'
-                : 'opacity-0 translate-x-12'
+                : 'opacity-0 translate-x-8'
             }`}
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 shadow-sm">
-              <svg
-                className="h-5 w-5 text-slate-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100">
+              <svg className="h-4 w-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </div>
-            <div className="rounded-2xl rounded-tl-none bg-slate-100 px-5 py-3 shadow-sm max-w-[85%]">
-              <p className="text-slate-700">{current.question}</p>
+            <div className="rounded-2xl rounded-tl-sm bg-slate-100 px-4 py-2.5 max-w-[80%]">
+              <p className="text-sm text-slate-700">{current.question}</p>
             </div>
           </div>
 
-          {/* AI Answer - slides from left */}
+          {/* AI Answer */}
           <div
-            className={`flex items-start gap-4 transition-all duration-500 ease-out ${
+            className={`flex items-start gap-3 transition-all duration-400 ease-out ${
               showAnswer
                 ? 'opacity-100 translate-x-0'
-                : 'opacity-0 -translate-x-12'
+                : 'opacity-0 -translate-x-8'
             }`}
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25">
-              <svg
-                className="h-5 w-5 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                />
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600">
+              <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
             </div>
-            <div className="rounded-2xl rounded-tl-none bg-gradient-to-br from-emerald-50 to-teal-50 px-5 py-4 shadow-sm border border-emerald-100 max-w-[85%]">
-              <p className="text-slate-700 leading-relaxed">{current.answer}</p>
+            <div className="rounded-2xl rounded-tl-sm bg-indigo-50 px-4 py-3 border border-indigo-100 max-w-[80%]">
+              <p className="text-sm text-slate-700 leading-relaxed">{current.answer}</p>
             </div>
           </div>
         </div>
 
         {/* Progress indicators */}
-        <div className="flex justify-center gap-2 pb-4">
+        <div className="flex justify-center gap-1.5 pb-4">
           {chatConversations.map((_, index) => (
             <button
               key={index}
               onClick={() => navigateToIndex(index)}
-              className="p-3 -m-3 cursor-pointer"
+              className="p-2 -m-2 cursor-pointer"
               aria-label={`Go to conversation ${index + 1}`}
-              aria-current={index === currentIndex ? "true" : undefined}
             >
               <span
-                className={`block h-2 rounded-full transition-all duration-300 ${
+                className={`block h-1 rounded-full transition-all duration-300 ${
                   index === currentIndex
-                    ? 'w-8 bg-gradient-to-r from-emerald-500 to-teal-500'
-                    : 'w-2 bg-slate-200 hover:bg-slate-300'
+                    ? 'w-6 bg-indigo-600'
+                    : 'w-1 bg-slate-200 hover:bg-slate-300'
                 }`}
               />
             </button>
@@ -356,10 +410,10 @@ function HeroDemo() {
 
 function Stats() {
   const stats = [
-    { value: "10K+", label: "Questions Answered" },
-    { value: "500+", label: "Stores Connected" },
-    { value: "$2M+", label: "Revenue Analyzed" },
-    { value: "24/7", label: "Always Available" },
+    { value: "$2B+", label: "Revenue Analyzed", color: "text-emerald-600" },
+    { value: "50K+", label: "Active Sellers", color: "text-indigo-600" },
+    { value: "50+", label: "Marketplaces", color: "text-cyan-600" },
+    { value: "99.9%", label: "Uptime SLA", color: "text-amber-600" },
   ];
 
   return (
@@ -367,15 +421,12 @@ function Stats() {
       {stats.map((stat, index) => (
         <div
           key={index}
-          className="group relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 text-center shadow-lg shadow-slate-100 transition-all duration-300 hover:shadow-xl hover:shadow-emerald-100 hover:border-emerald-200 hover:-translate-y-1"
+          className="rounded-xl border border-slate-100 bg-white p-5 text-center hover:shadow-md transition-shadow"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-teal-50 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-          <div className="relative">
-            <div className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-              {stat.value}
-            </div>
-            <div className="mt-1 text-sm text-slate-500">{stat.label}</div>
+          <div className={`text-2xl font-bold ${stat.color}`}>
+            {stat.value}
           </div>
+          <div className="mt-0.5 text-sm text-slate-600">{stat.label}</div>
         </div>
       ))}
     </div>

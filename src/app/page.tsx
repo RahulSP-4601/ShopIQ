@@ -4,9 +4,10 @@ import { useEffect } from "react";
 import {
   Navbar,
   Hero,
+  Integrations,
   Features,
+  TrustIndicators,
   HowItWorks,
-  ExampleQuestions,
   CTA,
   Footer,
   BackgroundEffects,
@@ -36,9 +37,10 @@ export default function Home() {
       <BackgroundEffects />
       <Navbar />
       <Hero />
+      <Integrations />
       <Features />
+      <TrustIndicators />
       <HowItWorks />
-      <ExampleQuestions />
       <CTA />
       <Footer />
     </div>
