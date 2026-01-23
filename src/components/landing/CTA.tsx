@@ -2,140 +2,155 @@
 
 import Link from "next/link";
 
+const plans = [
+  {
+    name: "Starter",
+    description: "Perfect for trying out ShopIQ",
+    price: "$0",
+    period: "/month",
+    features: [
+      "1 marketplace connection",
+      "100 AI queries/month",
+      "Basic analytics",
+      "7-day data history",
+      "Email support",
+    ],
+    cta: "Get Started Free",
+    href: "/connect",
+    featured: false,
+    color: "from-slate-600 to-slate-700",
+    checkColor: "text-teal-500",
+  },
+  {
+    name: "Professional",
+    description: "For growing multi-channel sellers",
+    price: "$49",
+    period: "/month",
+    features: [
+      "5 marketplace connections",
+      "Unlimited AI queries",
+      "Advanced analytics",
+      "1-year data history",
+      "Cross-channel reports",
+      "Priority support",
+      "Custom alerts",
+    ],
+    cta: "Start 14-Day Free Trial",
+    href: "/connect",
+    featured: true,
+    color: "from-teal-500 to-emerald-500",
+    checkColor: "text-teal-400",
+  },
+  {
+    name: "Enterprise",
+    description: "For large-scale operations",
+    price: "Custom",
+    period: "",
+    features: [
+      "Unlimited connections",
+      "Unlimited queries",
+      "Custom integrations",
+      "Unlimited history",
+      "Dedicated account manager",
+      "SLA guarantee",
+      "On-premise option",
+      "Custom training",
+    ],
+    cta: "Contact Sales",
+    href: "/contact",
+    featured: false,
+    color: "from-violet-500 to-purple-500",
+    checkColor: "text-violet-500",
+  },
+];
+
 export function CTA() {
   return (
-    <section id="pricing" className="py-24 bg-white">
+    <section id="pricing" className="py-24 bg-gradient-to-b from-slate-50 via-white to-slate-50">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        {/* Pricing cards */}
-        <div className="text-center fade-up mb-16">
-          <div className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1.5 text-sm font-medium text-indigo-700 mb-4">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Simple Pricing
-          </div>
-          <h2 className="text-3xl font-semibold text-slate-900 sm:text-4xl lg:text-5xl">
-            Start free, <span className="text-indigo-600">scale as you grow</span>
+        {/* Header */}
+        <div className="text-center fade-up max-w-2xl mx-auto mb-16">
+          <p className="text-sm font-medium text-teal-600 uppercase tracking-wider mb-3">
+            Pricing
+          </p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
+            Simple, transparent pricing
           </h2>
-          <p className="mt-4 text-lg text-slate-600 max-w-2xl mx-auto">
-            No hidden fees. No surprise charges. Just straightforward pricing that grows with your business.
+          <p className="mt-4 text-lg text-slate-600">
+            Start free and scale as your business grows. No hidden fees.
           </p>
         </div>
 
+        {/* Pricing cards */}
         <div className="grid gap-8 lg:grid-cols-3 max-w-5xl mx-auto">
-          {/* Free Plan */}
-          <div className="fade-up rounded-2xl border border-slate-200 bg-white p-8 transition-all hover:shadow-lg">
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-slate-900">Starter</h3>
-              <p className="text-sm text-slate-500 mt-1">Perfect for trying out ShopIQ</p>
-            </div>
-            <div className="mb-6">
-              <span className="text-4xl font-bold text-slate-900">$0</span>
-              <span className="text-slate-500">/month</span>
-            </div>
-            <ul className="space-y-3 mb-8">
-              {["1 marketplace connection", "100 AI queries/month", "Basic analytics", "7-day data history", "Email support"].map((feature, i) => (
-                <li key={i} className="flex items-center gap-3 text-sm text-slate-600">
-                  <svg className="w-5 h-5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  {feature}
-                </li>
-              ))}
-            </ul>
-            <Link
-              href="/connect"
-              className="block w-full py-3 text-center text-sm font-semibold text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
+          {plans.map((plan, index) => (
+            <div
+              key={plan.name}
+              className={`fade-up relative rounded-2xl p-8 transition-all duration-300 ${
+                plan.featured
+                  ? "bg-gradient-to-br from-teal-500 to-emerald-600 text-white shadow-xl shadow-teal-500/25 scale-105 z-10"
+                  : "bg-white border border-slate-200 hover:border-slate-300 hover:shadow-lg"
+              }`}
+              style={{ animationDelay: `${index * 0.1}s` }}
             >
-              Get Started Free
-            </Link>
-          </div>
+              {/* Popular badge */}
+              {plan.featured && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                  <span className="px-4 py-1.5 text-xs font-bold text-teal-600 bg-white rounded-full shadow-lg">
+                    MOST POPULAR
+                  </span>
+                </div>
+              )}
 
-          {/* Pro Plan - Featured */}
-          <div className="fade-up rounded-2xl border-2 border-indigo-500 bg-white p-8 shadow-xl relative">
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-              <span className="px-4 py-1 text-xs font-semibold text-white bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full">
-                MOST POPULAR
-              </span>
-            </div>
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-slate-900">Professional</h3>
-              <p className="text-sm text-slate-500 mt-1">For growing multi-channel sellers</p>
-            </div>
-            <div className="mb-6">
-              <span className="text-4xl font-bold text-indigo-600">$49</span>
-              <span className="text-slate-500">/month</span>
-            </div>
-            <ul className="space-y-3 mb-8">
-              {["5 marketplace connections", "Unlimited AI queries", "Advanced analytics", "1-year data history", "Cross-channel reports", "Priority support", "Custom alerts"].map((feature, i) => (
-                <li key={i} className="flex items-center gap-3 text-sm text-slate-600">
-                  <svg className="w-5 h-5 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  {feature}
-                </li>
-              ))}
-            </ul>
-            <Link
-              href="/connect"
-              className="block w-full py-3 text-center text-sm font-semibold text-white btn-primary rounded-lg"
-            >
-              Start 14-Day Free Trial
-            </Link>
-          </div>
-
-          {/* Enterprise Plan */}
-          <div className="fade-up rounded-2xl border border-slate-200 bg-white p-8 transition-all hover:shadow-lg">
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-slate-900">Enterprise</h3>
-              <p className="text-sm text-slate-500 mt-1">For large-scale operations</p>
-            </div>
-            <div className="mb-6">
-              <span className="text-4xl font-bold text-slate-900">Custom</span>
-            </div>
-            <ul className="space-y-3 mb-8">
-              {["Unlimited connections", "Unlimited queries", "Custom integrations", "Unlimited history", "Dedicated account manager", "SLA guarantee", "On-premise option", "Custom training"].map((feature, i) => (
-                <li key={i} className="flex items-center gap-3 text-sm text-slate-600">
-                  <svg className="w-5 h-5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  {feature}
-                </li>
-              ))}
-            </ul>
-            <a
-              href="/contact"
-              className="block w-full py-3 text-center text-sm font-semibold text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
-            >
-              Contact Sales
-            </a>
-          </div>
-        </div>
-
-        {/* Bottom CTA banner */}
-        <div className="fade-up mt-20">
-          <div className="rounded-3xl bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-900 p-12 text-center relative overflow-hidden">
-            {/* Decorative elements */}
-            <div className="absolute top-0 left-1/4 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl" />
-            <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl" />
-
-            <div className="relative">
-              <h2 className="text-3xl font-bold text-white sm:text-4xl">
-                Ready to unify your e-commerce analytics?
-              </h2>
-              <p className="mt-4 text-lg text-slate-300 max-w-2xl mx-auto">
-                Join 10,000+ sellers who manage all their marketplaces from one dashboard.
-                Start your free trial today.
-              </p>
-              <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <Link
-                  href="/connect"
-                  className="group flex h-14 items-center justify-center rounded-xl bg-white px-8 text-base font-semibold text-slate-900 shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105"
+              {/* Plan header */}
+              <div className="mb-6">
+                <h3
+                  className={`text-lg font-bold ${
+                    plan.featured ? "text-white" : "text-slate-900"
+                  }`}
                 >
-                  <span className="flex items-center gap-2">
-                    Start Free Trial
+                  {plan.name}
+                </h3>
+                <p
+                  className={`text-sm mt-1 ${
+                    plan.featured ? "text-teal-100" : "text-slate-500"
+                  }`}
+                >
+                  {plan.description}
+                </p>
+              </div>
+
+              {/* Price */}
+              <div className="mb-6">
+                <span
+                  className={`text-4xl font-bold ${
+                    plan.featured ? "text-white" : "text-slate-900"
+                  }`}
+                >
+                  {plan.price}
+                </span>
+                {plan.period && (
+                  <span
+                    className={plan.featured ? "text-teal-100" : "text-slate-500"}
+                  >
+                    {plan.period}
+                  </span>
+                )}
+              </div>
+
+              {/* Features */}
+              <ul className="space-y-3 mb-8">
+                {plan.features.map((feature, i) => (
+                  <li
+                    key={i}
+                    className={`flex items-center gap-3 text-sm ${
+                      plan.featured ? "text-teal-50" : "text-slate-600"
+                    }`}
+                  >
                     <svg
-                      className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1"
+                      className={`w-5 h-5 shrink-0 ${
+                        plan.featured ? "text-white" : plan.checkColor
+                      }`}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -144,39 +159,96 @@ export function CTA() {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M17 8l4 4m0 0l-4 4m4-4H3"
+                        d="M5 13l4 4L19 7"
                       />
                     </svg>
-                  </span>
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+
+              {/* CTA button */}
+              <Link
+                href={plan.href}
+                className={`block w-full py-3 text-center text-sm font-semibold rounded-xl transition-all duration-200 ${
+                  plan.featured
+                    ? "bg-white text-teal-600 hover:bg-teal-50 shadow-lg"
+                    : `bg-gradient-to-r ${plan.color} text-white hover:shadow-lg`
+                }`}
+              >
+                {plan.cta}
+              </Link>
+            </div>
+          ))}
+        </div>
+
+        {/* Bottom CTA banner */}
+        <div className="fade-up mt-24">
+          <div className="rounded-3xl bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 p-12 text-center relative overflow-hidden">
+            {/* Decorative gradient orbs */}
+            <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-500/20 rounded-full blur-3xl" />
+            <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-500/20 rounded-full blur-3xl" />
+
+            <div className="relative z-10">
+              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight drop-shadow-lg" style={{ color: '#ffffff' }}>
+                Ready to unify your e-commerce analytics?
+              </h2>
+              <p className="mt-4 text-lg text-slate-300 max-w-2xl mx-auto">
+                Join 10,000+ sellers who manage all their marketplaces from one
+                dashboard.
+              </p>
+
+              {/* CTA buttons */}
+              <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link
+                  href="/connect"
+                  className="group flex h-12 items-center justify-center rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 px-8 text-sm font-semibold text-white transition-all duration-200 hover:shadow-lg hover:shadow-teal-500/25"
+                >
+                  Start Free Trial
+                  <svg
+                    className="w-4 h-4 ml-2 transition-transform duration-200 group-hover:translate-x-0.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 8l4 4m0 0l-4 4m4-4H3"
+                    />
+                  </svg>
                 </Link>
                 <a
-                  href="/contact"
-                  className="flex h-14 items-center justify-center rounded-xl border border-slate-600 px-8 text-base font-semibold text-white transition-all duration-300 hover:bg-slate-800 hover:border-slate-500"
+                  href="#demo"
+                  className="flex h-12 items-center justify-center rounded-xl border border-slate-600 px-8 text-sm font-semibold text-white transition-all duration-200 hover:bg-slate-700 hover:border-slate-500"
                 >
-                  Schedule a Demo
+                  Watch Demo
                 </a>
               </div>
 
-              {/* Trust badges */}
+              {/* Trust points */}
               <div className="mt-10 flex flex-wrap items-center justify-center gap-6 text-sm text-slate-400">
-                <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span>14-day free trial</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span>No credit card required</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span>Cancel anytime</span>
-                </div>
+                {["14-day free trial", "No credit card required", "Cancel anytime"].map(
+                  (item, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <svg
+                        className="w-4 h-4 text-teal-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      <span>{item}</span>
+                    </div>
+                  )
+                )}
               </div>
             </div>
           </div>
