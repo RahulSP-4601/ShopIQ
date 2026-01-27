@@ -2,8 +2,11 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { RequestTrialModal } from "./RequestTrialModal";
 
 export function Hero() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <section className="relative pt-28 pb-20 overflow-hidden">
       {/* Background gradient */}
@@ -43,11 +46,11 @@ export function Hero() {
 
           {/* CTA buttons */}
           <div className="fade-up mt-10 flex flex-col sm:flex-row items-center gap-4">
-            <Link
-              href="/signup"
+            <button
+              onClick={() => setIsModalOpen(true)}
               className="group flex h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 px-6 text-sm font-medium text-white hover:from-teal-600 hover:to-emerald-600 transition-all duration-200 shadow-lg shadow-teal-500/25"
             >
-              Start Free Trial
+              Request a Free Trial
               <svg
                 className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5"
                 fill="none"
@@ -56,7 +59,7 @@ export function Hero() {
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
-            </Link>
+            </button>
             <a
               href="#demo"
               className="group flex h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200"
@@ -90,6 +93,12 @@ export function Hero() {
         {/* Stats */}
         <Stats />
       </div>
+
+      {/* Request Trial Modal */}
+      <RequestTrialModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </section>
   );
 }

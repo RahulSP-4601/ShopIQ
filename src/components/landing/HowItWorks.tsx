@@ -1,5 +1,8 @@
 "use client";
 
+import { useState } from "react";
+import { RequestTrialModal } from "./RequestTrialModal";
+
 const steps = [
   {
     number: "01",
@@ -28,6 +31,8 @@ const steps = [
 ];
 
 export function HowItWorks() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <section id="how-it-works" className="py-24 bg-gradient-to-b from-white via-slate-50 to-white">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -115,15 +120,21 @@ export function HowItWorks() {
                 <span className="font-semibold text-slate-900">2,847 sellers</span> started this week
               </span>
             </div>
-            <a
-              href="/connect"
+            <button
+              onClick={() => setIsModalOpen(true)}
               className="px-6 py-2.5 rounded-xl text-sm font-medium text-white bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 transition-all shadow-lg shadow-teal-500/25"
             >
-              Start Free Trial
-            </a>
+              Request a Free Trial
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Request Trial Modal */}
+      <RequestTrialModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </section>
   );
 }

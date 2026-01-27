@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import { RequestTrialModal } from "./RequestTrialModal";
 
 const plans = [
   {
@@ -35,7 +37,7 @@ const plans = [
       "Priority support",
       "Custom alerts",
     ],
-    cta: "Start 14-Day Free Trial",
+    cta: "Request a Free Trial",
     href: "/signup",
     featured: true,
     color: "from-teal-500 to-emerald-500",
@@ -65,6 +67,8 @@ const plans = [
 ];
 
 export function CTA() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <section id="pricing" className="py-24 bg-gradient-to-b from-slate-50 via-white to-slate-50">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -168,16 +172,21 @@ export function CTA() {
               </ul>
 
               {/* CTA button */}
-              <Link
-                href={plan.href}
-                className={`block w-full py-3 text-center text-sm font-semibold rounded-xl transition-all duration-200 ${
-                  plan.featured
-                    ? "bg-white text-teal-600 hover:bg-teal-50 shadow-lg"
-                    : `bg-gradient-to-r ${plan.color} text-white hover:shadow-lg`
-                }`}
-              >
-                {plan.cta}
-              </Link>
+              {plan.featured ? (
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="block w-full py-3 text-center text-sm font-semibold rounded-xl transition-all duration-200 bg-white text-teal-600 hover:bg-teal-50 shadow-lg"
+                >
+                  {plan.cta}
+                </button>
+              ) : (
+                <Link
+                  href={plan.href}
+                  className={`block w-full py-3 text-center text-sm font-semibold rounded-xl transition-all duration-200 bg-gradient-to-r ${plan.color} text-white hover:shadow-lg`}
+                >
+                  {plan.cta}
+                </Link>
+              )}
             </div>
           ))}
         </div>
@@ -200,11 +209,11 @@ export function CTA() {
 
               {/* CTA buttons */}
               <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link
-                  href="/signup"
+                <button
+                  onClick={() => setIsModalOpen(true)}
                   className="group flex h-12 items-center justify-center rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 px-8 text-sm font-semibold text-white transition-all duration-200 hover:shadow-lg hover:shadow-teal-500/25"
                 >
-                  Start Free Trial
+                  Request a Free Trial
                   <svg
                     className="w-4 h-4 ml-2 transition-transform duration-200 group-hover:translate-x-0.5"
                     fill="none"
@@ -218,7 +227,7 @@ export function CTA() {
                       d="M17 8l4 4m0 0l-4 4m4-4H3"
                     />
                   </svg>
-                </Link>
+                </button>
                 <a
                   href="#demo"
                   className="flex h-12 items-center justify-center rounded-xl border border-slate-600 px-8 text-sm font-semibold text-white transition-all duration-200 hover:bg-slate-700 hover:border-slate-500"
@@ -254,6 +263,12 @@ export function CTA() {
           </div>
         </div>
       </div>
+
+      {/* Request Trial Modal */}
+      <RequestTrialModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </section>
   );
 }
