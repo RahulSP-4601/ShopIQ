@@ -16,6 +16,8 @@ interface ChatLayoutProps {
   userEmail: string;
   connectedMarketplaces: ConnectedMarketplace[];
   marketplaceCount: number;
+  subscriptionStatus?: string | null;
+  trialEndsAt?: string | null;
   children: ReactNode;
 }
 
@@ -24,6 +26,8 @@ function ChatLayoutInner({
   userEmail,
   connectedMarketplaces,
   marketplaceCount,
+  subscriptionStatus,
+  trialEndsAt,
   children,
 }: ChatLayoutProps) {
   const { isOpen, close, toggle } = useMobileSidebar();
@@ -49,6 +53,8 @@ function ChatLayoutInner({
           userName={userName}
           userEmail={userEmail}
           marketplaceCount={marketplaceCount}
+          subscriptionStatus={subscriptionStatus}
+          trialEndsAt={trialEndsAt}
           onMenuToggle={toggle}
         />
 

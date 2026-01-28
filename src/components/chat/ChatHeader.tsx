@@ -9,6 +9,8 @@ interface ChatHeaderProps {
   userName: string;
   userEmail: string;
   marketplaceCount: number;
+  subscriptionStatus?: string | null;
+  trialEndsAt?: string | null;
   onMenuToggle?: () => void;
 }
 
@@ -16,6 +18,8 @@ export function ChatHeader({
   userName,
   userEmail,
   marketplaceCount,
+  subscriptionStatus,
+  trialEndsAt,
   onMenuToggle,
 }: ChatHeaderProps) {
   const router = useRouter();
@@ -158,6 +162,26 @@ export function ChatHeader({
 
       {/* Right side - User profile */}
       <div className="flex items-center gap-2 sm:gap-4">
+        {/* Trial countdown */}
+        {subscriptionStatus === "TRIAL" && trialEndsAt && (() => {
+          const trialDate = new Date(trialEndsAt);
+          if (isNaN(trialDate.getTime())) return null;
+          const daysLeft = Math.max(0, Math.ceil((trialDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+          return (
+            <div className="hidden sm:flex items-center gap-2">
+              <span className="text-sm text-slate-500">
+                {daysLeft} day{daysLeft !== 1 ? "s" : ""} left in trial
+              </span>
+              <Link
+                href="/onboarding/payment"
+                className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+              >
+                Get Subscription
+              </Link>
+            </div>
+          );
+        })()}
+
         {/* Connected badge - only show when marketplaces are connected, hide on mobile */}
         {marketplaceCount > 0 ? (
           <div className="hidden sm:flex items-center gap-2 rounded-full bg-teal-50 px-3 py-1.5 text-sm text-teal-700">

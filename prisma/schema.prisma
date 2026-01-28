@@ -10,7 +10,7 @@ datasource db {
 }
 
 // ============================================
-// USER & AUTH
+// USER (CLIENT only)
 // ============================================
 
 model User {
@@ -40,6 +40,49 @@ model User {
   stores           Store[]
   subscription     Subscription?
   marketplaceConns MarketplaceConnection[]
+  trialClient      SalesClient? @relation("trialClient")
+
+  @@index([email])
+}
+
+// ============================================
+// EMPLOYEE (FOUNDER & SALES_MEMBER)
+// ============================================
+
+enum EmployeeRole {
+  FOUNDER
+  SALES_MEMBER
+}
+
+model Employee {
+  id String @id @default(cuid())
+
+  // Profile
+  name  String
+  email String @unique
+  phone String?
+
+  // Authentication
+  passwordHash String
+
+  // Role & access control
+  role       EmployeeRole
+  isApproved Boolean      @default(false)
+  refCode        String?  @unique
+  commissionRate Decimal? @db.Decimal(5, 2)
+
+  // Password reset
+  resetTokenHash    String?   @unique
+  resetTokenExpiry  DateTime?
+  mustChangePassword Boolean  @default(false)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  salesClients SalesClient[]
+  commissions  Commission[]
 
   @@index([email])
 }
@@ -509,12 +552,18 @@ model TrialRequest {
   email String
   phone String?
 
+  // Sales referral tracking
+  refCode String?
+
   // Status tracking
   status TrialRequestStatus @default(PENDING)
 
   // Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Relations
+  salesClient SalesClient?
 
   @@index([email])
   @@index([createdAt])
@@ -525,4 +574,59 @@ enum TrialRequestStatus {
   CONTACTED
   CONVERTED
   DECLINED
+}
+
+// ============================================
+// SALES TEAM
+// ============================================
+
+model SalesClient {
+  id            String   @id @default(cuid())
+  salesMemberId String
+  salesMember   Employee @relation(fields: [salesMemberId], references: [id], onDelete: Cascade)
+
+  // Client info
+  name  String
+  email String
+  phone String?
+
+  status TrialRequestStatus @default(PENDING)
+
+  // Optional link to TrialRequest (if came via referral link)
+  trialRequestId String?       @unique
+  trialRequest   TrialRequest? @relation(fields: [trialRequestId], references: [id])
+
+  // Trial invitation
+  trialToken  String?   @unique
+  trialSentAt DateTime?
+
+  // Link to actual user account created during trial setup
+  clientUserId String? @unique
+  clientUser   User?   @relation("trialClient", fields: [clientUserId], references: [id])
+
+  commissions Commission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([salesMemberId])
+  @@index([email])
+}
+
+model Commission {
+  id            String   @id @default(cuid())
+  salesMemberId String
+  salesMember   Employee @relation(fields: [salesMemberId], references: [id], onDelete: Cascade)
+
+  salesClientId String?
+  salesClient   SalesClient? @relation(fields: [salesClientId], references: [id])
+
+  amount Decimal @db.Decimal(10, 2)
+  note   String?
+  period String @default("INITIAL") // "YYYY-MM" for monthly commissions, "INITIAL" for initial purchase
+
+  createdAt DateTime @default(now())
+
+  @@unique([salesMemberId, salesClientId, period])
+  @@index([salesMemberId])
 }

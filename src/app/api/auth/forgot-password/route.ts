@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
 import { generateResetToken, hashResetToken } from "@/lib/auth/password";
+import { sendPasswordResetEmail } from "@/lib/email";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -11,7 +12,6 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    // Validate input
     const result = forgotPasswordSchema.safeParse(body);
     if (!result.success) {
       return NextResponse.json(
@@ -21,62 +21,77 @@ export async function POST(request: NextRequest) {
     }
 
     const { email } = result.data;
+    const emailLower = email.toLowerCase();
 
-    // Find user
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() },
-    });
+    // Fetch both tables concurrently to prevent timing leaks
+    const [user, employee] = await Promise.all([
+      prisma.user.findUnique({ where: { email: emailLower } }),
+      prisma.employee.findUnique({ where: { email: emailLower } }),
+    ]);
 
     // Always return success to prevent email enumeration
-    if (!user) {
+    if (!user && !employee) {
       return NextResponse.json({
         success: true,
-        message:
-          "If an account with that email exists, we've sent a password reset link.",
+        message: "If an account with that email exists, we've sent a password reset link.",
       });
     }
 
-    // Generate reset token and hash it for secure storage
     const resetToken = generateResetToken();
     const resetTokenHash = hashResetToken(resetToken);
     const resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
-    // Save hashed reset token (never store plaintext tokens)
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        resetTokenHash,
-        resetTokenExpiry,
-      },
-    });
+    const accountName = user?.name || employee?.name || "User";
 
-    // TODO: Send email with reset link using an email service
-    // In development, optionally log obfuscated debug info (never the full token)
+    // Persist the token first so it exists when the user clicks the link
+    if (user) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { resetTokenHash, resetTokenExpiry },
+      });
+    } else if (employee) {
+      await prisma.employee.update({
+        where: { id: employee.id },
+        data: { resetTokenHash, resetTokenExpiry },
+      });
+    }
+
+    // Send the reset email after token is persisted
+    const origin = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
+    const resetUrl = `${origin}/reset-password?token=${resetToken}`;
+
+    try {
+      await sendPasswordResetEmail({
+        email: emailLower,
+        name: accountName,
+        resetUrl,
+      });
+    } catch (emailError) {
+      // Log the error but return success to prevent email enumeration
+      console.error("Failed to send reset email:", emailError instanceof Error ? emailError.message : emailError);
+    }
+
     if (
       process.env.NODE_ENV === "development" &&
       process.env.DEBUG_LOG_RESET_TOKEN === "true"
     ) {
-      // Only show last 4 characters of token for debugging, never the full token
-      // Use user.id instead of email to avoid PII leak in logs
+      const targetId = user?.id || employee?.id;
       console.log(
-        `[DEV] Password reset token generated for user ${user.id} (ends with: ...${resetToken.slice(-4)})`
+        `[DEV] Password reset token generated for ${user ? "user" : "employee"} ${targetId} (ends with: ...${resetToken.slice(-4)})`
       );
     }
 
     return NextResponse.json({
       success: true,
-      message:
-        "If an account with that email exists, we've sent a password reset link.",
+      message: "If an account with that email exists, we've sent a password reset link.",
     });
   } catch (error) {
-    // Sanitize error logging to avoid leaking stack traces in production
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     const errorName = error instanceof Error ? error.name : "Error";
 
     if (process.env.NODE_ENV === "development") {
       console.error("Forgot password error:", error);
     } else {
-      // Production: log only sanitized error info without stack traces
       console.error(`Forgot password error: ${errorName} - ${errorMessage}`);
     }
 

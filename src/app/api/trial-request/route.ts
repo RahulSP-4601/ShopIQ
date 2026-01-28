@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, phone } = body;
+    const { name, email, phone, refCode } = body;
 
     // Validate required fields
     if (!name || !email) {
@@ -34,13 +34,43 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create trial request in database
-    const trialRequest = await prisma.trialRequest.create({
-      data: {
-        name: name.trim(),
-        email: email.trim().toLowerCase(),
-        phone: phone?.trim() || null,
-      },
+    // Create trial request (and optionally sales client) atomically
+    const trimmedRef = refCode?.trim() || null;
+
+    const trialRequest = await prisma.$transaction(async (tx) => {
+      // Validate refCode inside transaction to avoid TOCTOU
+      let salesMember = null;
+      if (trimmedRef) {
+        salesMember = await tx.employee.findUnique({
+          where: { refCode: trimmedRef },
+        });
+        if (!salesMember) {
+          throw new Error("INVALID_REFERRAL_CODE");
+        }
+      }
+
+      const req = await tx.trialRequest.create({
+        data: {
+          name: name.trim(),
+          email: email.trim().toLowerCase(),
+          phone: phone?.trim() || null,
+          refCode: trimmedRef,
+        },
+      });
+
+      if (salesMember) {
+        await tx.salesClient.create({
+          data: {
+            salesMemberId: salesMember.id,
+            name: name.trim(),
+            email: email.trim().toLowerCase(),
+            phone: phone?.trim() || null,
+            trialRequestId: req.id,
+          },
+        });
+      }
+
+      return req;
     });
 
     return NextResponse.json(
@@ -52,7 +82,12 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    // Log only error name/code to avoid leaking PII from validation messages
+    if (error instanceof Error && error.message === "INVALID_REFERRAL_CODE") {
+      return NextResponse.json(
+        { error: "Invalid referral code" },
+        { status: 400 }
+      );
+    }
     const errorType = error instanceof Error ? error.constructor.name : "UnknownError";
     console.error("Failed to create trial request:", errorType);
     return NextResponse.json(

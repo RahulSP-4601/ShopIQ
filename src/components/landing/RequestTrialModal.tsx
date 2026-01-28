@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 interface RequestTrialModalProps {
   isOpen: boolean;
@@ -8,6 +8,12 @@ interface RequestTrialModalProps {
 }
 
 export function RequestTrialModal({ isOpen, onClose }: RequestTrialModalProps) {
+  const refCode = useMemo(() => {
+    if (typeof window === "undefined") return null;
+    const params = new URLSearchParams(window.location.search);
+    return params.get("ref") || null;
+  }, []);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -58,7 +64,7 @@ export function RequestTrialModal({ isOpen, onClose }: RequestTrialModalProps) {
       const response = await fetch("/api/trial-request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, refCode }),
       });
 
       let data;

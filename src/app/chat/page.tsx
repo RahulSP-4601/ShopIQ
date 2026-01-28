@@ -25,7 +25,7 @@ export default async function ChatPage() {
   }
 
   // Check for active subscription
-  const { hasActiveSubscription } = await checkSubscription();
+  const { hasActiveSubscription, subscription } = await checkSubscription();
   if (!hasActiveSubscription) {
     redirect("/onboarding/payment");
   }
@@ -39,6 +39,8 @@ export default async function ChatPage() {
         name: m.externalName || m.marketplace,
       }))}
       marketplaceCount={connectedMarketplaces?.length ?? 0}
+      subscriptionStatus={subscription?.status ?? null}
+      trialEndsAt={subscription?.currentPeriodEnd?.toISOString() ?? null}
     >
       <ChatContainer
         storeName={connectedMarketplaces[0]?.externalName || "your store"}

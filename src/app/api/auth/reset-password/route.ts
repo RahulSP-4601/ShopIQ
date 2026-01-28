@@ -26,7 +26,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate input
     const result = resetPasswordSchema.safeParse(body);
     if (!result.success) {
       return NextResponse.json(
@@ -37,7 +36,6 @@ export async function POST(request: NextRequest) {
 
     const { token, password } = result.data;
 
-    // Validate password strength
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.valid) {
       return NextResponse.json(
@@ -46,44 +44,42 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Hash the provided token to compare with stored hash
     const tokenHash = hashResetToken(token);
-
-    // Find user with valid reset token hash
-    const user = await prisma.user.findFirst({
-      where: {
-        resetTokenHash: tokenHash,
-        resetTokenExpiry: {
-          gt: new Date(),
-        },
-      },
-    });
-
-    if (!user) {
-      return NextResponse.json(
-        { error: "Invalid or expired reset token" },
-        { status: 400 }
-      );
-    }
-
-    // Hash new password
+    const now = new Date();
     const passwordHash = await hashPassword(password);
 
-    // Update password and clear reset token hash
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        passwordHash,
-        resetTokenHash: null,
-        resetTokenExpiry: null,
-      },
+    // Try atomic update on User table first
+    const userUpdateResult = await prisma.user.updateMany({
+      where: { resetTokenHash: tokenHash, resetTokenExpiry: { gt: now } },
+      data: { passwordHash, resetTokenHash: null, resetTokenExpiry: null },
     });
 
-    return NextResponse.json({
-      success: true,
-      message: "Password has been reset successfully",
-      redirect: "/signin",
+    if (userUpdateResult.count > 0) {
+      return NextResponse.json({
+        success: true,
+        message: "Password has been reset successfully",
+        redirect: "/signin",
+      });
+    }
+
+    // Try atomic update on Employee table
+    const employeeUpdateResult = await prisma.employee.updateMany({
+      where: { resetTokenHash: tokenHash, resetTokenExpiry: { gt: now } },
+      data: { passwordHash, resetTokenHash: null, resetTokenExpiry: null, mustChangePassword: false },
     });
+
+    if (employeeUpdateResult.count > 0) {
+      return NextResponse.json({
+        success: true,
+        message: "Password has been reset successfully",
+        redirect: "/signin",
+      });
+    }
+
+    return NextResponse.json(
+      { error: "Invalid or expired reset token" },
+      { status: 400 }
+    );
   } catch (error) {
     console.error("Reset password error:", error);
     return NextResponse.json(

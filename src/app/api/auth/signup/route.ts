@@ -26,7 +26,6 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    // Validate input
     const result = signupSchema.safeParse(body);
     if (!result.success) {
       return NextResponse.json(
@@ -38,7 +37,6 @@ export async function POST(request: NextRequest) {
     const { name, email, phone, city, state, zipCode, country, password } =
       result.data;
 
-    // Validate password strength
     const passwordValidation = validatePassword(password);
     if (!passwordValidation.valid) {
       return NextResponse.json(
@@ -47,29 +45,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() },
-    });
+    const emailLower = email.trim().toLowerCase();
 
-    if (existingUser) {
+    // Check both User and Employee tables for existing email
+    const [existingUser, existingEmployee] = await Promise.all([
+      prisma.user.findUnique({ where: { email: emailLower } }),
+      prisma.employee.findUnique({ where: { email: emailLower } }),
+    ]);
+
+    if (existingUser || existingEmployee) {
       return NextResponse.json(
         { error: "An account with this email already exists" },
         { status: 400 }
       );
     }
 
-    // Hash password
     const passwordHash = await hashPassword(password);
 
-    // Create user - wrap in try/catch to handle race condition where
-    // another request creates the same email between findUnique and create
     let user;
     try {
       user = await prisma.user.create({
         data: {
           name,
-          email: email.toLowerCase(),
+          email: emailLower,
           phone: phone || null,
           city: city || null,
           state: state || null,
@@ -79,7 +77,6 @@ export async function POST(request: NextRequest) {
         },
       });
     } catch (createError) {
-      // Handle unique constraint violation (race condition)
       if (
         createError instanceof Prisma.PrismaClientKnownRequestError &&
         createError.code === "P2002"
@@ -92,7 +89,6 @@ export async function POST(request: NextRequest) {
       throw createError;
     }
 
-    // Create session - if this fails, roll back by deleting the user
     try {
       await createUserSession({
         id: user.id,
@@ -100,17 +96,12 @@ export async function POST(request: NextRequest) {
         name: user.name,
       });
     } catch (sessionError) {
-      // Roll back user creation to maintain atomicity
-      // Sanitize error logging to avoid leaking sensitive data
       const sessionErrorMessage = sessionError instanceof Error ? sessionError.message : "Unknown error";
       console.error(`Session creation failed for user ${user.id}, rolling back: ${sessionErrorMessage}`);
 
-      // Wrap rollback in try/catch to handle deletion failures gracefully
       try {
         await prisma.user.delete({ where: { id: user.id } });
       } catch (deleteError) {
-        // Log the deletion failure with sanitized error for manual cleanup
-        // Avoid logging email to prevent sensitive data leakage
         const deleteErrorMessage = deleteError instanceof Error ? deleteError.message : "Unknown error";
         console.error(
           `Rollback failed: could not delete orphaned user (id: ${user.id}): ${deleteErrorMessage}`
@@ -129,11 +120,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-      },
+      user: { id: user.id, name: user.name, email: user.email },
       redirect: "/onboarding/connect",
     });
   } catch (error) {
