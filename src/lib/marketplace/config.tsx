@@ -211,6 +211,24 @@ export const MARKETPLACES: MarketplaceConfig[] = [
       </svg>
     ),
   },
+  {
+    id: "FLIPKART",
+    name: "Flipkart",
+    color: "#2874F0",
+    logo: (
+      <svg className="w-8 h-8" viewBox="0 0 48 48" fill="none">
+        <rect width="48" height="48" rx="8" fill="#2874F0" />
+        <path
+          d="M16 12h12v4H20v6h7v4h-7v10h-4V12z"
+          fill="#FFE500"
+        />
+        <path
+          d="M30 32c0-2.2 1.8-4 4-4s4 1.8 4 4-1.8 4-4 4-4-1.8-4-4z"
+          fill="#FFE500"
+        />
+      </svg>
+    ),
+  },
 ];
 
 // Lookup maps for quick access by marketplace type

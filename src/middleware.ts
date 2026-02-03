@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyEmployeeTokenFromDB } from "@/lib/auth/session";
+import { jwtVerify } from "jose";
+
+function getSecretKey() {
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) {
+    throw new Error("SESSION_SECRET is not set");
+  }
+  return new TextEncoder().encode(secret);
+}
 
 export async function middleware(request: NextRequest) {
   const token = request.cookies.get("shopiq_employee_session")?.value;
@@ -10,26 +18,29 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    // Verify token and fetch fresh employee data from database
-    const employee = await verifyEmployeeTokenFromDB(token);
+    // Verify JWT only (no DB call — Edge Runtime cannot use Prisma)
+    const { payload } = await jwtVerify(token, getSecretKey());
 
-    if (!employee) {
+    if (!payload.employeeId) {
       return NextResponse.redirect(new URL("/signin", request.url));
     }
 
+    const role = typeof payload.role === "string" ? payload.role : "";
+    const isApproved = payload.isApproved === true;
+
     // Founder routes - verify role
-    if (path.startsWith("/founder") && employee.role !== "FOUNDER") {
+    if (path.startsWith("/founder") && role !== "FOUNDER") {
       return NextResponse.redirect(new URL("/signin", request.url));
     }
 
     // Sales routes - verify role and approval status
     if (path.startsWith("/sales")) {
-      if (employee.role !== "SALES_MEMBER") {
+      if (role !== "SALES_MEMBER") {
         return NextResponse.redirect(new URL("/signin", request.url));
       }
 
       // Unapproved sales members can only see pending-approval page
-      if (!employee.isApproved && path !== "/sales/pending-approval") {
+      if (!isApproved && path !== "/sales/pending-approval") {
         return NextResponse.redirect(
           new URL("/sales/pending-approval", request.url)
         );

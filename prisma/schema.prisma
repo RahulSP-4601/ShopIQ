@@ -131,6 +131,7 @@ enum MarketplaceType {
   SQUARE
   MAGENTO
   PRESTASHOP
+  FLIPKART
 }
 
 enum ConnectionStatus {

@@ -90,6 +90,14 @@ export const MARKETPLACES: MarketplaceConfig[] = [
     hasOAuth: false,
     logo: "prestashop",
   },
+  {
+    id: "FLIPKART",
+    name: "Flipkart",
+    color: "#2874F0",
+    description: "Connect your Flipkart seller account",
+    hasOAuth: false,
+    logo: "flipkart",
+  },
 ];
 
 export function getMarketplaceConfig(
