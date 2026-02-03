@@ -159,6 +159,13 @@ export default function TrialConnectPage() {
         setError(data.error || "Failed to connect");
         return;
       }
+
+      // Handle OAuth redirect (for Flipkart and future OAuth marketplaces)
+      if (data.requiresOAuth && data.oauthUrl) {
+        window.location.href = data.oauthUrl;
+        return;
+      }
+
       await fetchConnections();
     } catch {
       setError("Failed to connect marketplace");

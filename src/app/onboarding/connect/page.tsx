@@ -136,6 +136,12 @@ export default function OnboardingConnectPage() {
         return;
       }
 
+      // Handle OAuth redirect (for Flipkart and future OAuth marketplaces)
+      if (data.requiresOAuth && data.oauthUrl) {
+        window.location.href = data.oauthUrl;
+        return;
+      }
+
       await fetchConnections();
     } catch (error) {
       console.error("Failed to connect marketplace:", error);

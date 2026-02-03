@@ -167,6 +167,12 @@ export default function AccountMarketplacesPage() {
         return;
       }
 
+      // Handle OAuth redirect (for Flipkart and future OAuth marketplaces)
+      if (data.requiresOAuth && data.oauthUrl) {
+        window.location.href = data.oauthUrl;
+        return;
+      }
+
       // Refresh data and get authoritative count from server
       const refreshedConnections = await fetchData();
       const newCount = refreshedConnections.filter(
