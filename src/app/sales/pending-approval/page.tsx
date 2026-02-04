@@ -1,11 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function PendingApprovalPage() {
   const router = useRouter();
   const [signOutError, setSignOutError] = useState("");
+
+  // Prevent stale page from bfcache when user presses back after sign-out
+  useEffect(() => {
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        fetch("/api/auth/verify-employee", { cache: "no-store" }).then((res) => {
+          if (!res.ok) router.replace("/signin");
+        }).catch(() => router.replace("/signin"));
+      }
+    };
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, [router]);
 
   const handleSignOut = async () => {
     setSignOutError("");
@@ -15,7 +28,7 @@ export default function PendingApprovalPage() {
         setSignOutError("Failed to sign out. Please try again.");
         return;
       }
-      router.push("/signin");
+      router.replace("/signin");
     } catch {
       setSignOutError("Failed to sign out. Please try again.");
     }

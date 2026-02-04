@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
 
 // Standardized date formatter for consistent locale
 const formatDate = (dateStr: string) => new Date(dateStr).toLocaleDateString("en-US");
@@ -37,6 +38,21 @@ interface Commission {
 type Tab = "team" | "clients";
 
 export default function FounderDashboardPage() {
+  const router = useRouter();
+
+  // Prevent stale page from bfcache when user presses back after sign-out
+  useEffect(() => {
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        fetch("/api/auth/verify-employee", { cache: "no-store" }).then((res) => {
+          if (!res.ok) router.replace("/signin");
+        }).catch(() => router.replace("/signin"));
+      }
+    };
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, [router]);
+
   const [tab, setTab] = useState<Tab>("team");
   const [members, setMembers] = useState<Member[]>([]);
   const [allClients, setAllClients] = useState<SalesClient[]>([]);
@@ -145,7 +161,7 @@ export default function FounderDashboardPage() {
         setSignOutError("Failed to sign out.");
         return;
       }
-      window.location.href = "/signin";
+      router.replace("/signin");
     } catch {
       setSignOutError("Failed to sign out.");
     }

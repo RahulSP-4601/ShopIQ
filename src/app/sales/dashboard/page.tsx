@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useRouter } from "next/navigation";
 
 interface SalesClient {
   id: string;
@@ -40,6 +41,21 @@ function getCurrentMonthKey() {
 }
 
 export default function SalesDashboardPage() {
+  const router = useRouter();
+
+  // Prevent stale page from bfcache when user presses back after sign-out
+  useEffect(() => {
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        fetch("/api/auth/verify-employee", { cache: "no-store" }).then((res) => {
+          if (!res.ok) router.replace("/signin");
+        }).catch(() => router.replace("/signin"));
+      }
+    };
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, [router]);
+
   const [clients, setClients] = useState<SalesClient[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -165,7 +181,7 @@ export default function SalesDashboardPage() {
         setSignOutError("Failed to sign out.");
         return;
       }
-      window.location.href = "/signin";
+      router.replace("/signin");
     } catch {
       setSignOutError("Failed to sign out.");
     }
