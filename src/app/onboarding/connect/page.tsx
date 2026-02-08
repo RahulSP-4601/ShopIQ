@@ -136,7 +136,7 @@ export default function OnboardingConnectPage() {
         return;
       }
 
-      // Handle OAuth redirect (for Flipkart and future OAuth marketplaces)
+      // Handle OAuth redirect
       if (data.requiresOAuth && data.oauthUrl) {
         window.location.href = data.oauthUrl;
         return;
@@ -327,12 +327,12 @@ export default function OnboardingConnectPage() {
               clipRule="evenodd"
             />
           </svg>
-          {connectedCount} of 10 marketplaces connected
+          {connectedCount} of {MARKETPLACES.length} marketplaces connected
         </div>
       </div>
 
       {/* Marketplace Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
         {MARKETPLACES.map((marketplace) => {
           const connected = isConnected(marketplace.id);
           const isLoading = loading === marketplace.id;

@@ -4,7 +4,7 @@ ShopIQ is an intelligent analytics platform that transforms complex e-commerce d
 
 ## The Problem We Solve
 
-Multi-channel e-commerce sellers face a growing challenge: managing data across multiple platforms (Shopify, Amazon, eBay, Etsy, WooCommerce, and more) is overwhelming. Each marketplace has its own dashboard, metrics, and reporting tools. Sellers spend hours jumping between platforms, manually compiling reports, and trying to make sense of fragmented data.
+Multi-channel e-commerce sellers face a growing challenge: managing data across multiple platforms (Shopify, eBay, Etsy, Flipkart, and more) is overwhelming. Each marketplace has its own dashboard, metrics, and reporting tools. Sellers spend hours jumping between platforms, manually compiling reports, and trying to make sense of fragmented data.
 
 **The result?** Lost time, missed opportunities, and decisions made on gut feeling instead of data.
 
@@ -17,32 +17,20 @@ ShopIQ acts as your AI-powered business analyst. Instead of navigating complex d
 - **Receive actionable recommendations** - AI doesn't just show numbers, it tells you what to do next
 - **Save hours every week** - Skip manual data analysis and focus on growing your business
 
-## The Idea
-
-ShopIQ is built on a simple premise: **e-commerce analytics should be as easy as having a conversation**.
-
-We believe that every seller, regardless of technical expertise, should have access to the same quality of insights that enterprise retailers get from expensive analytics teams. By combining:
-
-1. **Multi-marketplace integration** - Connect all your sales channels in one click
-2. **Conversational AI** - Ask questions like you would to a business analyst
-3. **Automated insights** - Get recommendations without needing to interpret raw data
-
-We democratize e-commerce analytics for the millions of small and medium sellers worldwide.
-
 ## Supported Marketplaces
 
-| Marketplace | Status |
-| ----------- | ------ |
-| Shopify | Fully Integrated |
-| Amazon Seller Central | Coming Soon |
-| eBay | Coming Soon |
-| Etsy | Coming Soon |
-| WooCommerce | Coming Soon |
-| BigCommerce | Coming Soon |
-| Wix eCommerce | Coming Soon |
-| Square Online | Coming Soon |
-| Magento (Adobe Commerce) | Coming Soon |
-| PrestaShop | Coming Soon |
+| Marketplace | Status | Auth Method | Data Sync |
+| ----------- | ------ | ----------- | --------- |
+| Shopify | Fully Integrated | OAuth 2.0 | Webhooks (real-time) + Polling |
+| eBay | Fully Integrated | OAuth 2.0 | Polling (every 15 min) |
+| Etsy | Fully Integrated | OAuth 2.0 + PKCE | Polling (every 15 min) |
+| Flipkart | Fully Integrated | OAuth 2.0 | Polling (every 15 min) |
+| WooCommerce | Fully Integrated | API Key + Secret | Webhooks (real-time) + Polling |
+| BigCommerce | Fully Integrated | OAuth 2.0 | Webhooks (real-time) + Polling |
+| Wix | Fully Integrated | OAuth 2.0 (4hr tokens) | Webhooks (real-time) + Polling |
+| Square | Fully Integrated | OAuth 2.0 + PKCE | Webhooks (real-time) + Polling |
+| Magento | Fully Integrated | Bearer Token | Polling (every 15 min) |
+| Amazon Seller Central | Coming Soon | — | — |
 
 ## Features
 
@@ -56,12 +44,26 @@ Ask questions like you would to a business analyst:
 - "What time of day do most orders come in?"
 - "How is my customer acquisition trending?"
 
-### One-Click Shopify Integration
+### Multi-Marketplace OAuth Integration
 
-- Secure OAuth authentication
-- Automatic data synchronization (products, orders, customers)
-- Real-time sync progress tracking
-- 90-day order history import
+- **Shopify** — Standard OAuth 2.0 with HMAC validation
+- **eBay** — OAuth 2.0 with automatic token refresh (~2hr tokens)
+- **Etsy** — OAuth 2.0 with PKCE (public client flow, rotating tokens)
+- **Flipkart** — OAuth 2.0 with client credentials
+- **WooCommerce** — API Key + Secret (user-provided credentials)
+- **BigCommerce** — OAuth 2.0 with permanent tokens
+- **Wix** — OAuth 2.0 with 4-hour tokens (both tokens rotate on refresh)
+- **Square** — OAuth 2.0 with PKCE (30-day tokens)
+- **Magento** — Bearer Token (user-provided integration token)
+- One-click connect from a unified onboarding page
+- Encrypted token storage (AES-256-GCM)
+
+### Real-Time Data Pipeline
+
+- **Webhooks (Shopify, WooCommerce, BigCommerce, Wix, Square)** — Instant order/product updates via HMAC-verified webhooks
+- **Polling (eBay, Etsy, Flipkart, Magento)** — Automated sync every 15 minutes via Vercel Cron
+- **Unified Data Model** — All 9 marketplaces normalized into cross-platform tables (UnifiedOrder, UnifiedProduct)
+- **Delta sync** — Only fetches data since last sync to minimize API calls
 
 ### Smart Analytics & Metrics
 
@@ -72,8 +74,6 @@ Ask questions like you would to a business analyst:
 
 ### Automated Report Generation
 
-Generate professional reports on demand:
-
 | Report Type       | What's Included                                  |
 | ----------------- | ------------------------------------------------ |
 | Revenue Summary   | Sales trends, AOV analysis, top products         |
@@ -83,23 +83,27 @@ Generate professional reports on demand:
 
 Each report includes AI-generated summaries with actionable recommendations.
 
-### Multi-Marketplace Management
+### Sales Team Management
 
-- Connect multiple sales channels from one dashboard
-- Unified analytics across all connected marketplaces
-- Single source of truth for your e-commerce business
+- Founder dashboard for managing sales members
+- Sales member onboarding with approval flow
+- Client tracking and trial management
+- Commission calculation and tracking
 
-### Conversation History
+### Additional Features
 
-- Track all your previous queries
-- Reference past insights
-- Build on previous analysis
+- Conversation history with file attachments
+- Cookie consent and GDPR compliance
+- Legal pages (Terms, Privacy, Security, GDPR, Cookies)
+- Rate limiting on API endpoints
+- Subscription management with trial support
 
 ## How It Works
 
-1. **Connect** - Link your Shopify store with one click
-2. **Sync** - Your data is automatically imported and processed
-3. **Ask** - Start asking questions and generating reports
+1. **Sign Up** - Create an account on ShopIQ
+2. **Connect** - Link your marketplaces (Shopify, eBay, Etsy, Flipkart, WooCommerce, BigCommerce, Wix, Square, Magento) via OAuth or API credentials
+3. **Sync** - Your data is automatically imported, normalized, and kept up to date
+4. **Ask** - Start asking questions and generating reports across all your stores
 
 ## Business Model
 
@@ -114,31 +118,13 @@ ShopIQ operates on a **subscription-based SaaS model** with transparent, scalabl
 
 **Example pricing:**
 - Single Shopify store: $19.99/month
-- Shopify + Amazon: $24.98/month
-- Shopify + Amazon + eBay: $29.97/month
-
-### How We Generate Revenue
-
-1. **Recurring Subscriptions** (Primary Revenue)
-   - Monthly subscription fees from e-commerce sellers
-   - Predictable, recurring revenue model
-   - Higher revenue from multi-channel sellers
-
-2. **Marketplace Expansion**
-   - Each new marketplace connection increases MRR
-   - Sellers naturally expand to multiple channels as they grow
-   - Built-in revenue growth as customers scale
-
-3. **Future Revenue Streams**
-   - Enterprise plans for high-volume sellers
-   - Premium features (advanced forecasting, custom integrations)
-   - API access for agencies and developers
-   - White-label solutions for marketplace platforms
+- Shopify + eBay: $24.98/month
+- Shopify + eBay + Etsy: $29.97/month
 
 ### Target Market
 
-- **Primary:** Multi-channel e-commerce sellers on Shopify, WooCommerce, and BigCommerce
-- **Secondary:** Marketplace sellers on Amazon, eBay, and Etsy
+- **Primary:** Multi-channel e-commerce sellers on Shopify, eBay, Etsy, Flipkart, WooCommerce, BigCommerce, Wix, Square, and Magento
+- **Secondary:** Growing sellers expanding to multiple marketplaces
 - **TAM:** 30M+ active e-commerce sellers globally
 - **Sweet Spot:** Sellers doing $10K-$500K/month who need insights but can't afford dedicated analysts
 
@@ -156,37 +142,70 @@ ShopIQ operates on a **subscription-based SaaS model** with transparent, scalabl
 
 - **Frontend**: Next.js 16, React 19, TypeScript, Tailwind CSS
 - **Backend**: Next.js API Routes, Prisma ORM
-- **Database**: PostgreSQL
-- **AI**: OpenAI API
-- **APIs**: Shopify Admin API (2025-10)
+- **Database**: PostgreSQL (Supabase)
+- **AI**: Google Gemini 1.5 Flash
+- **Marketplace APIs**: Shopify Admin API (2025-10), eBay REST API, Etsy Open API v3, Flipkart Seller API, WooCommerce REST API, BigCommerce API, Wix eCommerce API, Square API, Magento REST API
+- **Infrastructure**: Vercel (hosting + cron jobs)
+- **Email**: Resend
+- **Storage**: Supabase Storage
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 18+
-- PostgreSQL database
-- Shopify Partner account (for OAuth credentials)
-- OpenAI API
+- PostgreSQL database (Supabase recommended)
+- Marketplace developer accounts (Shopify, eBay, Etsy, Flipkart, BigCommerce, Wix, Square; WooCommerce and Magento use user-provided credentials)
+- Google Gemini API key
 
 ### Environment Variables
 
-Create a `.env` file with:
+Create a `.env` file based on `.env.example`:
 
 ```env
 # Database
 DATABASE_URL="postgresql://..."
 
 # Shopify OAuth
-SHOPIFY_CLIENT_ID="your-client-id"
-SHOPIFY_CLIENT_SECRET="your-client-secret"
+SHOPIFY_API_KEY="your_shopify_api_key"
+SHOPIFY_API_SECRET="your_shopify_api_secret"
+SHOPIFY_SCOPES="read_orders,read_products,read_customers"
+
+# eBay OAuth
+EBAY_CLIENT_ID="your_ebay_client_id"
+EBAY_CLIENT_SECRET="your_ebay_client_secret"
+EBAY_RU_NAME="your_ebay_ru_name"
+
+# Etsy OAuth (PKCE — no client secret needed)
+ETSY_API_KEY="your_etsy_api_key"
+
+# Flipkart OAuth
+FLIPKART_APP_ID="your_flipkart_app_id"
+FLIPKART_APP_SECRET="your_flipkart_app_secret"
+
+# BigCommerce OAuth
+BIGCOMMERCE_CLIENT_ID="your_bigcommerce_client_id"
+BIGCOMMERCE_CLIENT_SECRET="your_bigcommerce_client_secret"
+
+# Wix OAuth
+WIX_APP_ID="your_wix_app_id"
+WIX_APP_SECRET="your_wix_app_secret"
+
+# Square OAuth
+SQUARE_APPLICATION_ID="your_square_application_id"
+SQUARE_APPLICATION_SECRET="your_square_application_secret"
+
+# WooCommerce & Magento use user-provided credentials (no app secrets needed)
 
 # Google Gemini AI
-GEMINI_API_KEY="your-gemini-api-key"
+GEMINI_API_KEY="your_gemini_api_key"
 
 # App
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
-JWT_SECRET="your-jwt-secret"
+SESSION_SECRET="your_32_character_random_string"
+
+# Vercel Cron (for polling sync every 15 min)
+CRON_SECRET="your_cron_secret"
 ```
 
 ### Installation
@@ -198,12 +217,21 @@ npm install
 # Generate Prisma client
 npx prisma generate
 
-# Run database migrations
+# Run database migrations (development)
 npx prisma migrate dev
 
 # Start development server
 npm run dev
 ```
+
+**Database Migrations (Production):**
+
+```bash
+# Deploy migrations in production (CI/CD pipeline)
+npx prisma migrate deploy
+```
+
+> **Note:** Use `npx prisma migrate dev` during development to create and apply migrations with full migration history. Use `npx prisma migrate deploy` in production for reproducible, forward-only deployments. Prisma migrations are forward-only by default and do not provide automatic rollbacks; to roll back a migration, you must manually write a down-migration SQL file (or revert to a previous migration state) and re-deploy with `npx prisma migrate deploy`. Avoid `npx prisma db push` in production — it is intended for prototyping only, as it does not preserve migration history and can cause accidental schema changes.
 
 Open [http://localhost:3000](http://localhost:3000) to see the app.
 
@@ -211,29 +239,69 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
 
 ```
 src/
-├── app/                    # Next.js App Router pages
-│   ├── page.tsx           # Landing page
-│   ├── chat/              # Chat interface
-│   ├── reports/           # Reports management
-│   ├── sync/              # Sync progress
-│   └── api/               # API routes
-├── components/            # React components
-│   ├── landing/           # Marketing pages
-│   ├── chat/              # Chat UI
-│   └── reports/           # Report views
-└── lib/                   # Core utilities
-    ├── shopify/           # Shopify API client
-    ├── gemini/            # AI integration
-    ├── metrics/           # Analytics calculations
-    └── auth/              # Session management
+├── app/                          # Next.js App Router
+│   ├── page.tsx                  # Landing page
+│   ├── (auth)/                   # Auth pages (signin, signup, forgot/reset password)
+│   ├── onboarding/               # Onboarding flow (connect, payment)
+│   ├── chat/                     # Chat interface
+│   ├── reports/                  # Reports management
+│   ├── sync/                     # Sync progress
+│   ├── connect/                  # Marketplace connection
+│   ├── account/                  # Account settings
+│   ├── founder/                  # Founder dashboard
+│   ├── sales/                    # Sales team dashboard
+│   ├── trial/                    # Trial access
+│   └── api/                      # API routes
+│       ├── auth/                 # Auth + OAuth (shopify, ebay, etsy, flipkart, woocommerce, bigcommerce, wix, square, magento)
+│       ├── marketplaces/         # Connect/disconnect marketplaces
+│       ├── webhooks/             # Webhook receivers (shopify, woocommerce, bigcommerce, square, wix)
+│       ├── cron/sync/            # Vercel Cron polling endpoint
+│       ├── chat/                 # Chat API
+│       ├── reports/              # Reports API
+│       ├── sync/                 # Sync API
+│       ├── founder/              # Founder management API
+│       ├── sales/                # Sales team API
+│       ├── subscription/         # Subscription API
+│       └── trial/                # Trial API
+├── components/                   # React components
+│   ├── landing/                  # Marketing pages
+│   ├── chat/                     # Chat UI
+│   ├── reports/                  # Report views
+│   ├── auth/                     # Auth guard
+│   ├── cookie-consent/           # GDPR consent
+│   └── ui/                       # Shared UI components
+├── hooks/                        # Custom React hooks
+├── types/                        # TypeScript types
+└── lib/                          # Core utilities
+    ├── shopify/                  # Shopify client, OAuth, sync, webhooks
+    ├── ebay/                     # eBay client, OAuth, token refresh
+    ├── etsy/                     # Etsy client, OAuth (PKCE), token refresh
+    ├── flipkart/                 # Flipkart client, OAuth, token refresh
+    ├── woocommerce/              # WooCommerce client, auth, webhooks
+    ├── bigcommerce/              # BigCommerce client, OAuth, webhooks
+    ├── wix/                      # Wix client, OAuth, token refresh
+    ├── square/                   # Square client, OAuth (PKCE), token refresh, webhooks
+    ├── magento/                  # Magento client, auth
+    ├── sync/                     # Unified sync services for all 9 marketplaces
+    ├── gemini/                   # AI integration
+    ├── metrics/                  # Analytics calculations
+    ├── reports/                  # Report templates
+    ├── auth/                     # Session, password, subscription
+    ├── marketplace/              # Marketplace config
+    └── cookies/                  # Cookie management
 ```
 
 ## Security
 
-- OAuth 2.0 for Shopify authentication
-- JWT-based session management with HTTP-only cookies
-- HMAC validation for Shopify requests
-- Store-scoped data isolation
+- **OAuth 2.0** for marketplace authentication (with PKCE for Etsy and Square)
+- **AES-256-GCM** encryption for all stored access/refresh tokens
+- **HMAC-SHA256** verification for webhooks (Shopify, WooCommerce, BigCommerce, Square, Wix)
+- **JWT-based** session management with HTTP-only cookies
+- **Nonce/CSRF** protection on all OAuth flows
+- **Per-user token refresh locking** to prevent concurrent refresh storms
+- **Automatic token refresh** for Wix (4hr), Square (30-day), eBay (2hr), Etsy (1hr)
+- **Store-scoped** data isolation
+- **Rate limiting** on API endpoints
 
 ## License
 

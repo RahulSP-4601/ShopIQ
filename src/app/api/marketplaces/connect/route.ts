@@ -89,6 +89,42 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // For Etsy, redirect to OAuth flow
+    if (marketplace === "ETSY") {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+      const oauthUrl = new URL("/api/auth/etsy", appUrl);
+
+      return NextResponse.json({
+        success: true,
+        requiresOAuth: true,
+        oauthUrl: oauthUrl.toString(),
+      });
+    }
+
+    // For BigCommerce, redirect to OAuth flow
+    if (marketplace === "BIGCOMMERCE") {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+      const oauthUrl = new URL("/api/auth/bigcommerce", appUrl);
+
+      return NextResponse.json({
+        success: true,
+        requiresOAuth: true,
+        oauthUrl: oauthUrl.toString(),
+      });
+    }
+
+    // For Square, redirect to OAuth flow
+    if (marketplace === "SQUARE") {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+      const oauthUrl = new URL("/api/auth/square", appUrl);
+
+      return NextResponse.json({
+        success: true,
+        requiresOAuth: true,
+        oauthUrl: oauthUrl.toString(),
+      });
+    }
+
     // For other marketplaces, create a stub connection (simulating OAuth success)
     const marketplaceName = marketplace.replaceAll("_", " ");
     const connection = await prisma.marketplaceConnection.upsert({

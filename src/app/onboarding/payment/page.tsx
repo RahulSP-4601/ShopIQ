@@ -111,14 +111,20 @@ export default function OnboardingPaymentPage() {
     setIsProcessing(true);
     setError("");
 
-    // DEMO MODE: Simulated payment processing - no real payment is processed
-    // Card details are NOT sent to any payment processor or stored
-    // TODO: Replace with real Stripe integration before production
     if (isDemo) {
+      // DEMO MODE: No real payment is processed.
+      // Card details are NOT sent to any payment processor or stored.
+      // This creates a DB-only subscription record.
       console.warn(
-        "[DEMO] Payment simulation active - no real transaction processed"
+        "[DEMO] Payment not integrated — subscription created in DB only, no charge"
       );
+      // Simulate processing delay for UX
       await new Promise((resolve) => setTimeout(resolve, 2000));
+    } else {
+      // TODO: Replace with real Stripe integration before production launch.
+      setError("Payment integration not available — this feature is coming soon.");
+      setIsProcessing(false);
+      return;
     }
 
     try {

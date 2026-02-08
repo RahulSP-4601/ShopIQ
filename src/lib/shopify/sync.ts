@@ -203,6 +203,17 @@ export async function syncOrders(store: Store, daysBack = 90): Promise<number> {
 }
 
 export async function startFullSync(store: Store): Promise<void> {
+  // Guard: legacy sync is disabled by default — only runs when explicitly opted-in.
+  // This prevents dual sync flows from writing concurrently to the same tables.
+  if (process.env.SHOPIFY_LEGACY_SYNC_ENABLED !== "true") {
+    console.log(
+      `[LEGACY_SYNC] Legacy Shopify sync is disabled (SHOPIFY_LEGACY_SYNC_ENABLED != "true"). ` +
+      `Skipping sync for store ${store.id}. Data flows through the unified pipeline. ` +
+      `Set SHOPIFY_LEGACY_SYNC_ENABLED=true to re-enable.`
+    );
+    return;
+  }
+
   // Update store status
   await prisma.store.update({
     where: { id: store.id },

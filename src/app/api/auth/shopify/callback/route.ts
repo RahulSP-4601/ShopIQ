@@ -9,6 +9,7 @@ import {
 } from "@/lib/shopify/oauth";
 import { ShopifyClient } from "@/lib/shopify/client";
 import { getUserSession } from "@/lib/auth/session";
+import { registerWebhooks } from "@/lib/shopify/webhooks";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -33,7 +34,8 @@ export async function GET(request: NextRequest) {
   // Validate state/nonce
   const cookieStore = await cookies();
   const storedNonce = cookieStore.get("shopify_nonce")?.value;
-  cookieStore.delete("shopify_nonce");
+  // Must specify path to match how cookie was set in /api/auth/shopify
+  cookieStore.delete({ name: "shopify_nonce", path: "/" });
 
   if (!storedNonce || storedNonce !== state) {
     return NextResponse.redirect(
@@ -158,10 +160,27 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    // Register Shopify webhooks for real-time order/product updates
+    // Blocking call, but wrapped in try/catch so failure doesn't break the OAuth flow
+    try {
+      await registerWebhooks(store);
+    } catch (webhookError) {
+      // Sanitize error logging to avoid leaking sensitive data
+      const msg = webhookError instanceof Error ? webhookError.message : "Unknown error";
+      console.error(`Failed to register Shopify webhooks: ${msg}`);
+    }
+
+    // Note: Initial sync is handled by the scheduled cron job (/api/cron/sync)
+    // to avoid serverless runtime timeouts. The connection is marked as CONNECTED
+    // and will be picked up in the next sync cycle.
+
     // Redirect back to onboarding connect page to allow connecting more marketplaces
     return NextResponse.redirect(new URL("/onboarding/connect", request.url));
   } catch (error) {
-    console.error("OAuth callback error:", error);
+    // Sanitize error logging to avoid leaking sensitive data
+    const message = error instanceof Error ? error.message : "Unknown error";
+    const name = error instanceof Error ? error.name : "Error";
+    console.error(`Shopify OAuth callback error: [${name}] ${message}`);
     return NextResponse.redirect(
       new URL("/?error=oauth_failed", request.url)
     );

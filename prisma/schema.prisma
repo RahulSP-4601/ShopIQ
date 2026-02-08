@@ -41,6 +41,8 @@ model User {
   subscription     Subscription?
   marketplaceConns MarketplaceConnection[]
   trialClient      SalesClient? @relation("trialClient")
+  unifiedOrders    UnifiedOrder[]
+  unifiedProducts  UnifiedProduct[]
 
   @@index([email])
 }
@@ -107,14 +109,21 @@ model MarketplaceConnection {
   tokenExpiry  DateTime? // Token expiration timestamp (not encrypted, used for refresh scheduling)
 
   // Marketplace-specific data
-  externalId   String?
-  externalName String?
+  externalId    String?
+  externalName  String?
+  webhookSecret String? // Encrypted webhook signature key (Square, etc.) - use encryptToken() before write, decryptToken() after read
 
   // Timestamps
-  connectedAt DateTime?
-  lastSyncAt  DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  connectedAt       DateTime?
+  lastSyncAt        DateTime? // Last successful sync completion
+  lastSyncAttemptAt DateTime? // Last sync attempt (success or failure) — used for backoff
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Unified data relations
+  unifiedOrders   UnifiedOrder[]
+  unifiedProducts UnifiedProduct[]
+  unifiedSyncLogs UnifiedSyncLog[]
 
   @@unique([userId, marketplace])
   @@index([userId])
@@ -179,6 +188,7 @@ enum SubscriptionStatus {
   PAST_DUE
   CANCELED
   UNPAID
+  PAUSED
 }
 
 // ============================================
@@ -630,4 +640,180 @@ model Commission {
 
   @@unique([salesMemberId, salesClientId, period])
   @@index([salesMemberId])
+}
+
+// ============================================
+// UNIFIED MARKETPLACE DATA
+// ============================================
+
+enum UnifiedOrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
+}
+
+enum UnifiedProductStatus {
+  ACTIVE
+  INACTIVE
+  OUT_OF_STOCK
+}
+
+model UnifiedOrder {
+  id              String             @id @default(cuid())
+  userId          String
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  marketplace     MarketplaceType
+  connectionId    String
+  connection      MarketplaceConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  externalOrderId String
+  status          UnifiedOrderStatus @default(PENDING)
+  currency        String
+  totalAmount     Decimal            @db.Decimal(10, 2)
+  totalAmountUSD  Decimal?           @db.Decimal(10, 2)
+  itemCount       Int                @default(0)
+  customerName    String? // PII — subject to data retention policy. SECURITY: Consider application-layer encryption (AES-256-GCM via encryptToken/decryptToken in src/lib/shopify/oauth.ts) for at-rest protection, consistent with MarketplaceConnection token fields. NULLed by /api/cron/cleanup after retention period.
+  customerEmail   String? // PII — subject to data retention policy. SECURITY: Same encryption guidance as customerName above. NULLed by /api/cron/cleanup after retention period.
+  orderedAt       DateTime
+  fulfilledAt     DateTime?
+  rawData         Json?
+  syncedAt        DateTime           @default(now())
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  items UnifiedOrderItem[]
+
+  @@unique([connectionId, externalOrderId])
+  @@index([userId, marketplace])
+  @@index([userId, orderedAt])
+  @@index([connectionId])
+}
+
+model UnifiedProduct {
+  id           String               @id @default(cuid())
+  userId       String
+  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  marketplace  MarketplaceType
+  connectionId String
+  connection   MarketplaceConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  externalId   String
+  title        String
+  sku          String?
+  category     String?
+  price        Decimal              @db.Decimal(10, 2)
+  currency     String
+  inventory    Int                  @default(0)
+  status       UnifiedProductStatus @default(ACTIVE)
+  imageUrl     String?
+  rawData      Json?
+  syncedAt     DateTime             @default(now())
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  orderItems UnifiedOrderItem[]
+
+  @@unique([connectionId, externalId])
+  @@index([userId, marketplace])
+  @@index([userId, sku])
+  @@index([connectionId])
+}
+
+model UnifiedOrderItem {
+  id             String          @id @default(cuid())
+  orderId        String
+  order          UnifiedOrder    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId      String?
+  product        UnifiedProduct? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  externalItemId String
+  title          String
+  sku            String?
+  quantity       Int
+  unitPrice      Decimal         @db.Decimal(10, 2)
+  totalPrice     Decimal         @db.Decimal(10, 2)
+  currency       String
+  createdAt      DateTime        @default(now())
+
+  @@unique([orderId, externalItemId])
+  @@index([orderId])
+  @@index([productId])
+}
+
+model UnifiedSyncLog {
+  id           String                @id @default(cuid())
+  connectionId String
+  connection   MarketplaceConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  marketplace  MarketplaceType
+  entity       String // "orders" | "products"
+  status       String // "started" | "completed" | "failed"
+  totalCount   Int?
+  syncedCount  Int                   @default(0)
+  errorMessage String?
+  trigger      String                @default("cron") // "cron" | "webhook" | "manual"
+  startedAt    DateTime              @default(now())
+  completedAt  DateTime?
+
+  @@index([connectionId])
+  @@index([marketplace, startedAt])
+}
+
+// ============================================
+// TOKEN REVOCATION (Session Blacklist)
+// ============================================
+
+model RevokedToken {
+  id        String   @id @default(cuid())
+  jti       String   @unique // JWT ID claim
+  userId    String
+  revokedAt DateTime @default(now())
+  expiresAt DateTime // When the original token expires (for cleanup)
+
+  @@index([userId])
+  @@index([expiresAt]) // For periodic cleanup of expired entries
+}
+
+// ============================================
+// AUDIT LOG (Auth Events)
+// ============================================
+
+enum AuditAction {
+  LOGIN
+  LOGOUT
+  LOGIN_FAILED
+  SESSION_CREATED
+  SESSION_REVOKED
+  PASSWORD_RESET_REQUESTED
+  PASSWORD_RESET_COMPLETED
+  MARKETPLACE_CONNECTED
+  MARKETPLACE_DISCONNECTED
+}
+
+model AuditLog {
+  id        String      @id @default(cuid())
+  userId    String?     // Null for failed login attempts by unknown users
+  action    AuditAction
+  ipAddress String?
+  userAgent String?
+  metadata  Json?       // Additional context (e.g., marketplace type, error details)
+  createdAt DateTime    @default(now())
+
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+  @@index([createdAt]) // For TTL/cleanup queries
+}
+
+// ============================================
+// WEBHOOK EVENT DEDUPLICATION
+// ============================================
+
+model WebhookEvent {
+  id          String          @id @default(cuid())
+  marketplace MarketplaceType
+  eventId     String          // Marketplace-provided event ID (from headers or payload)
+  eventType   String          // e.g., "orders/create", "store/order/created"
+  processedAt DateTime        @default(now())
+
+  @@unique([marketplace, eventId])
+  @@index([processedAt]) // For TTL/cleanup of old events
 }

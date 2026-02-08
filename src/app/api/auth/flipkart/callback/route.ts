@@ -20,7 +20,8 @@ export async function GET(request: NextRequest) {
   // Validate state/nonce
   const cookieStore = await cookies();
   const storedNonce = cookieStore.get("flipkart_nonce")?.value;
-  cookieStore.delete("flipkart_nonce");
+  // Must specify path to match how cookie was set in /api/auth/flipkart
+  cookieStore.delete({ name: "flipkart_nonce", path: "/" });
 
   if (!storedNonce || storedNonce !== state) {
     return NextResponse.redirect(
@@ -93,9 +94,34 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    // Note: Initial sync is handled by the scheduled cron job (/api/cron/sync)
+    // to avoid serverless runtime timeouts. The connection is marked as CONNECTED
+    // and will be picked up in the next sync cycle.
+
     return NextResponse.redirect(new URL("/onboarding/connect", request.url));
   } catch (error) {
-    console.error("Flipkart OAuth callback error:", error);
+    // Log safe, actionable context — redact URLs/tokens from message
+    const name = error instanceof Error ? error.name : "Error";
+    const rawMessage = error instanceof Error ? error.message : "";
+    // Reusable helper to strip sensitive data from arbitrary text.
+    // Truncates the raw input BEFORE redaction so markers are never split.
+    function redactSensitiveText(text: string, maxLength: number): string {
+      const truncated = text.slice(0, maxLength);
+      return truncated
+        .replace(/https?:\/\/[^\s]+/g, "[URL_REDACTED]")
+        .replace(/eyJ[a-zA-Z0-9_-]{10,}\.[a-zA-Z0-9_-]{10,}\.[a-zA-Z0-9_-]{10,}/g, "[JWT_REDACTED]")
+        .replace(/(?:token|key|secret|password|auth|access_token|refresh_token|api_key|client_secret)[=:]\s*['"]?[^\s'"&,]{8,}/gi, "[CREDENTIAL_REDACTED]")
+        .replace(/\b[a-f0-9]{40,}\b/gi, "[HEX_REDACTED]");
+    }
+    const safeMessage = redactSensitiveText(rawMessage, 200);
+    const safeStack = error instanceof Error && error.stack
+      ? redactSensitiveText(error.stack.split("\n").slice(0, 3).join(" | "), 300)
+      : "";
+    console.error(
+      `Flipkart OAuth callback failed: [${name}] ${safeMessage}${safeStack ? ` | Stack: ${safeStack}` : ""}`
+    );
+    // TODO: Forward full error to Sentry/observability with automatic PII redaction:
+    // Sentry.captureException(error, { tags: { marketplace: "flipkart", flow: "oauth_callback" } });
     return NextResponse.redirect(
       new URL("/?error=oauth_failed", request.url)
     );

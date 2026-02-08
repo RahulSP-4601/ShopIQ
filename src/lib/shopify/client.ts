@@ -167,6 +167,7 @@ export class ShopifyClient {
     limit?: number;
     page_info?: string;
     created_at_min?: Date;
+    updated_at_min?: Date;
   }): Promise<{
     orders: ShopifyOrder[];
     nextPageInfo?: string;
@@ -176,7 +177,9 @@ export class ShopifyClient {
     if (params?.page_info) {
       searchParams.set("page_info", params.page_info);
     }
-    if (params?.created_at_min) {
+    if (params?.updated_at_min) {
+      searchParams.set("updated_at_min", params.updated_at_min.toISOString());
+    } else if (params?.created_at_min) {
       searchParams.set("created_at_min", params.created_at_min.toISOString());
     }
 
@@ -294,12 +297,20 @@ export interface ShopifyOrder {
   customer?: {
     id: number;
     email: string;
+    first_name?: string;
+    last_name?: string;
   };
   shipping_address?: {
     city: string;
     province: string;
     country: string;
   };
+  fulfillments?: Array<{
+    id: number;
+    status: string;
+    created_at: string;
+    updated_at: string;
+  }>;
   line_items: ShopifyLineItem[];
 }
 

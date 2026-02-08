@@ -79,7 +79,7 @@ externalOrderId String    (original order ID from marketplace)
 status          String    (PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED, RETURNED)
 currency        String    (USD, INR, EUR, etc.)
 totalAmount     Decimal   (order total in original currency)
-totalAmountUSD  Decimal   (converted to USD for cross-marketplace comparison)
+totalAmountUSD  Decimal?  (converted to USD for cross-marketplace comparison; null until exchange-rate conversion is applied during sync — see Phase 7)
 itemCount       Int
 customerName    String?
 customerEmail   String?
@@ -89,7 +89,7 @@ syncedAt        DateTime  (when this record was last updated from API)
 createdAt       DateTime
 updatedAt       DateTime
 
-@@unique([marketplace, externalOrderId])
+@@unique([connectionId, externalOrderId])
 @@index([userId, marketplace])
 @@index([userId, orderedAt])
 ```
@@ -113,7 +113,7 @@ syncedAt        DateTime
 createdAt       DateTime
 updatedAt       DateTime
 
-@@unique([marketplace, externalId])
+@@unique([connectionId, externalId])
 @@index([userId, marketplace])
 @@index([userId, sku])
 ```
@@ -169,6 +169,130 @@ currency        String
 | listing.skuId | UnifiedProduct.sku |
 | listing.title | UnifiedProduct.title |
 
+### Etsy → Unified
+| Etsy Field | Unified Field |
+|------------|---------------|
+| receipt.receiptId | externalOrderId |
+| receipt.grandtotal.amount / grandtotal.divisor | totalAmount |
+| receipt.grandtotal.currency_code | currency |
+| receipt.createTimestamp (unix → Date) | orderedAt |
+| receipt.status | status (mapped) |
+| transaction.title | UnifiedOrderItem.title |
+| transaction.sku | UnifiedOrderItem.sku |
+| transaction.quantity | UnifiedOrderItem.quantity |
+| transaction.price.amount / price.divisor | UnifiedOrderItem.unitPrice |
+| listing.listingId | UnifiedProduct.externalId |
+| listing.title | UnifiedProduct.title |
+| listing.price.amount / price.divisor | UnifiedProduct.price |
+| listing.quantity | UnifiedProduct.inventory |
+| listing.state | UnifiedProduct.status (mapped) |
+
+### eBay → Unified
+| eBay Field | Unified Field |
+|------------|---------------|
+| order.orderId | externalOrderId |
+| order.pricingSummary.total.value | totalAmount |
+| order.pricingSummary.total.currency | currency |
+| order.creationDate | orderedAt |
+| order.orderFulfillmentStatus | status (mapped) |
+| lineItem.title | UnifiedOrderItem.title |
+| lineItem.sku | UnifiedOrderItem.sku |
+| lineItem.quantity | UnifiedOrderItem.quantity |
+| lineItem.lineItemCost.value | UnifiedOrderItem.unitPrice |
+| inventoryItem.sku | UnifiedProduct.externalId (eBay Inventory API uses seller-defined SKU as the stable unique identifier for inventory items) |
+| inventoryItem.product.title | UnifiedProduct.title |
+| inventoryItem.availability.shipToLocationAvailability.quantity | UnifiedProduct.inventory |
+
+### WooCommerce → Unified
+| WooCommerce Field | Unified Field |
+|-------------------|---------------|
+| order.id | externalOrderId |
+| order.total | totalAmount |
+| order.currency | currency |
+| order.date_created | orderedAt |
+| order.status | status (mapped) |
+| line_item.name | UnifiedOrderItem.title |
+| line_item.sku | UnifiedOrderItem.sku |
+| line_item.quantity | UnifiedOrderItem.quantity |
+| line_item.price | UnifiedOrderItem.unitPrice |
+| product.id | UnifiedProduct.externalId |
+| product.name | UnifiedProduct.title |
+| product.sku | UnifiedProduct.sku |
+| product.price | UnifiedProduct.price |
+| product.stock_quantity | UnifiedProduct.inventory |
+
+### BigCommerce → Unified
+| BigCommerce Field | Unified Field |
+|-------------------|---------------|
+| order.id | externalOrderId |
+| order.total_inc_tax | totalAmount |
+| order.currency_code | currency |
+| order.date_created | orderedAt |
+| order.status_id | status (mapped) |
+| order_product.name | UnifiedOrderItem.title |
+| order_product.sku | UnifiedOrderItem.sku |
+| order_product.quantity | UnifiedOrderItem.quantity |
+| order_product.price_inc_tax | UnifiedOrderItem.unitPrice |
+| product.id | UnifiedProduct.externalId |
+| product.name | UnifiedProduct.title |
+| product.sku | UnifiedProduct.sku |
+| product.price | UnifiedProduct.price |
+| product.inventory_level | UnifiedProduct.inventory |
+
+### Wix → Unified
+| Wix Field | Unified Field |
+|-----------|---------------|
+| order.id | externalOrderId |
+| order.totals.total | totalAmount |
+| order.currency | currency |
+| order.createdDate | orderedAt |
+| order.fulfillmentStatus | status (mapped) |
+| lineItem.name | UnifiedOrderItem.title |
+| lineItem.sku | UnifiedOrderItem.sku |
+| lineItem.quantity | UnifiedOrderItem.quantity |
+| lineItem.price | UnifiedOrderItem.unitPrice |
+| product.id | UnifiedProduct.externalId |
+| product.name | UnifiedProduct.title |
+| product.sku | UnifiedProduct.sku |
+| product.price.price | UnifiedProduct.price |
+| product.stock.quantity | UnifiedProduct.inventory |
+
+### Square → Unified
+| Square Field | Unified Field |
+|--------------|---------------|
+| order.id | externalOrderId |
+| order.total_money.amount / 100 | totalAmount |
+| order.total_money.currency | currency |
+| order.created_at | orderedAt |
+| order.state | status (mapped) |
+| line_item.name | UnifiedOrderItem.title |
+| line_item.catalog_object_id | UnifiedOrderItem.sku (catalog variation ID, not true SKU) |
+| line_item.quantity | UnifiedOrderItem.quantity |
+| line_item.base_price_money.amount / 100 | UnifiedOrderItem.unitPrice |
+| catalog_object.id | UnifiedProduct.externalId |
+| catalog_object.item_data.name | UnifiedProduct.title |
+| item_variation_data.sku | UnifiedProduct.sku |
+| item_variation_data.price_money.amount / 100 | UnifiedProduct.price |
+| inventory_count.quantity | UnifiedProduct.inventory |
+
+### Magento → Unified
+| Magento Field | Unified Field |
+|---------------|---------------|
+| order.entity_id | externalOrderId |
+| order.grand_total | totalAmount |
+| order.order_currency_code | currency |
+| order.created_at | orderedAt |
+| order.status | status (mapped) |
+| order_item.name | UnifiedOrderItem.title |
+| order_item.sku | UnifiedOrderItem.sku |
+| order_item.qty_ordered | UnifiedOrderItem.quantity |
+| order_item.price | UnifiedOrderItem.unitPrice |
+| product.id | UnifiedProduct.externalId |
+| product.name | UnifiedProduct.title |
+| product.sku | UnifiedProduct.sku |
+| product.price | UnifiedProduct.price |
+| stock_item.qty | UnifiedProduct.inventory |
+
 ### Status Mapping
 | Marketplace Status | Unified Status |
 |-------------------|----------------|
@@ -181,6 +305,36 @@ currency        String
 | Flipkart: DELIVERED | DELIVERED |
 | Flipkart: CANCELLED | CANCELLED |
 | Flipkart: RETURN_REQUESTED | RETURNED |
+| Etsy: open | PENDING |
+| Etsy: paid | CONFIRMED |
+| Etsy: completed | DELIVERED |
+| Etsy: canceled | CANCELLED |
+| eBay: NOT_STARTED | PENDING |
+| eBay: IN_PROGRESS | SHIPPED |
+| eBay: FULFILLED | DELIVERED |
+| eBay: CANCELLED | CANCELLED |
+| eBay: RETURNED | RETURNED |
+| WooCommerce: pending | PENDING |
+| WooCommerce: processing | CONFIRMED |
+| WooCommerce: on-hold | CONFIRMED |
+| WooCommerce: completed | DELIVERED |
+| WooCommerce: cancelled | CANCELLED |
+| WooCommerce: refunded | RETURNED |
+| BigCommerce: 2 (Shipped) | SHIPPED |
+| BigCommerce: 10 (Completed) | DELIVERED |
+| BigCommerce: 5 (Cancelled) | CANCELLED |
+| BigCommerce: 4 (Refunded) | RETURNED |
+| Wix: NOT_FULFILLED | PENDING |
+| Wix: PARTIALLY_FULFILLED | SHIPPED |
+| Wix: FULFILLED | DELIVERED |
+| Square: OPEN | PENDING |
+| Square: COMPLETED | DELIVERED |
+| Square: CANCELED | CANCELLED |
+| Magento: pending | PENDING |
+| Magento: processing | CONFIRMED |
+| Magento: complete | DELIVERED |
+| Magento: closed | DELIVERED |
+| Magento: canceled | CANCELLED |
 
 ---
 
@@ -197,10 +351,17 @@ Each marketplace has a sync service that:
 
 ```
 src/lib/sync/
-  shopify-sync.ts    — Shopify → UnifiedOrder/Product
-  flipkart-sync.ts   — Flipkart → UnifiedOrder/Product
-  amazon-sync.ts     — (future)
-  sync-manager.ts    — Orchestrates sync for all connections
+  shopify-sync.ts      — Shopify → UnifiedOrder/Product
+  flipkart-sync.ts     — Flipkart → UnifiedOrder/Product
+  etsy-sync.ts         — Etsy → UnifiedOrder/Product
+  ebay-sync.ts         — eBay → UnifiedOrder/Product
+  woocommerce-sync.ts  — WooCommerce → UnifiedOrder/Product
+  bigcommerce-sync.ts  — BigCommerce → UnifiedOrder/Product
+  wix-sync.ts          — Wix → UnifiedOrder/Product
+  square-sync.ts       — Square → UnifiedOrder/Product
+  magento-sync.ts      — Magento → UnifiedOrder/Product
+  amazon-sync.ts       — (future)
+  sync-manager.ts      — Orchestrates sync for all 9 connections
 ```
 
 ### 2. Cron Job
@@ -268,10 +429,28 @@ For cross-marketplace comparison, all amounts need a common currency:
 
 ## Implementation Priority
 
-1. **Phase 1 (Current)**: OAuth integrations for all marketplaces (Shopify done, Flipkart done)
-2. **Phase 2**: Unified data model (Prisma schema for UnifiedOrder, UnifiedProduct, UnifiedOrderItem)
-3. **Phase 3**: Sync services for Shopify and Flipkart
-4. **Phase 4**: Cron job + on-demand sync infrastructure
-5. **Phase 5**: Connect AI chat layer to query unified data
-6. **Phase 6**: Add sync services for remaining marketplaces as their OAuth integrations are built
-7. **Phase 7**: Currency conversion, advanced analytics, historical trend tracking
+1. **Phase 1 (Done)**: OAuth integrations (Shopify, Flipkart, eBay, Etsy)
+2. **Phase 2 (Done)**: Unified data model (Prisma schema for UnifiedOrder, UnifiedProduct, UnifiedOrderItem)
+3. **Phase 3 (Done)**: Sync services for Shopify, Flipkart, eBay, and Etsy
+4. **Phase 4 (Done)**: Cron job + on-demand sync infrastructure
+5. **Phase 5 (Done)**: Connect AI chat layer to query unified data
+6. **Phase 6 (Done)**: Add OAuth + sync for 5 new marketplaces (WooCommerce, BigCommerce, Wix, Square, Magento)
+7. **Phase 7 (In Progress — infrastructure present)**: Currency conversion, advanced analytics, historical trend tracking
+
+   **Implemented:**
+   - [x] `totalAmountUSD` field in UnifiedOrder schema (nullable `Decimal?`)
+   - [x] Currency conversion design documented (store original amount + currency, convert to USD)
+   - [x] `totalAmount` + `currency` stored per order for all 9 marketplaces
+
+   **Pending:**
+   - [ ] Exchange-rate provider integration (e.g., exchangerate-api.com, Open Exchange Rates)
+   - [ ] Scheduled rate fetching (daily cron or on-demand with caching)
+   - [ ] Apply conversion to `totalAmountUSD` during sync for non-USD orders
+   - [ ] Backfill historical orders with exchange rates at time of order
+   - [ ] Advanced analytics queries using `totalAmountUSD` for cross-marketplace comparison
+   - [ ] Historical trend tracking and normalization
+
+   > **Current state:** The DB schema and conversion design are in place, but live exchange-rate fetching and application to `totalAmountUSD` are not yet implemented. `totalAmountUSD` is nullable (`Decimal?`) and will be `null` for all orders until exchange-rate conversion is applied during sync. All cross-marketplace revenue comparisons currently rely on raw `totalAmount` in the original currency.
+
+8. **Phase 8**: Amazon Seller Central integration
+9. **Phase 9**: PrestaShop integration

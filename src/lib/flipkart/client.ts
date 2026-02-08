@@ -18,11 +18,16 @@ export interface FlipkartListing {
   skuId: string;
   productId: string;
   title: string;
+  mrp?: number;
+  sellingPrice?: number;
+  stock?: number;
 }
 
 export interface FlipkartShipment {
   shipmentId: string;
   orderId: string;
+  orderDate?: string;
+  status?: string;
   orderItems: FlipkartOrderItem[];
 }
 

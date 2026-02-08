@@ -6,7 +6,8 @@ import { EbayClient } from "@/lib/ebay/client";
 import { getUserSession } from "@/lib/auth/session";
 
 function clearNonceCookie(response: NextResponse): NextResponse {
-  response.cookies.delete("ebay_nonce");
+  // Must specify path to match how cookie was set in /api/auth/ebay
+  response.cookies.delete({ name: "ebay_nonce", path: "/" });
   return response;
 }
 
@@ -121,6 +122,10 @@ export async function GET(request: NextRequest) {
         connectedAt: new Date(),
       },
     });
+
+    // Note: Initial sync is handled by the scheduled cron job (/api/cron/sync)
+    // to avoid serverless runtime timeouts. The connection is marked as CONNECTED
+    // and will be picked up in the next sync cycle.
 
     return clearNonceCookie(
       NextResponse.redirect(new URL("/onboarding/connect", request.url))
