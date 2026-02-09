@@ -125,6 +125,18 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // For SnapDeal, redirect to auth flow
+    if (marketplace === "SNAPDEAL") {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+      const oauthUrl = new URL("/api/auth/snapdeal", appUrl);
+
+      return NextResponse.json({
+        success: true,
+        requiresOAuth: true,
+        oauthUrl: oauthUrl.toString(),
+      });
+    }
+
     // For other marketplaces, create a stub connection (simulating OAuth success)
     const marketplaceName = marketplace.replaceAll("_", " ");
     const connection = await prisma.marketplaceConnection.upsert({

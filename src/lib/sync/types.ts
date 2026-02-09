@@ -182,3 +182,49 @@ export function mapSquareCatalogStatus(
   return "ACTIVE";
 }
 
+// ============================================
+// SNAPDEAL STATUS MAPPING
+// ============================================
+
+/**
+ * SnapDeal order statuses:
+ * PFF = Pending For Fulfilment
+ * PRNT = Print (ready for packing)
+ * SHIPPED = In transit
+ * DELIVERED = Delivered to customer
+ * CANCELLED = Cancelled
+ */
+export function mapSnapDealOrderStatus(status: string): UnifiedOrderStatus {
+  switch (status) {
+    case "DELIVERED":
+      return "DELIVERED";
+    case "SHIPPED":
+    case "IN_TRANSIT":
+      return "SHIPPED";
+    case "APPROVED":
+    case "PACKED":
+      return "CONFIRMED";
+    case "CANCELLED":
+      return "CANCELLED";
+    case "RETURNED":
+      return "RETURNED";
+    case "PFF":
+    case "PRNT":
+    default:
+      return "PENDING";
+  }
+}
+
+export function mapSnapDealProductStatus(
+  status: string,
+  inventory: number
+): UnifiedProductStatus {
+  if (status === "INACTIVE" || status === "BLOCKED") {
+    return "INACTIVE";
+  }
+  if (inventory <= 0) {
+    return "OUT_OF_STOCK";
+  }
+  return "ACTIVE";
+}
+

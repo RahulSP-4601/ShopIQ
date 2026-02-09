@@ -141,6 +141,7 @@ enum MarketplaceType {
   MAGENTO
   PRESTASHOP
   FLIPKART
+  SNAPDEAL
 }
 
 enum ConnectionStatus {

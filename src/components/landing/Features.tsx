@@ -32,7 +32,7 @@ const features = [
       </svg>
     ),
     title: "Cross-Channel Comparison",
-    description: "Compare performance between Amazon, Flipkart, Meesho, and others. Find what works best where.",
+    description: "Compare performance between Amazon, Flipkart, Snapdeal, and others. Find what works best where.",
     color: "from-blue-500 to-indigo-500",
     bgColor: "bg-blue-50",
     iconColor: "text-blue-600",
