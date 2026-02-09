@@ -2,14 +2,47 @@
 
 ## Overview
 
-ShopIQ is a chat-based analytics platform. Users connect multiple marketplace accounts (Shopify, Flipkart, Amazon, etc.) and ask questions in natural language. The AI fetches, combines, and analyzes data across all connected marketplaces to provide unified insights.
+ShopIQ is a chat-based analytics platform. Users connect multiple marketplace accounts (Shopify, eBay, Etsy, Flipkart, BigCommerce, Square, Snapdeal) and ask questions in natural language. The AI fetches, combines, and analyzes data across all connected marketplaces to provide unified insights.
+
+---
+
+## Active Marketplaces (7 Fully Integrated)
+
+| Marketplace | Auth Method | Data Sync | Token Refresh |
+|-------------|------------|-----------|---------------|
+| Shopify | OAuth 2.0 | Webhooks + Polling | N/A (long-lived) |
+| eBay | OAuth 2.0 | Polling (15 min) | Auto (~2hr tokens) |
+| Etsy | OAuth 2.0 + PKCE | Polling (15 min) | Auto (~1hr, both tokens rotate) |
+| Flipkart | OAuth 2.0 | Polling (15 min) | Auto (client credentials) |
+| BigCommerce | OAuth 2.0 | Webhooks + Polling | N/A (permanent tokens) |
+| Square | OAuth 2.0 + PKCE | Webhooks + Polling | Auto (30-day tokens) |
+| Snapdeal | Redirect-based Auth | Polling (15 min) | N/A (non-expiring seller token) |
+
+## Coming Soon
+
+| Marketplace | Status |
+|-------------|--------|
+| Amazon Seller Central | Planned |
+| PrestaShop | Planned |
+
+## Future Target Integrations
+
+Below are the future target integrations we are working to partner with:
+
+- Meesho
+- Myntra
+- Nykaa
+- JioMart
+- IndiaMart
+- Udaan
+- Ajio
 
 ---
 
 ## Data Flow
 
 ```
-Marketplace APIs (Shopify, Flipkart, Amazon, etc.)
+Marketplace APIs (Shopify, eBay, Etsy, Flipkart, BigCommerce, Square, Snapdeal)
         │
         ▼
   Background Sync (Cron Job)
@@ -34,7 +67,7 @@ Marketplace APIs (Shopify, Flipkart, Amazon, etc.)
 ## Sync Strategy: Daily Background + On-Demand Refresh
 
 ### Background Sync (Cron Job)
-- Runs once or twice daily (e.g., 2 AM and 2 PM in user's timezone)
+- Runs every 15 minutes via Vercel Cron
 - Loops through all users with CONNECTED marketplace connections
 - For each connection, fetches new/updated data since `lastSyncAt`
 - Stores normalized data in unified tables
@@ -73,13 +106,13 @@ All marketplace data gets normalized into common tables so the AI can query acro
 ```
 id              String    @id
 userId          String    (FK to User)
-marketplace     MarketplaceType (SHOPIFY, FLIPKART, AMAZON, etc.)
+marketplace     MarketplaceType (SHOPIFY, EBAY, ETSY, FLIPKART, BIGCOMMERCE, SQUARE, SNAPDEAL)
 connectionId    String    (FK to MarketplaceConnection)
 externalOrderId String    (original order ID from marketplace)
 status          String    (PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED, RETURNED)
 currency        String    (USD, INR, EUR, etc.)
 totalAmount     Decimal   (order total in original currency)
-totalAmountUSD  Decimal?  (converted to USD for cross-marketplace comparison; null until exchange-rate conversion is applied during sync — see Phase 7)
+totalAmountUSD  Decimal?  (converted to USD for cross-marketplace comparison)
 itemCount       Int
 customerName    String?
 customerEmail   String?
@@ -156,18 +189,21 @@ currency        String
 | variant.price | UnifiedProduct.price |
 | variant.inventory_quantity | UnifiedProduct.inventory |
 
-### Flipkart → Unified
-| Flipkart Field | Unified Field |
-|----------------|---------------|
-| shipment.orderId | externalOrderId |
-| orderItem.priceComponents.sellingPrice | totalAmount |
-| "INR" (always) | currency |
-| shipment.orderDate | orderedAt |
-| shipment.status | status (mapped) |
-| orderItem.sku | UnifiedOrderItem.sku |
-| orderItem.quantity | UnifiedOrderItem.quantity |
-| listing.skuId | UnifiedProduct.sku |
-| listing.title | UnifiedProduct.title |
+### eBay → Unified
+| eBay Field | Unified Field |
+|------------|---------------|
+| order.orderId | externalOrderId |
+| order.pricingSummary.total.value | totalAmount |
+| order.pricingSummary.total.currency | currency |
+| order.creationDate | orderedAt |
+| order.orderFulfillmentStatus | status (mapped) |
+| lineItem.title | UnifiedOrderItem.title |
+| lineItem.sku | UnifiedOrderItem.sku |
+| lineItem.quantity | UnifiedOrderItem.quantity |
+| lineItem.lineItemCost.value | UnifiedOrderItem.unitPrice |
+| inventoryItem.sku | UnifiedProduct.externalId |
+| inventoryItem.product.title | UnifiedProduct.title |
+| inventoryItem.availability.shipToLocationAvailability.quantity | UnifiedProduct.inventory |
 
 ### Etsy → Unified
 | Etsy Field | Unified Field |
@@ -187,39 +223,18 @@ currency        String
 | listing.quantity | UnifiedProduct.inventory |
 | listing.state | UnifiedProduct.status (mapped) |
 
-### eBay → Unified
-| eBay Field | Unified Field |
-|------------|---------------|
-| order.orderId | externalOrderId |
-| order.pricingSummary.total.value | totalAmount |
-| order.pricingSummary.total.currency | currency |
-| order.creationDate | orderedAt |
-| order.orderFulfillmentStatus | status (mapped) |
-| lineItem.title | UnifiedOrderItem.title |
-| lineItem.sku | UnifiedOrderItem.sku |
-| lineItem.quantity | UnifiedOrderItem.quantity |
-| lineItem.lineItemCost.value | UnifiedOrderItem.unitPrice |
-| inventoryItem.sku | UnifiedProduct.externalId (eBay Inventory API uses seller-defined SKU as the stable unique identifier for inventory items) |
-| inventoryItem.product.title | UnifiedProduct.title |
-| inventoryItem.availability.shipToLocationAvailability.quantity | UnifiedProduct.inventory |
-
-### WooCommerce → Unified
-| WooCommerce Field | Unified Field |
-|-------------------|---------------|
-| order.id | externalOrderId |
-| order.total | totalAmount |
-| order.currency | currency |
-| order.date_created | orderedAt |
-| order.status | status (mapped) |
-| line_item.name | UnifiedOrderItem.title |
-| line_item.sku | UnifiedOrderItem.sku |
-| line_item.quantity | UnifiedOrderItem.quantity |
-| line_item.price | UnifiedOrderItem.unitPrice |
-| product.id | UnifiedProduct.externalId |
-| product.name | UnifiedProduct.title |
-| product.sku | UnifiedProduct.sku |
-| product.price | UnifiedProduct.price |
-| product.stock_quantity | UnifiedProduct.inventory |
+### Flipkart → Unified
+| Flipkart Field | Unified Field |
+|----------------|---------------|
+| shipment.orderId | externalOrderId |
+| orderItem.priceComponents.sellingPrice | totalAmount |
+| "INR" (always) | currency |
+| shipment.orderDate | orderedAt |
+| shipment.status | status (mapped) |
+| orderItem.sku | UnifiedOrderItem.sku |
+| orderItem.quantity | UnifiedOrderItem.quantity |
+| listing.skuId | UnifiedProduct.sku |
+| listing.title | UnifiedProduct.title |
 
 ### BigCommerce → Unified
 | BigCommerce Field | Unified Field |
@@ -239,24 +254,6 @@ currency        String
 | product.price | UnifiedProduct.price |
 | product.inventory_level | UnifiedProduct.inventory |
 
-### Wix → Unified
-| Wix Field | Unified Field |
-|-----------|---------------|
-| order.id | externalOrderId |
-| order.totals.total | totalAmount |
-| order.currency | currency |
-| order.createdDate | orderedAt |
-| order.fulfillmentStatus | status (mapped) |
-| lineItem.name | UnifiedOrderItem.title |
-| lineItem.sku | UnifiedOrderItem.sku |
-| lineItem.quantity | UnifiedOrderItem.quantity |
-| lineItem.price | UnifiedOrderItem.unitPrice |
-| product.id | UnifiedProduct.externalId |
-| product.name | UnifiedProduct.title |
-| product.sku | UnifiedProduct.sku |
-| product.price.price | UnifiedProduct.price |
-| product.stock.quantity | UnifiedProduct.inventory |
-
 ### Square → Unified
 | Square Field | Unified Field |
 |--------------|---------------|
@@ -266,7 +263,7 @@ currency        String
 | order.created_at | orderedAt |
 | order.state | status (mapped) |
 | line_item.name | UnifiedOrderItem.title |
-| line_item.catalog_object_id | UnifiedOrderItem.sku (catalog variation ID, not true SKU) |
+| line_item.catalog_object_id | UnifiedOrderItem.sku |
 | line_item.quantity | UnifiedOrderItem.quantity |
 | line_item.base_price_money.amount / 100 | UnifiedOrderItem.unitPrice |
 | catalog_object.id | UnifiedProduct.externalId |
@@ -275,23 +272,24 @@ currency        String
 | item_variation_data.price_money.amount / 100 | UnifiedProduct.price |
 | inventory_count.quantity | UnifiedProduct.inventory |
 
-### Magento → Unified
-| Magento Field | Unified Field |
-|---------------|---------------|
-| order.entity_id | externalOrderId |
-| order.grand_total | totalAmount |
-| order.order_currency_code | currency |
-| order.created_at | orderedAt |
+### Snapdeal → Unified
+| Snapdeal Field | Unified Field |
+|----------------|---------------|
+| order.subOrderId (or orderId) | externalOrderId |
+| order.price + order.shippingCharge | totalAmount |
+| order.currency (default "INR") | currency |
+| order.createdDate | orderedAt |
 | order.status | status (mapped) |
-| order_item.name | UnifiedOrderItem.title |
-| order_item.sku | UnifiedOrderItem.sku |
-| order_item.qty_ordered | UnifiedOrderItem.quantity |
-| order_item.price | UnifiedOrderItem.unitPrice |
-| product.id | UnifiedProduct.externalId |
-| product.name | UnifiedProduct.title |
+| order.productTitle | UnifiedOrderItem.title |
+| order.sku | UnifiedOrderItem.sku |
+| order.quantity | UnifiedOrderItem.quantity |
+| order.price | UnifiedOrderItem.unitPrice |
+| product.supc | UnifiedProduct.externalId |
+| product.title | UnifiedProduct.title |
 | product.sku | UnifiedProduct.sku |
-| product.price | UnifiedProduct.price |
-| stock_item.qty | UnifiedProduct.inventory |
+| product.sellingPrice | UnifiedProduct.price |
+| product.inventory | UnifiedProduct.inventory |
+| product.imageUrl | UnifiedProduct.imageUrl |
 
 ### Status Mapping
 | Marketplace Status | Unified Status |
@@ -314,33 +312,25 @@ currency        String
 | eBay: FULFILLED | DELIVERED |
 | eBay: CANCELLED | CANCELLED |
 | eBay: RETURNED | RETURNED |
-| WooCommerce: pending | PENDING |
-| WooCommerce: processing | CONFIRMED |
-| WooCommerce: on-hold | CONFIRMED |
-| WooCommerce: completed | DELIVERED |
-| WooCommerce: cancelled | CANCELLED |
-| WooCommerce: refunded | RETURNED |
 | BigCommerce: 2 (Shipped) | SHIPPED |
 | BigCommerce: 10 (Completed) | DELIVERED |
 | BigCommerce: 5 (Cancelled) | CANCELLED |
 | BigCommerce: 4 (Refunded) | RETURNED |
-| Wix: NOT_FULFILLED | PENDING |
-| Wix: PARTIALLY_FULFILLED | SHIPPED |
-| Wix: FULFILLED | DELIVERED |
 | Square: OPEN | PENDING |
 | Square: COMPLETED | DELIVERED |
 | Square: CANCELED | CANCELLED |
-| Magento: pending | PENDING |
-| Magento: processing | CONFIRMED |
-| Magento: complete | DELIVERED |
-| Magento: closed | DELIVERED |
-| Magento: canceled | CANCELLED |
+| Snapdeal: PFF / PRNT | PENDING |
+| Snapdeal: APPROVED / PACKED | CONFIRMED |
+| Snapdeal: SHIPPED / IN_TRANSIT | SHIPPED |
+| Snapdeal: DELIVERED | DELIVERED |
+| Snapdeal: CANCELLED | CANCELLED |
+| Snapdeal: RETURNED | RETURNED |
 
 ---
 
-## Sync Implementation Outline
+## Sync Implementation
 
-### 1. Sync Service (per marketplace)
+### Sync Services (per marketplace)
 
 Each marketplace has a sync service that:
 - Accepts a MarketplaceConnection record
@@ -352,36 +342,28 @@ Each marketplace has a sync service that:
 ```
 src/lib/sync/
   shopify-sync.ts      — Shopify → UnifiedOrder/Product
-  flipkart-sync.ts     — Flipkart → UnifiedOrder/Product
-  etsy-sync.ts         — Etsy → UnifiedOrder/Product
   ebay-sync.ts         — eBay → UnifiedOrder/Product
-  woocommerce-sync.ts  — WooCommerce → UnifiedOrder/Product
+  etsy-sync.ts         — Etsy → UnifiedOrder/Product
+  flipkart-sync.ts     — Flipkart → UnifiedOrder/Product
   bigcommerce-sync.ts  — BigCommerce → UnifiedOrder/Product
-  wix-sync.ts          — Wix → UnifiedOrder/Product
   square-sync.ts       — Square → UnifiedOrder/Product
-  magento-sync.ts      — Magento → UnifiedOrder/Product
-  amazon-sync.ts       — (future)
-  sync-manager.ts      — Orchestrates sync for all 9 connections
+  snapdeal-sync.ts     — Snapdeal → UnifiedOrder/Product
+  sync-manager.ts      — Orchestrates sync for all 7 connections
 ```
 
-### 2. Cron Job
+### Cron Job
 
 ```
 src/app/api/cron/sync/route.ts
 ```
 - Protected endpoint (verify cron secret header)
 - Fetches all CONNECTED marketplace connections
-- Groups by user to avoid parallel syncs for same user
+- Batch processing (5 connections per invocation) for Vercel timeout safety
 - Calls appropriate sync service for each connection
 - Handles errors per-connection (one failure doesn't block others)
-- Logs sync results
+- Logs sync results to UnifiedSyncLog
 
-Can be triggered by:
-- Vercel Cron Jobs (vercel.json config)
-- External cron service (e.g., cron-job.org)
-- Self-hosted: node-cron or system crontab
-
-### 3. On-Demand Sync (Chat-Triggered)
+### On-Demand Sync (Chat-Triggered)
 
 ```
 src/lib/sync/on-demand.ts
@@ -392,7 +374,7 @@ src/lib/sync/on-demand.ts
 - Returns quickly if data is fresh
 - Has a lock mechanism to prevent concurrent syncs for same user
 
-### 4. Currency Conversion
+### Currency Conversion
 
 For cross-marketplace comparison, all amounts need a common currency:
 - Store original amount + currency
@@ -407,18 +389,12 @@ For cross-marketplace comparison, all amounts need a common currency:
 ### "What were my total sales last month?"
 1. Query `UnifiedOrder` WHERE userId = X AND orderedAt >= lastMonthStart AND orderedAt < thisMonthStart
 2. SUM(totalAmountUSD) grouped by marketplace
-3. Return: "Your total sales last month were $45,230 — Shopify: $32,100, Flipkart: ₹8,50,000 ($10,130), Amazon: $3,000"
+3. Return: "Your total sales last month were $45,230 — Shopify: $32,100, Flipkart: ₹8,50,000 ($10,130), Snapdeal: $3,000"
 
 ### "Which product sells best on Flipkart vs Shopify?"
 1. Query `UnifiedOrderItem` joined with `UnifiedProduct` grouped by product + marketplace
 2. Compare quantities and revenue per product across marketplaces
 3. Return ranked comparison
-
-### "Should I list Product X on Amazon?"
-1. Look at Product X's performance on connected marketplaces
-2. Compare with category averages (if available)
-3. Analyze pricing, margins, competition data
-4. Provide recommendation with reasoning
 
 ### "Show me my return rate by marketplace"
 1. Query `UnifiedOrder` WHERE status = RETURNED grouped by marketplace
@@ -434,23 +410,8 @@ For cross-marketplace comparison, all amounts need a common currency:
 3. **Phase 3 (Done)**: Sync services for Shopify, Flipkart, eBay, and Etsy
 4. **Phase 4 (Done)**: Cron job + on-demand sync infrastructure
 5. **Phase 5 (Done)**: Connect AI chat layer to query unified data
-6. **Phase 6 (Done)**: Add OAuth + sync for 5 new marketplaces (WooCommerce, BigCommerce, Wix, Square, Magento)
-7. **Phase 7 (In Progress — infrastructure present)**: Currency conversion, advanced analytics, historical trend tracking
-
-   **Implemented:**
-   - [x] `totalAmountUSD` field in UnifiedOrder schema (nullable `Decimal?`)
-   - [x] Currency conversion design documented (store original amount + currency, convert to USD)
-   - [x] `totalAmount` + `currency` stored per order for all 9 marketplaces
-
-   **Pending:**
-   - [ ] Exchange-rate provider integration (e.g., exchangerate-api.com, Open Exchange Rates)
-   - [ ] Scheduled rate fetching (daily cron or on-demand with caching)
-   - [ ] Apply conversion to `totalAmountUSD` during sync for non-USD orders
-   - [ ] Backfill historical orders with exchange rates at time of order
-   - [ ] Advanced analytics queries using `totalAmountUSD` for cross-marketplace comparison
-   - [ ] Historical trend tracking and normalization
-
-   > **Current state:** The DB schema and conversion design are in place, but live exchange-rate fetching and application to `totalAmountUSD` are not yet implemented. `totalAmountUSD` is nullable (`Decimal?`) and will be `null` for all orders until exchange-rate conversion is applied during sync. All cross-marketplace revenue comparisons currently rely on raw `totalAmount` in the original currency.
-
-8. **Phase 8**: Amazon Seller Central integration
-9. **Phase 9**: PrestaShop integration
+6. **Phase 6 (Done)**: Add OAuth + sync for BigCommerce, Square, Snapdeal
+7. **Phase 7 (In Progress)**: Currency conversion, advanced analytics, historical trend tracking
+8. **Phase 8 (Planned)**: Amazon Seller Central integration
+9. **Phase 9 (Planned)**: PrestaShop integration
+10. **Phase 10 (Future)**: Meesho, Myntra, Nykaa, JioMart, IndiaMart, Udaan, Ajio

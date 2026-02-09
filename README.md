@@ -25,12 +25,23 @@ ShopIQ acts as your AI-powered business analyst. Instead of navigating complex d
 | eBay | Fully Integrated | OAuth 2.0 | Polling (every 15 min) |
 | Etsy | Fully Integrated | OAuth 2.0 + PKCE | Polling (every 15 min) |
 | Flipkart | Fully Integrated | OAuth 2.0 | Polling (every 15 min) |
-| WooCommerce | Fully Integrated | API Key + Secret | Webhooks (real-time) + Polling |
 | BigCommerce | Fully Integrated | OAuth 2.0 | Webhooks (real-time) + Polling |
-| Wix | Fully Integrated | OAuth 2.0 (4hr tokens) | Webhooks (real-time) + Polling |
 | Square | Fully Integrated | OAuth 2.0 + PKCE | Webhooks (real-time) + Polling |
-| Magento | Fully Integrated | Bearer Token | Polling (every 15 min) |
-| Amazon Seller Central | Coming Soon | — | — |
+| Snapdeal | Fully Integrated | Redirect-based Auth | Polling (every 15 min) |
+| Amazon | Coming Soon | — | — |
+| PrestaShop | Coming Soon | — | — |
+
+### Future Target Integrations
+
+Below are the future target integrations we are working to partner with:
+
+- Meesho
+- Myntra
+- Nykaa
+- JioMart
+- IndiaMart
+- Udaan
+- Ajio
 
 ## Features
 
@@ -50,19 +61,17 @@ Ask questions like you would to a business analyst:
 - **eBay** — OAuth 2.0 with automatic token refresh (~2hr tokens)
 - **Etsy** — OAuth 2.0 with PKCE (public client flow, rotating tokens)
 - **Flipkart** — OAuth 2.0 with client credentials
-- **WooCommerce** — API Key + Secret (user-provided credentials)
 - **BigCommerce** — OAuth 2.0 with permanent tokens
-- **Wix** — OAuth 2.0 with 4-hour tokens (both tokens rotate on refresh)
 - **Square** — OAuth 2.0 with PKCE (30-day tokens)
-- **Magento** — Bearer Token (user-provided integration token)
+- **Snapdeal** — Redirect-based implicit grant (seller token)
 - One-click connect from a unified onboarding page
 - Encrypted token storage (AES-256-GCM)
 
 ### Real-Time Data Pipeline
 
-- **Webhooks (Shopify, WooCommerce, BigCommerce, Wix, Square)** — Instant order/product updates via HMAC-verified webhooks
-- **Polling (eBay, Etsy, Flipkart, Magento)** — Automated sync every 15 minutes via Vercel Cron
-- **Unified Data Model** — All 9 marketplaces normalized into cross-platform tables (UnifiedOrder, UnifiedProduct)
+- **Webhooks (Shopify, BigCommerce, Square)** — Instant order/product updates via HMAC-verified webhooks
+- **Polling (eBay, Etsy, Flipkart, Snapdeal)** — Automated sync every 15 minutes via Vercel Cron
+- **Unified Data Model** — All 7 active marketplaces normalized into cross-platform tables (UnifiedOrder, UnifiedProduct)
 - **Delta sync** — Only fetches data since last sync to minimize API calls
 
 ### Smart Analytics & Metrics
@@ -101,7 +110,7 @@ Each report includes AI-generated summaries with actionable recommendations.
 ## How It Works
 
 1. **Sign Up** - Create an account on ShopIQ
-2. **Connect** - Link your marketplaces (Shopify, eBay, Etsy, Flipkart, WooCommerce, BigCommerce, Wix, Square, Magento) via OAuth or API credentials
+2. **Connect** - Link your marketplaces (Shopify, eBay, Etsy, Flipkart, BigCommerce, Square, Snapdeal) via OAuth or credentials
 3. **Sync** - Your data is automatically imported, normalized, and kept up to date
 4. **Ask** - Start asking questions and generating reports across all your stores
 
@@ -123,7 +132,7 @@ ShopIQ operates on a **subscription-based SaaS model** with transparent, scalabl
 
 ### Target Market
 
-- **Primary:** Multi-channel e-commerce sellers on Shopify, eBay, Etsy, Flipkart, WooCommerce, BigCommerce, Wix, Square, and Magento
+- **Primary:** Multi-channel e-commerce sellers on Shopify, eBay, Etsy, Flipkart, BigCommerce, Square, and Snapdeal
 - **Secondary:** Growing sellers expanding to multiple marketplaces
 - **TAM:** 30M+ active e-commerce sellers globally
 - **Sweet Spot:** Sellers doing $10K-$500K/month who need insights but can't afford dedicated analysts
@@ -144,7 +153,7 @@ ShopIQ operates on a **subscription-based SaaS model** with transparent, scalabl
 - **Backend**: Next.js API Routes, Prisma ORM
 - **Database**: PostgreSQL (Supabase)
 - **AI**: Google Gemini 1.5 Flash
-- **Marketplace APIs**: Shopify Admin API (2025-10), eBay REST API, Etsy Open API v3, Flipkart Seller API, WooCommerce REST API, BigCommerce API, Wix eCommerce API, Square API, Magento REST API
+- **Marketplace APIs**: Shopify Admin API (2025-10), eBay REST API, Etsy Open API v3, Flipkart Seller API, BigCommerce API, Square API, Snapdeal Seller API
 - **Infrastructure**: Vercel (hosting + cron jobs)
 - **Email**: Resend
 - **Storage**: Supabase Storage
@@ -155,7 +164,7 @@ ShopIQ operates on a **subscription-based SaaS model** with transparent, scalabl
 
 - Node.js 18+
 - PostgreSQL database (Supabase recommended)
-- Marketplace developer accounts (Shopify, eBay, Etsy, Flipkart, BigCommerce, Wix, Square; WooCommerce and Magento use user-provided credentials)
+- Marketplace developer accounts (Shopify, eBay, Etsy, Flipkart, BigCommerce, Square, Snapdeal)
 - Google Gemini API key
 
 ### Environment Variables
@@ -165,6 +174,12 @@ Create a `.env` file based on `.env.example`:
 ```env
 # Database
 DATABASE_URL="postgresql://..."
+
+# App
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+APP_URL="http://localhost:3000"
+SESSION_SECRET="your_32_character_random_string"
+TOKEN_ENCRYPTION_KEY="your_64_hex_char_key"
 
 # Shopify OAuth
 SHOPIFY_API_KEY="your_shopify_api_key"
@@ -187,25 +202,28 @@ FLIPKART_APP_SECRET="your_flipkart_app_secret"
 BIGCOMMERCE_CLIENT_ID="your_bigcommerce_client_id"
 BIGCOMMERCE_CLIENT_SECRET="your_bigcommerce_client_secret"
 
-# Wix OAuth
-WIX_APP_ID="your_wix_app_id"
-WIX_APP_SECRET="your_wix_app_secret"
-
 # Square OAuth
 SQUARE_APPLICATION_ID="your_square_application_id"
 SQUARE_APPLICATION_SECRET="your_square_application_secret"
 
-# WooCommerce & Magento use user-provided credentials (no app secrets needed)
+# Snapdeal Auth
+SNAPDEAL_CLIENT_ID="your_snapdeal_client_id"
+SNAPDEAL_AUTH_TOKEN="your_snapdeal_auth_token"
 
 # Google Gemini AI
 GEMINI_API_KEY="your_gemini_api_key"
 
-# App
-NEXT_PUBLIC_APP_URL="http://localhost:3000"
-SESSION_SECRET="your_32_character_random_string"
-
-# Vercel Cron (for polling sync every 15 min)
+# Vercel Cron
 CRON_SECRET="your_cron_secret"
+
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL="https://your-project-ref.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="your_anon_key"
+SUPABASE_SERVICE_ROLE_KEY="your_service_role_key"
+
+# Email (Resend)
+RESEND_API_KEY="your_resend_key"
+RESEND_FROM_EMAIL="onboarding@yourdomain.com"
 ```
 
 ### Installation
@@ -231,7 +249,7 @@ npm run dev
 npx prisma migrate deploy
 ```
 
-> **Note:** Use `npx prisma migrate dev` during development to create and apply migrations with full migration history. Use `npx prisma migrate deploy` in production for reproducible, forward-only deployments. Prisma migrations are forward-only by default and do not provide automatic rollbacks; to roll back a migration, you must manually write a down-migration SQL file (or revert to a previous migration state) and re-deploy with `npx prisma migrate deploy`. Avoid `npx prisma db push` in production — it is intended for prototyping only, as it does not preserve migration history and can cause accidental schema changes.
+> **Note:** Use `npx prisma migrate dev` during development to create and apply migrations with full migration history. Use `npx prisma migrate deploy` in production for reproducible, forward-only deployments. Avoid `npx prisma db push` in production — it is intended for prototyping only.
 
 Open [http://localhost:3000](http://localhost:3000) to see the app.
 
@@ -252,9 +270,9 @@ src/
 │   ├── sales/                    # Sales team dashboard
 │   ├── trial/                    # Trial access
 │   └── api/                      # API routes
-│       ├── auth/                 # Auth + OAuth (shopify, ebay, etsy, flipkart, woocommerce, bigcommerce, wix, square, magento)
+│       ├── auth/                 # Auth + OAuth (shopify, ebay, etsy, flipkart, bigcommerce, square, snapdeal)
 │       ├── marketplaces/         # Connect/disconnect marketplaces
-│       ├── webhooks/             # Webhook receivers (shopify, woocommerce, bigcommerce, square, wix)
+│       ├── webhooks/             # Webhook receivers (shopify, bigcommerce, square)
 │       ├── cron/sync/            # Vercel Cron polling endpoint
 │       ├── chat/                 # Chat API
 │       ├── reports/              # Reports API
@@ -277,12 +295,10 @@ src/
     ├── ebay/                     # eBay client, OAuth, token refresh
     ├── etsy/                     # Etsy client, OAuth (PKCE), token refresh
     ├── flipkart/                 # Flipkart client, OAuth, token refresh
-    ├── woocommerce/              # WooCommerce client, auth, webhooks
     ├── bigcommerce/              # BigCommerce client, OAuth, webhooks
-    ├── wix/                      # Wix client, OAuth, token refresh
     ├── square/                   # Square client, OAuth (PKCE), token refresh, webhooks
-    ├── magento/                  # Magento client, auth
-    ├── sync/                     # Unified sync services for all 9 marketplaces
+    ├── snapdeal/                 # Snapdeal client, auth
+    ├── sync/                     # Unified sync services for all 7 active marketplaces
     ├── gemini/                   # AI integration
     ├── metrics/                  # Analytics calculations
     ├── reports/                  # Report templates
@@ -295,11 +311,11 @@ src/
 
 - **OAuth 2.0** for marketplace authentication (with PKCE for Etsy and Square)
 - **AES-256-GCM** encryption for all stored access/refresh tokens
-- **HMAC-SHA256** verification for webhooks (Shopify, WooCommerce, BigCommerce, Square, Wix)
+- **HMAC-SHA256** verification for webhooks (Shopify, BigCommerce, Square)
 - **JWT-based** session management with HTTP-only cookies
 - **Nonce/CSRF** protection on all OAuth flows
 - **Per-user token refresh locking** to prevent concurrent refresh storms
-- **Automatic token refresh** for Wix (4hr), Square (30-day), eBay (2hr), Etsy (1hr)
+- **Automatic token refresh** for Square (30-day), eBay (2hr), Etsy (1hr)
 - **Store-scoped** data isolation
 - **Rate limiting** on API endpoints
 
