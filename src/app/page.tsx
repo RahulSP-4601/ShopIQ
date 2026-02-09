@@ -6,7 +6,7 @@ import {
   Hero,
   Integrations,
   Features,
-  TrustIndicators,
+  // TrustIndicators,
   HowItWorks,
   CTA,
   Footer,
@@ -39,7 +39,7 @@ export default function Home() {
       <Hero />
       <Integrations />
       <Features />
-      <TrustIndicators />
+      {/* <TrustIndicators /> */}
       <HowItWorks />
       <CTA />
       <Footer />
