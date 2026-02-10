@@ -1,32 +1,45 @@
-import { Store } from "@prisma/client";
 import { decryptToken } from "./oauth";
+import { isValidShopifyDomain } from "./validation";
 
 // Use a supported Shopify API version - update this periodically
 // Supported versions as of 2026: 2026-01, 2025-10, 2025-07, 2025-04
 const API_VERSION = process.env.SHOPIFY_API_VERSION || "2025-10";
 const FETCH_TIMEOUT_MS = 30000; // 30 second timeout for API calls
 
+/** Minimal interface for Shopify API access — replaces the legacy Store model */
+export interface ShopifyStoreConfig {
+  domain: string;
+  accessToken: string | null;
+}
+
 export class ShopifyClient {
-  private store: Store;
+  private domain: string;
   private accessToken: string;
 
   /**
    * Create a ShopifyClient
-   * @param store - Store object with accessToken
-   * @param isEncrypted - Whether the accessToken in store is encrypted (default: true for DB-stored tokens)
+   * @param config - Object with domain and accessToken
+   * @param isEncrypted - Whether the accessToken is encrypted (default: true for DB-stored tokens)
    */
-  constructor(store: Store, isEncrypted: boolean = true) {
-    if (!store.accessToken) {
-      throw new Error("Store access token is required for API calls");
+  constructor(config: ShopifyStoreConfig, isEncrypted: boolean = true) {
+    if (!config.accessToken) {
+      throw new Error("Access token is required for Shopify API calls");
     }
-    this.store = store;
-    // Decrypt the token if it's encrypted (tokens from database are encrypted)
-    // Pass isEncrypted=false when using a temp store with plaintext token
-    this.accessToken = isEncrypted ? decryptToken(store.accessToken) : store.accessToken;
+
+    const domain = config.domain?.trim();
+    if (!domain) {
+      throw new Error("Shopify domain is required and cannot be empty");
+    }
+    if (!isValidShopifyDomain(domain)) {
+      throw new Error(`Invalid Shopify domain: "${domain}"`);
+    }
+
+    this.domain = domain;
+    this.accessToken = isEncrypted ? decryptToken(config.accessToken) : config.accessToken;
   }
 
   private async fetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
-    const url = `https://${this.store.domain}/admin/api/${API_VERSION}${endpoint}`;
+    const url = `https://${this.domain}/admin/api/${API_VERSION}${endpoint}`;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
@@ -77,7 +90,7 @@ export class ShopifyClient {
 
     try {
       const response = await fetch(
-        `https://${this.store.domain}/admin/api/${API_VERSION}/products.json?${searchParams}`,
+        `https://${this.domain}/admin/api/${API_VERSION}/products.json?${searchParams}`,
         {
           signal: controller.signal,
           headers: {
@@ -124,7 +137,7 @@ export class ShopifyClient {
 
     try {
       const response = await fetch(
-        `https://${this.store.domain}/admin/api/${API_VERSION}/customers.json?${searchParams}`,
+        `https://${this.domain}/admin/api/${API_VERSION}/customers.json?${searchParams}`,
         {
           signal: controller.signal,
           headers: {
@@ -188,7 +201,7 @@ export class ShopifyClient {
 
     try {
       const response = await fetch(
-        `https://${this.store.domain}/admin/api/${API_VERSION}/orders.json?${searchParams}`,
+        `https://${this.domain}/admin/api/${API_VERSION}/orders.json?${searchParams}`,
         {
           signal: controller.signal,
           headers: {

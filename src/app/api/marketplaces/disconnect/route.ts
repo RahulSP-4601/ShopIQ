@@ -53,15 +53,7 @@ export async function POST(request: NextRequest) {
     // Capture tokens/info BEFORE the transaction clears them, for webhook deregistration after
     const savedAccessToken = existingConnection.accessToken;
     const savedExternalId = existingConnection.externalId;
-
-    // For Shopify: capture store access tokens before the transaction nulls them
-    let savedShopifyStoreTokens: Array<{ id: string; domain: string; accessToken: string | null }> = [];
-    if (marketplace === "SHOPIFY" && savedExternalId) {
-      savedShopifyStoreTokens = await prisma.store.findMany({
-        where: { userId: session.userId, shopifyId: savedExternalId },
-        select: { id: true, domain: true, accessToken: true },
-      });
-    }
+    const savedExternalName = existingConnection.externalName;
 
     // Use a transaction to ensure atomicity — clear tokens first
     const connection = await prisma.$transaction(async (tx) => {
@@ -81,21 +73,6 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      // If it's Shopify, update store sync status instead of deleting
-      // This preserves historical data while marking stores as disconnected
-      if (marketplace === "SHOPIFY" && savedExternalId) {
-        await tx.store.updateMany({
-          where: {
-            userId: session.userId,
-            shopifyId: savedExternalId,
-          },
-          data: {
-            syncStatus: "PENDING",
-            accessToken: null,
-          },
-        });
-      }
-
       return updatedConnection;
     });
 
@@ -104,23 +81,16 @@ export async function POST(request: NextRequest) {
     // If deregistration fails, the connection is already disconnected and
     // orphaned webhooks will be cleaned up on next connect.
 
-    // Shopify webhook deregistration — use saved tokens captured before the transaction
-    if (marketplace === "SHOPIFY" && savedExternalId && savedShopifyStoreTokens.length > 0) {
-      const storesWithTokens = savedShopifyStoreTokens.filter(
-        (s): s is typeof s & { accessToken: string } => s.accessToken != null
-      );
-      if (storesWithTokens.length > 0) {
-        const results = await Promise.allSettled(
-          storesWithTokens.map((savedStore) =>
-            deregisterShopifyWebhooks(savedStore as Parameters<typeof deregisterShopifyWebhooks>[0])
-          )
-        );
-        for (const result of results) {
-          if (result.status === "rejected") {
-            const msg = result.reason instanceof Error ? result.reason.message : "Unknown error";
-            console.error(`Failed to deregister Shopify webhooks for a store: ${msg}`);
-          }
-        }
+    // Shopify webhook deregistration — use saved domain (externalName) and token
+    if (marketplace === "SHOPIFY" && savedAccessToken && savedExternalName) {
+      try {
+        await deregisterShopifyWebhooks({
+          domain: savedExternalName,
+          accessToken: savedAccessToken,
+        });
+      } catch (webhookError) {
+        const msg = webhookError instanceof Error ? webhookError.message : "Unknown error";
+        console.error(`Failed to deregister Shopify webhooks: ${msg}`);
       }
     }
 

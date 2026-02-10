@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { verifyWebhookHmac } from "@/lib/shopify/webhooks";
+import { ShopifyClient } from "@/lib/shopify/client";
 import { mapShopifyOrderStatus } from "@/lib/sync/types";
 
 /** Safely parse a float value, returning fallback if NaN */
@@ -42,26 +43,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ received: true }, { status: 200 });
     }
 
-    // Look up store and marketplace connection
-    const store = await prisma.store.findUnique({
-      where: { domain: shopDomain },
-    });
-
-    if (!store) {
-      console.error(`Webhook received for unknown store: ${shopDomain}`);
-      return NextResponse.json({ received: true }, { status: 200 });
-    }
-
-    const connection = await prisma.marketplaceConnection.findUnique({
+    // Look up marketplace connection by domain (stored in externalName during OAuth)
+    const connection = await prisma.marketplaceConnection.findFirst({
       where: {
-        userId_marketplace: {
-          userId: store.userId,
-          marketplace: "SHOPIFY",
-        },
+        marketplace: "SHOPIFY",
+        externalName: shopDomain,
+        status: "CONNECTED",
       },
     });
 
-    if (!connection || connection.status !== "CONNECTED") {
+    if (!connection) {
+      console.error(`Webhook received for unknown Shopify store: ${shopDomain}`);
       return NextResponse.json({ received: true }, { status: 200 });
     }
 
@@ -78,21 +70,34 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Resolve currency: payload -> Shopify shop API -> "USD" fallback
+    let resolvedCurrency = typeof data.currency === "string" ? data.currency : "";
+    if (!resolvedCurrency && connection.accessToken && connection.externalName) {
+      try {
+        const client = new ShopifyClient(
+          { domain: connection.externalName, accessToken: connection.accessToken }
+        );
+        const shopInfo = await client.getShopInfo();
+        resolvedCurrency = shopInfo.currency || "";
+      } catch {
+        // Shopify API call failed — fall through to USD default
+      }
+    }
+    const fallbackCurrency = resolvedCurrency || "USD";
+
     // Track whether a handler actually processed the webhook
     let handled = false;
 
     // Route to handler based on topic
     if (topic === "orders/create" || topic === "orders/updated") {
-      await handleOrderWebhook(connection.userId, connection.id, store.currency, data);
+      await handleOrderWebhook(connection.userId, connection.id, fallbackCurrency, data);
       handled = true;
     } else if (topic === "products/create" || topic === "products/update") {
-      await handleProductWebhook(connection.userId, connection.id, store.currency, data);
+      await handleProductWebhook(connection.userId, connection.id, fallbackCurrency, data);
       handled = true;
     }
 
     // Phase 2: record dedup AFTER successful processing
-    // If two concurrent webhooks race past the phase-1 check, the P2002 unique
-    // constraint violation on the second insert is harmless — the work was already done.
     if (handled && webhookId) {
       try {
         await prisma.webhookEvent.create({
@@ -106,7 +111,6 @@ export async function POST(request: NextRequest) {
         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
           // Another concurrent request already recorded it — harmless
         } else {
-          // Log but don't throw — the webhook was already processed successfully
           const msg = error instanceof Error ? error.message : "Unknown error";
           console.error(`Shopify webhook: Failed to record dedup entry for ${webhookId}: ${msg}`);
         }
@@ -142,7 +146,6 @@ async function handleOrderWebhook(
   currency: string,
   order: Record<string, unknown>
 ): Promise<void> {
-  // Validate order.id to prevent storing "undefined"/"null" as externalOrderId
   if (order.id == null) {
     console.error("Shopify webhook: order.id is missing, skipping order processing");
     return;
@@ -151,7 +154,6 @@ async function handleOrderWebhook(
   const fulfillmentStatus = (order.fulfillment_status as string | null) ?? null;
   const lineItems = (order.line_items as Array<Record<string, unknown>>) || [];
 
-  // Build customer name from first_name and last_name, fallback to email
   const customer = order.customer as Record<string, unknown> | undefined;
   const firstName = (customer?.first_name as string) || "";
   const lastName = (customer?.last_name as string) || "";
@@ -159,14 +161,11 @@ async function handleOrderWebhook(
   const customerName = fullName || (customer?.email as string) || null;
   const customerEmail = (customer?.email as string) || null;
 
-  // Extract fulfillment timestamp from order.fulfillments array
-  // Fall back to order.updated_at only if no fulfillment timestamp exists
   const fulfillments = (order.fulfillments as Array<Record<string, unknown>>) || [];
   const fulfilledAt = fulfillmentStatus === "fulfilled"
     ? (safeParseDate(fulfillments[0]?.created_at as string) ?? safeParseDate(order.updated_at as string))
     : null;
 
-  // Filter out items with missing id to avoid storing "undefined"/"null"
   const validItems = lineItems.filter((item) => item.id != null);
 
   const unifiedOrder = await prisma.unifiedOrder.upsert({
@@ -234,7 +233,6 @@ async function handleProductWebhook(
   currency: string,
   product: Record<string, unknown>
 ): Promise<void> {
-  // Validate product.id to prevent storing "undefined"/"null" as externalId
   if (product.id == null) {
     console.error("Shopify webhook: product.id is missing, skipping product processing");
     return;

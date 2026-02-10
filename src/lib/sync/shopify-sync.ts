@@ -33,20 +33,18 @@ function getFulfilledAt(
 export async function syncShopifyOrders(
   connection: MarketplaceConnection
 ): Promise<number> {
-  // Validate externalId before using it
-  if (!connection.externalId) {
-    throw new Error("syncShopifyOrders: connection.externalId is missing");
+  if (!connection.accessToken) {
+    throw new Error("syncShopifyOrders: connection has no access token");
+  }
+  if (!connection.externalName) {
+    throw new Error("syncShopifyOrders: connection.externalName (domain) is missing");
   }
 
-  const store = await prisma.store.findFirst({
-    where: { userId: connection.userId, shopifyId: connection.externalId },
+  const client = new ShopifyClient({
+    domain: connection.externalName,
+    accessToken: connection.accessToken,
   });
 
-  if (!store || !store.accessToken) {
-    throw new Error("Shopify store not found or no access token");
-  }
-
-  const client = new ShopifyClient(store);
   let pageInfo: string | undefined;
   let synced = 0;
 
@@ -180,30 +178,34 @@ export async function syncShopifyOrders(
 export async function syncShopifyProducts(
   connection: MarketplaceConnection
 ): Promise<number> {
-  // Validate externalId before using it
-  if (!connection.externalId) {
-    throw new Error("syncShopifyProducts: connection.externalId is missing");
+  if (!connection.accessToken) {
+    throw new Error("syncShopifyProducts: connection has no access token");
+  }
+  if (!connection.externalName) {
+    throw new Error("syncShopifyProducts: connection.externalName (domain) is missing");
   }
 
-  const store = await prisma.store.findFirst({
-    where: { userId: connection.userId, shopifyId: connection.externalId },
+  const client = new ShopifyClient({
+    domain: connection.externalName,
+    accessToken: connection.accessToken,
   });
-
-  if (!store || !store.accessToken) {
-    throw new Error("Shopify store not found or no access token");
-  }
-
-  const client = new ShopifyClient(store);
-  const storeCurrency = store.currency;
-  if (!storeCurrency) {
-    console.warn(
-      `Shopify sync: store ${store.id} has no currency configured — defaulting to "USD". ` +
-      `This may cause incorrect product pricing data.`
-    );
-  }
 
   let pageInfo: string | undefined;
   let synced = 0;
+
+  // Fetch the shop's currency once — Shopify products inherit the shop currency.
+  // If the API call fails or returns no currency, abort the sync rather than silently writing incorrect "USD".
+  let shopCurrency: string;
+  try {
+    const shopInfo = await client.getShopInfo();
+    if (!shopInfo.currency) {
+      throw new Error("Shopify API returned empty or missing currency for this shop");
+    }
+    shopCurrency = shopInfo.currency;
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    throw new Error(`Failed to fetch shop currency — cannot sync products without accurate currency: ${msg}`);
+  }
 
   const syncLog = await prisma.unifiedSyncLog.create({
     data: {
@@ -248,7 +250,7 @@ export async function syncShopifyProducts(
             sku: firstVariant?.sku || null,
             category: product.product_type || null,
             price: parseFloat(firstVariant?.price || "0"),
-            currency: storeCurrency || "USD",
+            currency: shopCurrency,
             inventory: totalInventory,
             status: product.status === "active" ? "ACTIVE" : "INACTIVE",
             imageUrl,
@@ -258,6 +260,7 @@ export async function syncShopifyProducts(
             sku: firstVariant?.sku || null,
             category: product.product_type || null,
             price: parseFloat(firstVariant?.price || "0"),
+            currency: shopCurrency,
             inventory: totalInventory,
             status: product.status === "active" ? "ACTIVE" : "INACTIVE",
             imageUrl,
@@ -295,50 +298,91 @@ export async function syncShopifyProducts(
 export async function syncShopify(
   connection: MarketplaceConnection
 ): Promise<SyncResult> {
-  // Guard: skip unified sync when legacy sync is explicitly enabled via feature flag.
-  // Mutual exclusion ensures only one pipeline writes at a time.
-  if (process.env.SHOPIFY_LEGACY_SYNC_ENABLED === "true") {
-    console.log(
-      `[UNIFIED_SYNC] Unified Shopify sync skipped — SHOPIFY_LEGACY_SYNC_ENABLED=true. ` +
-      `Set to 'false' to enable the unified pipeline for connection ${connection.id}.`
-    );
+  // Use atomic CAS on syncInProgress + syncLockVersion to prevent concurrent syncs.
+  // Also release stale locks older than 30 minutes (or with null syncStartedAt).
+  const STALE_LOCK_THRESHOLD_MS = 30 * 60 * 1000;
+  const staleThreshold = new Date(Date.now() - STALE_LOCK_THRESHOLD_MS);
+  const now = new Date();
+
+  // Read current lock version for optimistic locking
+  const conn = await prisma.marketplaceConnection.findUnique({
+    where: { id: connection.id },
+    select: { syncLockVersion: true },
+  });
+  const currentVersion = conn?.syncLockVersion ?? 0;
+  let acquiredVersion = currentVersion + 1;
+
+  // First, try to claim a free lock (atomic version-check + increment)
+  let claim = await prisma.marketplaceConnection.updateMany({
+    where: { id: connection.id, syncInProgress: false, syncLockVersion: currentVersion },
+    data: {
+      syncInProgress: true,
+      syncStartedAt: now,
+      lastSyncAttemptAt: now,
+      syncLockVersion: acquiredVersion,
+    },
+  });
+
+  // If the lock is held, check if it's stale (including null syncStartedAt)
+  if (claim.count === 0) {
+    // Re-read version in case it changed since our first read
+    const freshConn = await prisma.marketplaceConnection.findUnique({
+      where: { id: connection.id },
+      select: { syncLockVersion: true },
+    });
+    const freshVersion = freshConn?.syncLockVersion ?? 0;
+    acquiredVersion = freshVersion + 1;
+
+    claim = await prisma.marketplaceConnection.updateMany({
+      where: {
+        id: connection.id,
+        syncInProgress: true,
+        syncLockVersion: freshVersion,
+        OR: [
+          { syncStartedAt: { lt: staleThreshold } },
+          { syncStartedAt: null },
+        ],
+      },
+      data: {
+        syncInProgress: true,
+        syncStartedAt: now,
+        lastSyncAttemptAt: now,
+        syncLockVersion: acquiredVersion,
+      },
+    });
+
+    if (claim.count > 0) {
+      console.warn(`Shopify sync: Released stale lock for connection ${connection.id}`);
+    }
+  }
+
+  // If stale-lock reclaim also failed, the lock holder may have released between our
+  // first attempt and now. Retry the free-lock claim once before giving up.
+  if (claim.count === 0) {
+    const retryConn = await prisma.marketplaceConnection.findUnique({
+      where: { id: connection.id },
+      select: { syncLockVersion: true },
+    });
+    const retryVersion = retryConn?.syncLockVersion ?? 0;
+    acquiredVersion = retryVersion + 1;
+
+    claim = await prisma.marketplaceConnection.updateMany({
+      where: { id: connection.id, syncInProgress: false, syncLockVersion: retryVersion },
+      data: {
+        syncInProgress: true,
+        syncStartedAt: now,
+        lastSyncAttemptAt: now,
+        syncLockVersion: acquiredVersion,
+      },
+    });
+  }
+
+  if (claim.count === 0) {
     return {
       ordersSynced: 0,
       productsSynced: 0,
-      errors: ["Skipped: legacy sync is enabled (SHOPIFY_LEGACY_SYNC_ENABLED=true)"],
+      errors: ["Skipped: Shopify sync is currently in progress"],
     };
-  }
-
-  // Guard: abort if the legacy Shopify sync is currently running for this store.
-  // Uses atomic updateMany as a compare-and-swap to claim the sync slot, preventing
-  // the TOCTOU race that exists with a separate findFirst + act pattern.
-  let claimedSyncLock = false;
-  if (connection.externalId) {
-    const claim = await prisma.store.updateMany({
-      where: {
-        userId: connection.userId,
-        shopifyId: connection.externalId,
-        syncStatus: { not: "SYNCING" },
-      },
-      data: { syncStatus: "SYNCING" },
-    });
-    if (claim.count === 0) {
-      // Either the store doesn't exist or a sync is already in progress
-      const storeExists = await prisma.store.findFirst({
-        where: { userId: connection.userId, shopifyId: connection.externalId },
-        select: { id: true },
-      });
-      if (storeExists) {
-        return {
-          ordersSynced: 0,
-          productsSynced: 0,
-          errors: ["Skipped: Shopify sync is currently in progress for this store"],
-        };
-      }
-      // Store doesn't exist — proceed (syncShopifyOrders will throw if store is needed)
-    } else {
-      claimedSyncLock = true;
-    }
   }
 
   const errors: string[] = [];
@@ -362,8 +406,6 @@ export async function syncShopify(
       errors.push(`Products: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
 
-    // Only update lastSyncAt when both syncs succeed to avoid skipping
-    // partially-failed records on subsequent syncs
     if (ordersSucceeded && productsSucceeded) {
       try {
         await prisma.marketplaceConnection.update({
@@ -377,22 +419,18 @@ export async function syncShopify(
       }
     }
   } finally {
-    // Release the sync lock so future syncs can proceed
-    if (claimedSyncLock && connection.externalId) {
-      try {
-        await prisma.store.updateMany({
-          where: {
-            userId: connection.userId,
-            shopifyId: connection.externalId,
-          },
-          data: {
-            syncStatus: ordersSucceeded && productsSucceeded ? "COMPLETED" : "FAILED",
-          },
-        });
-      } catch (resetError) {
-        const msg = resetError instanceof Error ? resetError.message : "Unknown error";
-        console.error(`Failed to reset syncStatus for store: ${msg}`);
+    // Release the sync lock — only if our version still matches (prevents releasing another process's lock)
+    try {
+      const released = await prisma.marketplaceConnection.updateMany({
+        where: { id: connection.id, syncLockVersion: acquiredVersion },
+        data: { syncInProgress: false, syncStartedAt: null },
+      });
+      if (released.count === 0) {
+        console.warn(`Shopify sync: Lock for connection ${connection.id} was reclaimed by another process, skipping release`);
       }
+    } catch (resetError) {
+      const msg = resetError instanceof Error ? resetError.message : "Unknown error";
+      console.error(`Failed to release sync lock for connection ${connection.id}: ${msg}`);
     }
   }
 

@@ -1,17 +1,17 @@
 import { NextResponse } from "next/server";
-import { getStore } from "@/lib/auth/session";
+import { getUserSession } from "@/lib/auth/session";
 import prisma from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const store = await getStore();
+    const session = await getUserSession();
 
-    if (!store) {
+    if (!session?.userId) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
     const reports = await prisma.report.findMany({
-      where: { storeId: store.id },
+      where: { userId: session.userId },
       orderBy: { createdAt: "desc" },
       select: {
         id: true,

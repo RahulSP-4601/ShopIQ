@@ -38,16 +38,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get user's stores
-    const userStores = await prisma.store.findMany({
-      where: { userId: session.userId },
-      orderBy: { createdAt: "asc" },
-    });
-
-    // Get first store for conversation creation (if exists)
-    const store = userStores[0];
-    const storeIds = userStores.map((s) => s.id);
-
     const { message, conversationId, attachments } = await request.json();
 
     if (!message || typeof message !== "string") {
@@ -62,9 +52,9 @@ export async function POST(request: NextRequest) {
 
     // Get or create conversation
     let conversation;
-    if (conversationId && storeIds.length > 0) {
+    if (conversationId) {
       conversation = await prisma.conversation.findFirst({
-        where: { id: conversationId, storeId: { in: storeIds } },
+        where: { id: conversationId, userId: session.userId },
         include: {
           messages: {
             orderBy: { createdAt: "desc" },
@@ -80,20 +70,12 @@ export async function POST(request: NextRequest) {
     }
 
     if (!conversation) {
-      // Need a store to create a conversation
-      if (!store) {
-        return NextResponse.json(
-          { error: "Please connect a marketplace store first to enable chat" },
-          { status: 400 }
-        );
-      }
-
       const title = message
         ? message.slice(0, 50) + (message.length > 50 ? "..." : "")
         : "New conversation";
       conversation = await prisma.conversation.create({
         data: {
-          storeId: store.id,
+          userId: session.userId,
           title,
         },
         include: { messages: { include: { attachments: true } } },
@@ -123,8 +105,8 @@ export async function POST(request: NextRequest) {
       include: { attachments: true },
     });
 
-    // Get store context (metrics data) - conversation.storeId is always set
-    const storeContext = await getStoreContext(conversation.storeId);
+    // Get store context (metrics data) for the user
+    const storeContext = await getStoreContext(session.userId);
 
     // Build conversation history for context (including attachments)
     interface MessageWithAttachments {

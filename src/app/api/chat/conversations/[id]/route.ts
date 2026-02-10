@@ -26,15 +26,8 @@ export async function GET(
 
     const { id } = await params;
 
-    // Get user's stores
-    const userStores = await prisma.store.findMany({
-      where: { userId: session.userId },
-      select: { id: true },
-    });
-    const storeIds = userStores.map((s) => s.id);
-
     const conversation = await prisma.conversation.findFirst({
-      where: { id, storeId: { in: storeIds.length > 0 ? storeIds : ["none"] } },
+      where: { id, userId: session.userId },
       include: {
         messages: {
           orderBy: { createdAt: "asc" },
@@ -103,16 +96,9 @@ export async function DELETE(
 
     const { id } = await params;
 
-    // Get user's stores
-    const userStores = await prisma.store.findMany({
-      where: { userId: session.userId },
-      select: { id: true },
-    });
-    const storeIds = userStores.map((s) => s.id);
-
-    // Verify conversation belongs to user's store
+    // Verify conversation belongs to this user
     const conversation = await prisma.conversation.findFirst({
-      where: { id, storeId: { in: storeIds.length > 0 ? storeIds : ["none"] } },
+      where: { id, userId: session.userId },
     });
 
     if (!conversation) {

@@ -61,7 +61,6 @@ export async function GET(request: NextRequest) {
     if (!session) {
       // User must be authenticated before OAuth flow
       // Store only the shop domain (not the code) so they can restart after login
-      // Reuse cookieStore from above instead of redeclaring
       cookieStore.set("pending_shopify_shop", shop, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -77,65 +76,17 @@ export async function GET(request: NextRequest) {
     }
 
     // Exchange code for access token
-    const { accessToken, scope } = await exchangeCodeForToken(shop, code);
+    const { accessToken } = await exchangeCodeForToken(shop, code);
 
-    // Create a temporary store object to fetch shop info
-    const tempStore = {
-      id: "",
-      userId: session.userId,
-      domain: shop,
-      accessToken,
-      shopifyId: "",
-      name: "",
-      email: null,
-      currency: "USD",
-      timezone: "UTC",
-      scope,
-      syncStatus: "PENDING" as const,
-      lastSyncedAt: null,
-      ordersCount: 0,
-      productsCount: 0,
-      customersCount: 0,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    // Pass isEncrypted=false since tempStore has plaintext token (not from database)
-    const client = new ShopifyClient(tempStore, false);
+    // Create a temporary config to fetch shop info (plaintext token, not encrypted yet)
+    const client = new ShopifyClient({ domain: shop, accessToken }, false);
     const shopInfo = await client.getShopInfo();
 
     // Encrypt access token before storing for security
-    // Must be done before any database writes to avoid plaintext storage
     const encryptedAccessToken = encryptToken(accessToken);
 
-    // Create or update store in database with encrypted token
-    const store = await prisma.store.upsert({
-      where: { domain: shop },
-      create: {
-        userId: session.userId,
-        shopifyId: String(shopInfo.id),
-        domain: shop,
-        name: shopInfo.name,
-        email: shopInfo.email,
-        currency: shopInfo.currency,
-        timezone: shopInfo.iana_timezone || shopInfo.timezone,
-        accessToken: encryptedAccessToken,
-        scope,
-        syncStatus: "PENDING",
-      },
-      update: {
-        userId: session.userId,
-        accessToken: encryptedAccessToken,
-        scope,
-        name: shopInfo.name,
-        email: shopInfo.email,
-        currency: shopInfo.currency,
-        timezone: shopInfo.iana_timezone || shopInfo.timezone,
-      },
-    });
-
-    // Create or update marketplace connection
-    await prisma.marketplaceConnection.upsert({
+    // Upsert marketplace connection — store domain in externalName for webhook lookups
+    const connection = await prisma.marketplaceConnection.upsert({
       where: {
         userId_marketplace: {
           userId: session.userId,
@@ -148,26 +99,28 @@ export async function GET(request: NextRequest) {
         status: "CONNECTED",
         accessToken: encryptedAccessToken,
         externalId: String(shopInfo.id),
-        externalName: shopInfo.name,
+        externalName: shop, // Store the myshopify.com domain for webhook lookups
         connectedAt: new Date(),
       },
       update: {
         status: "CONNECTED",
         accessToken: encryptedAccessToken,
         externalId: String(shopInfo.id),
-        externalName: shopInfo.name,
+        externalName: shop, // Store the myshopify.com domain for webhook lookups
         connectedAt: new Date(),
       },
     });
 
     // Register Shopify webhooks for real-time order/product updates
-    // Blocking call, but wrapped in try/catch so failure doesn't break the OAuth flow
+    // Use connection data to build the ShopifyStoreConfig for webhook registration
     try {
-      await registerWebhooks(store);
+      await registerWebhooks({
+        domain: shop,
+        accessToken: encryptedAccessToken,
+      });
     } catch (webhookError) {
-      // Sanitize error logging to avoid leaking sensitive data
       const msg = webhookError instanceof Error ? webhookError.message : "Unknown error";
-      console.error(`Failed to register Shopify webhooks: ${msg}`);
+      console.error(`Failed to register Shopify webhooks for connection ${connection.id}: ${msg}`);
     }
 
     // Note: Initial sync is handled by the scheduled cron job (/api/cron/sync)
@@ -177,7 +130,6 @@ export async function GET(request: NextRequest) {
     // Redirect back to onboarding connect page to allow connecting more marketplaces
     return NextResponse.redirect(new URL("/onboarding/connect", request.url));
   } catch (error) {
-    // Sanitize error logging to avoid leaking sensitive data
     const message = error instanceof Error ? error.message : "Unknown error";
     const name = error instanceof Error ? error.name : "Error";
     console.error(`Shopify OAuth callback error: [${name}] ${message}`);

@@ -1,5 +1,5 @@
 import { redirect, notFound } from "next/navigation";
-import { getStore } from "@/lib/auth/session";
+import { getUserSession } from "@/lib/auth/session";
 import prisma from "@/lib/prisma";
 import { ReportView } from "@/components/reports/ReportView";
 
@@ -12,16 +12,16 @@ interface ReportDetailPageProps {
 export default async function ReportDetailPage({
   params,
 }: ReportDetailPageProps) {
-  const store = await getStore();
+  const session = await getUserSession();
 
-  if (!store) {
+  if (!session?.userId) {
     redirect("/");
   }
 
   const { id } = await params;
 
   const report = await prisma.report.findFirst({
-    where: { id, storeId: store.id },
+    where: { id, userId: session.userId },
   });
 
   if (!report) {

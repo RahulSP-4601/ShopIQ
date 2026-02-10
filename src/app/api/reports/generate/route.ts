@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getStore } from "@/lib/auth/session";
+import { getUserSession } from "@/lib/auth/session";
 import prisma from "@/lib/prisma";
 import { generateReport } from "@/lib/gemini/client";
 import {
@@ -12,9 +12,9 @@ import { ReportType, Prisma } from "@prisma/client";
 
 export async function POST(request: NextRequest) {
   try {
-    const store = await getStore();
+    const session = await getUserSession();
 
-    if (!store) {
+    if (!session) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     // Create report record
     const report = await prisma.report.create({
       data: {
-        storeId: store.id,
+        userId: session.userId,
         type: type as ReportType,
         title: getReportTitle(type),
         status: "GENERATING",
@@ -48,26 +48,27 @@ export async function POST(request: NextRequest) {
 
       switch (type) {
         case "REVENUE_SUMMARY":
-          reportData = await generateRevenueSummaryData(store.id, start, end);
+          reportData = await generateRevenueSummaryData(session.userId, start, end);
           break;
         case "PRODUCT_ANALYSIS":
-          reportData = await generateProductAnalysisData(store.id, start, end);
+          reportData = await generateProductAnalysisData(session.userId, start, end);
           break;
         case "CUSTOMER_INSIGHTS":
-          reportData = await generateCustomerInsightsData(store.id);
+          reportData = await generateCustomerInsightsData(session.userId);
           break;
         case "FULL_ANALYSIS":
-          reportData = await generateFullAnalysisData(store.id);
+          reportData = await generateFullAnalysisData(session.userId);
           break;
         default:
           throw new Error("Invalid report type");
       }
 
       // Generate AI summary
+      const author = session.name || session.email || "Unknown User";
       const summary = await generateReport(
         type,
         JSON.stringify(reportData.metrics, null, 2),
-        store.name
+        author
       );
 
       // Update report with data and summary
@@ -107,7 +108,7 @@ function getReportTitle(type: string): string {
     case "CUSTOMER_INSIGHTS":
       return "Customer Insights Report";
     case "FULL_ANALYSIS":
-      return "Complete Store Analysis";
+      return "Complete Marketplace Analysis";
     default:
       return "Report";
   }

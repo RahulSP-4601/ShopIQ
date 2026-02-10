@@ -21,19 +21,9 @@ export async function GET() {
       );
     }
 
-    // Get all stores for this user
-    const userStores = await prisma.store.findMany({
-      where: { userId: session.userId },
-      select: { id: true },
-    });
-
-    const storeIds = userStores.map((s) => s.id);
-
-    // Get conversations from all user's stores
+    // Get conversations directly by userId
     const conversations = await prisma.conversation.findMany({
-      where: {
-        storeId: { in: storeIds.length > 0 ? storeIds : ["none"] },
-      },
+      where: { userId: session.userId },
       orderBy: { updatedAt: "desc" },
       select: {
         id: true,

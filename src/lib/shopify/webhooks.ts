@@ -1,6 +1,7 @@
 import crypto from "crypto";
-import { Store } from "@prisma/client";
 import { decryptToken } from "./oauth";
+import { ShopifyStoreConfig } from "./client";
+import { isValidShopifyDomain } from "./validation";
 
 const API_VERSION = process.env.SHOPIFY_API_VERSION || "2025-10";
 const FETCH_TIMEOUT_MS = 15000;
@@ -12,13 +13,8 @@ const WEBHOOK_TOPICS = [
   "products/update",
 ];
 
-/**
- * Validate that a domain is a legitimate Shopify myshopify.com hostname.
- * Prevents SSRF by rejecting arbitrary hostnames.
- */
-function isValidShopifyDomain(domain: string): boolean {
-  return /^[a-zA-Z0-9][a-zA-Z0-9-]*\.myshopify\.com$/.test(domain);
-}
+// Re-export for external consumers
+export { isValidShopifyDomain } from "./validation";
 
 /**
  * Verify the HMAC signature of a Shopify webhook request body.
@@ -62,7 +58,7 @@ interface WebhookRegistrationResult {
  * Throws an error if all registrations fail.
  */
 export async function registerWebhooks(
-  store: Store
+  store: ShopifyStoreConfig
 ): Promise<WebhookRegistrationResult> {
   if (!store.accessToken) {
     throw new Error("Store access token is required to register webhooks");
@@ -162,7 +158,7 @@ interface WebhookFailure {
  * Returns list of failures if any webhooks failed to delete.
  */
 export async function deregisterWebhooks(
-  store: Store
+  store: ShopifyStoreConfig
 ): Promise<{ deleted: number; failures: WebhookFailure[] }> {
   if (!store.accessToken) {
     return { deleted: 0, failures: [] };
@@ -258,7 +254,7 @@ type ListWebhooksResult =
   | { ok: true; webhooks: ShopifyWebhook[] }
   | { ok: false; error: string };
 
-async function listWebhooks(store: Store): Promise<ListWebhooksResult> {
+async function listWebhooks(store: ShopifyStoreConfig): Promise<ListWebhooksResult> {
   if (!store.accessToken) {
     return { ok: false, error: "Store access token is missing" };
   }

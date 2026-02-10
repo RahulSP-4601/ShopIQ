@@ -1,18 +1,14 @@
 import { redirect } from "next/navigation";
-import { getStore } from "@/lib/auth/session";
+import { getUserSession } from "@/lib/auth/session";
 import { ReportsList } from "@/components/reports/ReportsList";
 
 export const runtime = "nodejs";
 
 export default async function ReportsPage() {
-  const store = await getStore();
+  const session = await getUserSession();
 
-  if (!store) {
+  if (!session) {
     redirect("/");
-  }
-
-  if (store.syncStatus !== "COMPLETED") {
-    redirect("/sync");
   }
 
   return (
@@ -56,7 +52,7 @@ export default async function ReportsPage() {
 
       {/* Content */}
       <main className="mx-auto max-w-6xl px-6 py-8">
-        <ReportsList storeName={store.name} />
+        <ReportsList storeName={session.name} />
       </main>
     </div>
   );
