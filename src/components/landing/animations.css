@@ -410,6 +410,43 @@
   background: radial-gradient(circle, var(--tw-gradient-stops));
 }
 
+/* ==================== Pricing Card Shine ==================== */
+
+/* Diagonal shine sweep across the pricing card */
+@keyframes cardShine {
+  0% {
+    transform: translateX(-100%) rotate(25deg);
+  }
+  100% {
+    transform: translateX(200%) rotate(25deg);
+  }
+}
+
+.pricing-card-shine {
+  pointer-events: none;
+  z-index: 1;
+}
+
+.pricing-card-shine::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 60%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.03) 40%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.03) 60%,
+    transparent 100%
+  );
+  transform: translateX(-100%) rotate(25deg);
+  animation: cardShine 6s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
 /* ==================== Cookie Consent Animations ==================== */
 
 /* Slide up animation for cookie banner */
@@ -506,7 +543,8 @@
   .animate-slide-up,
   .animate-slide-down,
   .animate-modal-in,
-  .animate-menu-slide-down {
+  .animate-menu-slide-down,
+  .pricing-card-shine::after {
     animation: none !important;
     transition: none !important;
   }

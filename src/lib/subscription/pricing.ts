@@ -1,16 +1,22 @@
 export const PRICING = {
-  BASE_PRICE: 19.99,
-  ADDITIONAL_PRICE: 4.99,
+  BASE_PRICE: 999,
+  ADDITIONAL_PRICE: 449,
+  INCLUDED_MARKETPLACES: 2,
+  CURRENCY_SYMBOL: "₹",
 };
 
 /**
- * Calculate monthly subscription price based on marketplace count
+ * Calculate monthly subscription price based on marketplace count.
+ * Base price covers up to INCLUDED_MARKETPLACES connections.
  */
 export function calculateMonthlyPrice(marketplaceCount: number): number {
   if (marketplaceCount <= 0) return 0;
-  if (marketplaceCount === 1) return PRICING.BASE_PRICE;
+  if (marketplaceCount <= PRICING.INCLUDED_MARKETPLACES)
+    return PRICING.BASE_PRICE;
   return (
-    PRICING.BASE_PRICE + (marketplaceCount - 1) * PRICING.ADDITIONAL_PRICE
+    PRICING.BASE_PRICE +
+    (marketplaceCount - PRICING.INCLUDED_MARKETPLACES) *
+      PRICING.ADDITIONAL_PRICE
   );
 }
 
@@ -23,7 +29,6 @@ export function getPriceBreakdown(marketplaceCount: number): {
   additionalPrice: number;
   totalPrice: number;
 } {
-  // Handle zero marketplace count consistently - no base price when no marketplaces
   if (marketplaceCount <= 0) {
     return {
       basePrice: 0,
@@ -33,7 +38,10 @@ export function getPriceBreakdown(marketplaceCount: number): {
     };
   }
 
-  const additionalCount = marketplaceCount - 1;
+  const additionalCount = Math.max(
+    0,
+    marketplaceCount - PRICING.INCLUDED_MARKETPLACES
+  );
   return {
     basePrice: PRICING.BASE_PRICE,
     additionalCount,
@@ -46,5 +54,5 @@ export function getPriceBreakdown(marketplaceCount: number): {
  * Format price for display
  */
 export function formatPrice(price: number): string {
-  return `$${price.toFixed(2)}`;
+  return `${PRICING.CURRENCY_SYMBOL}${Math.round(price)}`;
 }

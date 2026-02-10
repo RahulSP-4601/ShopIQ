@@ -614,19 +614,19 @@ export default function AccountMarketplacesPage() {
 
                 <div className="border-t border-slate-200 pt-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-slate-600">Base plan</span>
+                    <span className="text-slate-600">Base plan ({PRICING.INCLUDED_MARKETPLACES} marketplaces)</span>
                     <span className="text-slate-900">
-                      ${PRICING.BASE_PRICE.toFixed(2)}
+                      {PRICING.CURRENCY_SYMBOL}{PRICING.BASE_PRICE}
                     </span>
                   </div>
-                  {connectedCount > 1 && (
+                  {connectedCount > PRICING.INCLUDED_MARKETPLACES && (
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-slate-600">
-                        +{connectedCount - 1} additional
+                        +{connectedCount - PRICING.INCLUDED_MARKETPLACES} additional
                       </span>
                       <span className="text-slate-900">
-                        $
-                        {((connectedCount - 1) * PRICING.ADDITIONAL_PRICE).toFixed(2)}
+                        {PRICING.CURRENCY_SYMBOL}
+                        {(connectedCount - PRICING.INCLUDED_MARKETPLACES) * PRICING.ADDITIONAL_PRICE}
                       </span>
                     </div>
                   )}
@@ -638,7 +638,7 @@ export default function AccountMarketplacesPage() {
                       Monthly Total
                     </span>
                     <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-emerald-500">
-                      ${calculateMonthlyPrice(connectedCount).toFixed(2)}
+                      {PRICING.CURRENCY_SYMBOL}{calculateMonthlyPrice(connectedCount)}
                     </span>
                   </div>
                 </div>

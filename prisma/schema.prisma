@@ -170,12 +170,12 @@ model Subscription {
   status SubscriptionStatus @default(ACTIVE)
 
   // Pricing
-  basePrice       Decimal @default(19.99) @db.Decimal(10, 2)
-  additionalPrice Decimal @default(4.99) @db.Decimal(10, 2)
-  totalPrice      Decimal @default(19.99) @db.Decimal(10, 2)
+  basePrice       Decimal @default(999) @db.Decimal(10, 2)
+  additionalPrice Decimal @default(449) @db.Decimal(10, 2)
+  totalPrice      Decimal @default(999) @db.Decimal(10, 2)
 
   // Connected marketplaces count for billing
-  marketplaceCount Int @default(1)
+  marketplaceCount Int @default(2)
 
   // Billing cycle
   currentPeriodStart DateTime @default(now())

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { PRICING } from "@/lib/subscription/pricing";
+import { PRICING, calculateMonthlyPrice } from "@/lib/subscription/pricing";
 import { MARKETPLACE_NAMES } from "@/lib/marketplace/config";
 import { MarketplaceType } from "@prisma/client";
 
@@ -75,9 +75,9 @@ export default function OnboardingPaymentPage() {
   };
 
   const connectedCount = connections.length;
-  const additionalCount = Math.max(0, connectedCount - 1);
+  const additionalCount = Math.max(0, connectedCount - PRICING.INCLUDED_MARKETPLACES);
   const additionalPrice = additionalCount * PRICING.ADDITIONAL_PRICE;
-  const totalPrice = PRICING.BASE_PRICE + additionalPrice;
+  const totalPrice = calculateMonthlyPrice(connectedCount);
 
   const formatCardNumber = (value: string) => {
     const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
@@ -248,7 +248,7 @@ export default function OnboardingPaymentPage() {
                   </span>
                 </div>
                 <span className="text-slate-500 text-sm">
-                  {index === 0 ? "Included" : `+$${PRICING.ADDITIONAL_PRICE}`}
+                  {index < PRICING.INCLUDED_MARKETPLACES ? "Included" : `+${PRICING.CURRENCY_SYMBOL}${PRICING.ADDITIONAL_PRICE}`}
                 </span>
               </div>
             ))}
@@ -257,9 +257,9 @@ export default function OnboardingPaymentPage() {
           {/* Divider */}
           <div className="border-t border-slate-200 pt-4 space-y-3">
             <div className="flex justify-between text-sm">
-              <span className="text-slate-600">Base plan (1 marketplace)</span>
+              <span className="text-slate-600">Base plan ({PRICING.INCLUDED_MARKETPLACES} marketplaces)</span>
               <span className="text-slate-900 font-medium">
-                ${PRICING.BASE_PRICE.toFixed(2)}
+                {PRICING.CURRENCY_SYMBOL}{PRICING.BASE_PRICE}
               </span>
             </div>
             {additionalCount > 0 && (
@@ -269,7 +269,7 @@ export default function OnboardingPaymentPage() {
                   {additionalCount > 1 ? "s" : ""})
                 </span>
                 <span className="text-slate-900 font-medium">
-                  ${additionalPrice.toFixed(2)}
+                  {PRICING.CURRENCY_SYMBOL}{additionalPrice}
                 </span>
               </div>
             )}
@@ -282,7 +282,7 @@ export default function OnboardingPaymentPage() {
                 Total per month
               </span>
               <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-emerald-500">
-                ${totalPrice.toFixed(2)}
+                {PRICING.CURRENCY_SYMBOL}{totalPrice}
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-2">
@@ -449,7 +449,7 @@ export default function OnboardingPaymentPage() {
                       d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
                     />
                   </svg>
-                  <span>Start Subscription - ${totalPrice.toFixed(2)}/mo</span>
+                  <span>Start Subscription - {PRICING.CURRENCY_SYMBOL}{totalPrice}/mo</span>
                 </>
               )}
             </button>

@@ -122,20 +122,20 @@ Frame operates on a **subscription-based SaaS model** with transparent, scalable
 
 | Plan | Price | Includes |
 | ---- | ----- | -------- |
-| Base | $19.99/month | 1 marketplace connection |
-| Additional Marketplace | +$4.99/month | Per additional channel |
+| Base | ₹999/month | 2 marketplace connections |
+| Additional Marketplace | +₹449/month | Per additional channel |
 
 **Example pricing:**
-- Single Shopify store: $19.99/month
-- Shopify + eBay: $24.98/month
-- Shopify + eBay + Etsy: $29.97/month
+- Shopify + eBay: ₹999/month
+- Shopify + eBay + Etsy: ₹1,448/month
+- 4 marketplaces: ₹1,897/month
 
 ### Target Market
 
 - **Primary:** Multi-channel e-commerce sellers on Shopify, eBay, Etsy, Flipkart, BigCommerce, Square, and Snapdeal
 - **Secondary:** Growing sellers expanding to multiple marketplaces
 - **TAM:** 30M+ active e-commerce sellers globally
-- **Sweet Spot:** Sellers doing $10K-$500K/month who need insights but can't afford dedicated analysts
+- **Sweet Spot:** Sellers doing ₹5L-₹50L/month who need insights but can't afford dedicated analysts
 
 ### Competitive Advantage
 
@@ -144,7 +144,7 @@ Frame operates on a **subscription-based SaaS model** with transparent, scalable
 | Complex dashboards | Conversational AI |
 | Single platform focus | Multi-marketplace unified |
 | Raw data exports | Actionable recommendations |
-| $100-1000+/month | Starting at $19.99/month |
+| ₹8,000-80,000+/month | Starting at ₹999/month |
 | Requires training | Ask questions naturally |
 
 ## Tech Stack

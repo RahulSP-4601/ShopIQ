@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
                   salesMemberId: salesClient.salesMemberId,
                   salesClientId: salesClient.id,
                   amount: commissionAmount,
-                  note: `Subscription purchase (client:${salesClient.id}) — $${Number(totalPrice).toFixed(2)}/mo`,
+                  note: `Subscription purchase (client:${salesClient.id}) — ${PRICING.CURRENCY_SYMBOL}${Math.round(Number(totalPrice))}/mo`,
                   period: "INITIAL",
                 },
               });
