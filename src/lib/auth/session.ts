@@ -4,8 +4,8 @@ import { SignJWT, jwtVerify } from "jose";
 import prisma from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 
-const SESSION_COOKIE = "shopiq_session";
-const EMPLOYEE_SESSION_COOKIE = "shopiq_employee_session";
+const SESSION_COOKIE = "frame_session";
+const EMPLOYEE_SESSION_COOKIE = "frame_employee_session";
 const SESSION_DEFAULT_MAX_AGE = 60 * 60 * 24 * 7; // 7 days (default)
 const SESSION_REMEMBER_ME_MAX_AGE = 60 * 60 * 24 * 30; // 30 days (remember me)
 const SESSION_REFRESH_THRESHOLD = 60 * 60 * 24; // Refresh if < 1 day remaining

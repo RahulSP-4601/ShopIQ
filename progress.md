@@ -1,8 +1,8 @@
-# ShopIQ - Implementation Progress
+# Frame - Implementation Progress
 
 ## Overview
 
-ShopIQ is an AI-powered multi-marketplace e-commerce analytics platform that helps store owners understand their business through natural language conversations and automated reports. It supports 7 fully integrated marketplace integrations (Shopify, eBay, Etsy, Flipkart, BigCommerce, Square, and Snapdeal) with a unified data model and real-time sync pipeline. The MarketplaceType enum also reserves AMAZON and PRESTASHOP for future integrations.
+Frame is an AI-powered multi-marketplace e-commerce analytics platform that helps store owners understand their business through natural language conversations and automated reports. It supports 7 fully integrated marketplace integrations (Shopify, eBay, Etsy, Flipkart, BigCommerce, Square, and Snapdeal) with a unified data model and real-time sync pipeline. The MarketplaceType enum also reserves AMAZON and PRESTASHOP for future integrations.
 
 ---
 

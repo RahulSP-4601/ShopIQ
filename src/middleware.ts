@@ -95,7 +95,7 @@ async function getLatestEmployeeStatus(
 }
 
 export async function middleware(request: NextRequest) {
-  const token = request.cookies.get("shopiq_employee_session")?.value;
+  const token = request.cookies.get("frame_employee_session")?.value;
   const path = request.nextUrl.pathname;
 
   if (!token) {

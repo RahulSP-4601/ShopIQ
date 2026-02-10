@@ -134,7 +134,7 @@ export async function registerWebhooks(
 }
 
 /**
- * Deregister all ShopIQ webhooks from a BigCommerce store.
+ * Deregister all Frame webhooks from a BigCommerce store.
  * Returns count of deleted webhooks and any failures.
  */
 export async function deregisterWebhooks(

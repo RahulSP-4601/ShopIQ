@@ -21,13 +21,13 @@ export default function TermsOfServicePage() {
   return (
     <LegalLayout
       title="Terms of Service"
-      subtitle="Please read these terms carefully before using ShopIQ. By accessing our platform, you agree to be bound by these terms."
+      subtitle="Please read these terms carefully before using Frame. By accessing our platform, you agree to be bound by these terms."
       lastUpdated="January 26, 2026"
       sections={sections}
     >
       <LegalSection id="acceptance" title="Acceptance of Terms">
         <p>
-          Welcome to ShopIQ. By accessing or using our platform, website, or any of our services
+          Welcome to Frame. By accessing or using our platform, website, or any of our services
           (collectively, the &quot;Service&quot;), you agree to be bound by these Terms of Service
           (&quot;Terms&quot;). If you do not agree to these Terms, you may not access or use the Service.
         </p>
@@ -46,7 +46,7 @@ export default function TermsOfServicePage() {
 
       <LegalSection id="description" title="Description of Service">
         <p>
-          ShopIQ is an AI-powered analytics platform designed for multi-channel e-commerce sellers. Our Service provides:
+          Frame is an AI-powered analytics platform designed for multi-channel e-commerce sellers. Our Service provides:
         </p>
         <LegalList
           items={[
@@ -80,7 +80,7 @@ export default function TermsOfServicePage() {
 
         <InfoCard title="Account Security" variant="warning">
           <p>
-            You are responsible for safeguarding your account credentials. ShopIQ will not be liable for any
+            You are responsible for safeguarding your account credentials. Frame will not be liable for any
             loss or damage arising from your failure to maintain account security. We strongly recommend
             enabling two-factor authentication.
           </p>
@@ -89,7 +89,7 @@ export default function TermsOfServicePage() {
 
       <LegalSection id="responsibilities" title="User Responsibilities">
         <p>
-          As a user of ShopIQ, you are responsible for:
+          As a user of Frame, you are responsible for:
         </p>
         <LegalList
           items={[
@@ -101,7 +101,7 @@ export default function TermsOfServicePage() {
           ]}
         />
         <p>
-          You acknowledge that ShopIQ provides tools and insights to assist your business decisions, but
+          You acknowledge that Frame provides tools and insights to assist your business decisions, but
           ultimate responsibility for those decisions remains with you.
         </p>
       </LegalSection>
@@ -137,7 +137,7 @@ export default function TermsOfServicePage() {
           <InfoCard title="Our Intellectual Property">
             <p>
               The Service, including all content, features, and functionality (including but not limited to
-              software, algorithms, designs, graphics, and documentation), is owned by ShopIQ and protected
+              software, algorithms, designs, graphics, and documentation), is owned by Frame and protected
               by copyright, trademark, and other intellectual property laws.
             </p>
           </InfoCard>
@@ -195,7 +195,7 @@ export default function TermsOfServicePage() {
 
           <InfoCard title="Taxes">
             <p>
-              You are responsible for all applicable taxes, except for taxes based on ShopIQ&apos;s net income.
+              You are responsible for all applicable taxes, except for taxes based on Frame&apos;s net income.
               If we are required to collect or pay taxes, they will be added to your invoice.
             </p>
           </InfoCard>
@@ -242,7 +242,7 @@ export default function TermsOfServicePage() {
             THE SERVICE IS PROVIDED &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; WITHOUT WARRANTIES OF ANY KIND.
           </p>
           <p>
-            To the fullest extent permitted by law, ShopIQ disclaims all warranties, express or implied,
+            To the fullest extent permitted by law, Frame disclaims all warranties, express or implied,
             including warranties of merchantability, fitness for a particular purpose, and non-infringement.
             We do not warrant that the Service will be uninterrupted, error-free, or secure.
           </p>
@@ -250,7 +250,7 @@ export default function TermsOfServicePage() {
 
         <InfoCard title="Limitation of Liability" variant="warning">
           <p>
-            To the maximum extent permitted by law, ShopIQ shall not be liable for any indirect, incidental,
+            To the maximum extent permitted by law, Frame shall not be liable for any indirect, incidental,
             special, consequential, or punitive damages, including loss of profits, data, or goodwill,
             regardless of the cause of action.
           </p>
@@ -263,7 +263,7 @@ export default function TermsOfServicePage() {
 
       <LegalSection id="indemnification" title="Indemnification">
         <p>
-          You agree to indemnify, defend, and hold harmless ShopIQ, its affiliates, officers, directors,
+          You agree to indemnify, defend, and hold harmless Frame, its affiliates, officers, directors,
           employees, and agents from and against any claims, damages, losses, liabilities, costs, and
           expenses (including reasonable attorneys&apos; fees) arising from:
         </p>
@@ -295,7 +295,7 @@ export default function TermsOfServicePage() {
           <InfoCard title="Informal Resolution">
             <p>
               Before initiating any formal dispute resolution, you agree to contact us at{" "}
-              <a href="mailto:legal@shopiq.com" className="text-teal-600 hover:underline">legal@shopiq.com</a>{" "}
+              <a href="mailto:legal@frame.com" className="text-teal-600 hover:underline">legal@frame.com</a>{" "}
               to attempt to resolve the dispute informally. We will make good-faith efforts to resolve any
               dispute within 30 days.
             </p>
@@ -313,7 +313,7 @@ export default function TermsOfServicePage() {
             <p>
               You agree that any dispute resolution proceedings will be conducted only on an individual basis
               and not as a class, consolidated, or representative action. You waive any right to participate
-              in class actions against ShopIQ.
+              in class actions against Frame.
             </p>
           </InfoCard>
         </div>
@@ -346,20 +346,20 @@ export default function TermsOfServicePage() {
           <div className="grid sm:grid-cols-2 gap-6">
             <div>
               <h3 className="font-semibold text-slate-900 mb-2">Legal Inquiries</h3>
-              <a href="mailto:legal@shopiq.com" className="text-teal-600 hover:underline">
-                legal@shopiq.com
+              <a href="mailto:legal@frame.com" className="text-teal-600 hover:underline">
+                legal@frame.com
               </a>
             </div>
             <div>
               <h3 className="font-semibold text-slate-900 mb-2">General Support</h3>
-              <a href="mailto:support@shopiq.com" className="text-teal-600 hover:underline">
-                support@shopiq.com
+              <a href="mailto:support@frame.com" className="text-teal-600 hover:underline">
+                support@frame.com
               </a>
             </div>
             <div className="sm:col-span-2">
               <h3 className="font-semibold text-slate-900 mb-2">Mailing Address</h3>
               <p className="text-slate-600">
-                ShopIQ Analytics Inc.<br />
+                Frame Inc.<br />
                 123 Commerce Street, Suite 500<br />
                 San Francisco, CA 94105<br />
                 United States

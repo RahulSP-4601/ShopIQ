@@ -17,13 +17,13 @@ export default function SecurityPage() {
   return (
     <LegalLayout
       title="Security"
-      subtitle="At ShopIQ, security is fundamental to everything we do. Learn how we protect your data and maintain the trust you place in us."
+      subtitle="At Frame, security is fundamental to everything we do. Learn how we protect your data and maintain the trust you place in us."
       lastUpdated="January 26, 2026"
       sections={sections}
     >
       <LegalSection id="commitment" title="Our Commitment to Security">
         <p>
-          Security is not just a feature at ShopIQ—it&apos;s a core principle that guides every decision we make.
+          Security is not just a feature at Frame—it&apos;s a core principle that guides every decision we make.
           We understand that you trust us with sensitive business data, and we take that responsibility seriously.
         </p>
 
@@ -345,8 +345,8 @@ export default function SecurityPage() {
           <p>
             We maintain a bug bounty program to reward security researchers who help us identify and fix
             vulnerabilities. If you discover a security issue, please report it to us at{" "}
-            <a href="mailto:security@shopiq.com" className="text-teal-600 hover:underline">
-              security@shopiq.com
+            <a href="mailto:security@frame.com" className="text-teal-600 hover:underline">
+              security@frame.com
             </a>
             .
           </p>
@@ -380,8 +380,8 @@ export default function SecurityPage() {
           <div className="grid sm:grid-cols-2 gap-6">
             <div>
               <h3 className="font-semibold text-slate-900 mb-2">Security Team</h3>
-              <a href="mailto:security@shopiq.com" className="text-teal-600 hover:underline">
-                security@shopiq.com
+              <a href="mailto:security@frame.com" className="text-teal-600 hover:underline">
+                security@frame.com
               </a>
               <p className="text-sm text-slate-500 mt-1">For security reports and inquiries</p>
             </div>
@@ -397,8 +397,8 @@ export default function SecurityPage() {
 
         <p className="mt-6 text-sm text-slate-500">
           For non-security-related inquiries, please contact{" "}
-          <a href="mailto:support@shopiq.com" className="text-teal-600 hover:underline">
-            support@shopiq.com
+          <a href="mailto:support@frame.com" className="text-teal-600 hover:underline">
+            support@frame.com
           </a>
           .
         </p>

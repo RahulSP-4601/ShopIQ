@@ -39,7 +39,7 @@ export default async function ReportDetailPage({
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white font-bold shadow-md shadow-emerald-500/25">
                   S
                 </div>
-                <span className="text-lg font-bold text-slate-900">ShopIQ</span>
+                <span className="text-lg font-bold text-slate-900">Frame</span>
               </a>
               <span className="text-slate-300">|</span>
               <a

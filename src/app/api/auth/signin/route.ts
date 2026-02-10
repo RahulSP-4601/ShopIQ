@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
           redirect: "/reset-password",
         });
 
-        response.cookies.set("shopiq_reset_token", resetToken, {
+        response.cookies.set("frame_reset_token", resetToken, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: "lax",

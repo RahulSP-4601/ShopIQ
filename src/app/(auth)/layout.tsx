@@ -19,14 +19,14 @@ export default function AuthLayout({
         <Link href="/" className="inline-flex items-center gap-3 group">
           <Image
             src="/logo.png"
-            alt="ShopIQ"
+            alt="Frame"
             width={66}
             height={66}
             className="object-contain transition-transform duration-200 group-hover:scale-105"
             priority
           />
           <span className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
-            ShopIQ
+            Frame
           </span>
         </Link>
       </header>
@@ -38,7 +38,7 @@ export default function AuthLayout({
 
       {/* Footer */}
       <footer className="relative z-10 p-6 text-center text-sm text-slate-500">
-        <p>&copy; {new Date().getFullYear()} ShopIQ. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} Frame. All rights reserved.</p>
       </footer>
     </div>
   );

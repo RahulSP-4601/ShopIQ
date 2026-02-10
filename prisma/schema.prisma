@@ -1,4 +1,4 @@
-// ShopIQ Database Schema
+// Frame Database Schema
 // Prisma ORM for Multi-Marketplace Analytics Platform
 
 generator client {

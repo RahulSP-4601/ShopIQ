@@ -178,7 +178,7 @@ export function Integrations() {
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-600">Command Center</span>
           </h2>
           <p className="mt-6 text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
-            Connect once, analyze everywhere. ShopIQ syncs with every major marketplace
+            Connect once, analyze everywhere. Frame syncs with every major marketplace
             to give you unified insights across all your sales channels.
           </p>
         </div>
@@ -321,7 +321,7 @@ export function Integrations() {
                 <div className="absolute inset-0 bg-gradient-to-br from-teal-50 to-white" />
                 <Image
                   src="/logo.png"
-                  alt="ShopIQ"
+                  alt="Frame"
                   width={130}
                   height={130}
                   className="w-32 h-32 md:w-36 md:h-36 object-contain relative z-10"

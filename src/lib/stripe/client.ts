@@ -39,7 +39,7 @@ export async function getOrCreateCustomer(
   const customer = await stripe.customers.create({
     email,
     name,
-    metadata: { source: "shopiq" },
+    metadata: { source: "frame" },
   });
 
   return customer.id;

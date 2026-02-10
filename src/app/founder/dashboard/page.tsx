@@ -305,7 +305,7 @@ export default function FounderDashboardPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-gray-900">Founder Dashboard</h1>
-            <p className="text-sm text-gray-500">ShopIQ Sales Management</p>
+            <p className="text-sm text-gray-500">Frame Sales Management</p>
           </div>
           <div className="flex items-center gap-3">
             {signOutError && <span className="text-sm text-red-600">{signOutError}</span>}

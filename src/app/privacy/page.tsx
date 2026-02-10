@@ -110,7 +110,7 @@ export default function PrivacyPolicyPage() {
 
           <InfoCard title="Business Transfers">
             <p>
-              If ShopIQ is involved in a merger, acquisition, or sale of assets, your information may be
+              If Frame is involved in a merger, acquisition, or sale of assets, your information may be
               transferred as part of that transaction. We will notify you of any such change.
             </p>
           </InfoCard>
@@ -118,7 +118,7 @@ export default function PrivacyPolicyPage() {
           <InfoCard title="Legal Requirements">
             <p>
               We may disclose your information if required by law, regulation, legal process, or governmental
-              request, or to protect the rights, property, or safety of ShopIQ, our users, or others.
+              request, or to protect the rights, property, or safety of Frame, our users, or others.
             </p>
           </InfoCard>
 
@@ -186,8 +186,8 @@ export default function PrivacyPolicyPage() {
 
         <p className="mt-6">
           To exercise these rights, please contact us at{" "}
-          <a href="mailto:privacy@shopiq.com" className="text-teal-600 hover:underline">
-            privacy@shopiq.com
+          <a href="mailto:privacy@frame.com" className="text-teal-600 hover:underline">
+            privacy@frame.com
           </a>
           . We will respond to your request within 30 days.
         </p>
@@ -214,7 +214,7 @@ export default function PrivacyPolicyPage() {
 
       <LegalSection id="international-transfers" title="International Data Transfers">
         <p>
-          ShopIQ operates globally, and your information may be transferred to and processed in countries
+          Frame operates globally, and your information may be transferred to and processed in countries
           other than your own. We ensure appropriate safeguards are in place:
         </p>
         <LegalList
@@ -232,8 +232,8 @@ export default function PrivacyPolicyPage() {
           Our services are not intended for children under the age of 16. We do not knowingly collect
           personal information from children. If you are a parent or guardian and believe your child has
           provided us with personal information, please contact us immediately at{" "}
-          <a href="mailto:privacy@shopiq.com" className="text-teal-600 hover:underline">
-            privacy@shopiq.com
+          <a href="mailto:privacy@frame.com" className="text-teal-600 hover:underline">
+            privacy@frame.com
           </a>
           , and we will take steps to delete such information.
         </p>
@@ -266,20 +266,20 @@ export default function PrivacyPolicyPage() {
           <div className="grid sm:grid-cols-2 gap-6">
             <div>
               <h3 className="font-semibold text-slate-900 mb-2">Email</h3>
-              <a href="mailto:privacy@shopiq.com" className="text-teal-600 hover:underline">
-                privacy@shopiq.com
+              <a href="mailto:privacy@frame.com" className="text-teal-600 hover:underline">
+                privacy@frame.com
               </a>
             </div>
             <div>
               <h3 className="font-semibold text-slate-900 mb-2">Data Protection Officer</h3>
-              <a href="mailto:dpo@shopiq.com" className="text-teal-600 hover:underline">
-                dpo@shopiq.com
+              <a href="mailto:dpo@frame.com" className="text-teal-600 hover:underline">
+                dpo@frame.com
               </a>
             </div>
             <div className="sm:col-span-2">
               <h3 className="font-semibold text-slate-900 mb-2">Mailing Address</h3>
               <p className="text-slate-600">
-                ShopIQ Analytics Inc.<br />
+                Frame Inc.<br />
                 123 Commerce Street, Suite 500<br />
                 San Francisco, CA 94105<br />
                 United States

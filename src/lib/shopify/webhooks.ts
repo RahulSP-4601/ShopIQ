@@ -153,7 +153,7 @@ interface WebhookFailure {
 }
 
 /**
- * Deregister all ShopIQ webhooks from a Shopify store.
+ * Deregister all Frame webhooks from a Shopify store.
  * Called on marketplace disconnect.
  * Returns list of failures if any webhooks failed to delete.
  */

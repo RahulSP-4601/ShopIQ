@@ -191,7 +191,7 @@ export function ChatContainer({
                 S
               </div>
               <h2 className="text-xl font-semibold text-slate-900">
-                Welcome to ShopIQ
+                Welcome to Frame
               </h2>
               <p className="mt-1 text-sm text-slate-500">
                 {isConnected

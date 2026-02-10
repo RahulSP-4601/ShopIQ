@@ -2,7 +2,7 @@
 
 ## Overview
 
-ShopIQ is a chat-based analytics platform. Users connect multiple marketplace accounts (Shopify, eBay, Etsy, Flipkart, BigCommerce, Square, Snapdeal) and ask questions in natural language. The AI fetches, combines, and analyzes data across all connected marketplaces to provide unified insights.
+Frame is a chat-based analytics platform. Users connect multiple marketplace accounts (Shopify, eBay, Etsy, Flipkart, BigCommerce, Square, Snapdeal) and ask questions in natural language. The AI fetches, combines, and analyzes data across all connected marketplaces to provide unified insights.
 
 ---
 

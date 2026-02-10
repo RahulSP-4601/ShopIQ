@@ -7,7 +7,7 @@ import { RequestTrialModal } from "./RequestTrialModal";
 const plans = [
   {
     name: "Starter",
-    description: "Perfect for trying out ShopIQ",
+    description: "Perfect for trying out Frame",
     price: "$0",
     period: "/month",
     features: [

@@ -1,9 +1,9 @@
-# ShopIQ Database Documentation
+# Frame Database Documentation
 
 ## Core Users
 
 ### User
-Your clients — business owners who sign up and use ShopIQ to analyze their sales data across multiple marketplaces.
+Your clients — business owners who sign up and use Frame to analyze their sales data across multiple marketplaces.
 
 **Key fields:** name, email, passwordHash, profile info (phone, city, state, country)
 
@@ -19,7 +19,7 @@ Your internal team. Two roles:
 ## Marketplace Connections
 
 ### MarketplaceConnection
-When a client connects their store from any marketplace, one record is created per marketplace per user. Stores encrypted OAuth tokens so ShopIQ can pull their data automatically.
+When a client connects their store from any marketplace, one record is created per marketplace per user. Stores encrypted OAuth tokens so Frame can pull their data automatically.
 
 **Supported marketplaces (10):**
 Shopify, eBay, Etsy, WooCommerce, BigCommerce, Wix, Square, Magento, Flipkart, SnapDeal

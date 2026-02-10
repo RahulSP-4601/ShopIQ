@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "ShopIQ — Your AI E-commerce Analyst",
+  title: "Frame — Get all your marketplaces in 1 Frame",
   description: "AI-powered analytics for multi-channel e-commerce sellers. Connect Shopify, Amazon, Flipkart, and 50+ marketplaces. Get unified insights in one dashboard.",
 };
 

@@ -24,6 +24,8 @@ function deriveKey(marketplace?: string): Buffer {
   if (marketplace) {
     // HKDF: extract with SHA-256, then expand with marketplace-specific info
     const ikm = Buffer.from(TOKEN_ENCRYPTION_KEY!, "utf8");
+    // IMPORTANT: Do NOT rename this salt — it derives the AES-256-GCM key for all existing encrypted tokens.
+    // Changing it would make every stored token (OAuth, PII) permanently undecryptable.
     const salt = crypto.createHash("sha256").update("shopiq-token-encryption").digest();
     const info = Buffer.from(`marketplace:${marketplace}`, "utf8");
     // HKDF-Extract

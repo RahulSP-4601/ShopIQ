@@ -160,7 +160,7 @@ export function RequestTrialModal({ isOpen, onClose }: RequestTrialModalProps) {
               Request Submitted!
             </h3>
             <p className="mt-2 text-slate-600">
-              Thank you for your interest in ShopIQ. Our team will follow up
+              Thank you for your interest in Frame. Our team will follow up
               with you shortly.
             </p>
             <button

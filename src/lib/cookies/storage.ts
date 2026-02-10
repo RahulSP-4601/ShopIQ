@@ -1,6 +1,6 @@
 import type { CookieConsentState, CookiePreferences } from "./types";
 
-const STORAGE_KEY = "shopiq_cookie_consent";
+const STORAGE_KEY = "frame_cookie_consent";
 const CONSENT_VERSION = "1.0";
 
 export const defaultPreferences: CookiePreferences = {

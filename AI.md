@@ -1,8 +1,8 @@
-# ShopIQ AI Architecture
+# Frame AI Architecture
 
-> Applying Forrest Hosten's Research to ShopIQ's Shopify Integration
+> Applying Forrest Hosten's Research to Frame's Shopify Integration
 
-This document outlines the comprehensive AI architecture for ShopIQ, based on cognitive research principles for building intelligent e-commerce assistants.
+This document outlines the comprehensive AI architecture for Frame, based on cognitive research principles for building intelligent e-commerce assistants.
 
 ---
 
@@ -21,11 +21,11 @@ This document outlines the comprehensive AI architecture for ShopIQ, based on co
 
 ## 1. Three-Column Working Memory for Shopify Sellers
 
-From Forrest's "Three-Column Working Memory" paper, we structure ShopIQ's cognitive state:
+From Forrest's "Three-Column Working Memory" paper, we structure Frame's cognitive state:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                    SHOPIQ WORKING MEMORY FOR SHOPIFY                        │
+│                    FRAME WORKING MEMORY FOR SHOPIFY                        │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │  COLUMN 1: ACTIVE TASKS (3-4 slots)                                         │
@@ -85,7 +85,7 @@ From Forrest's "Three-Column Working Memory" paper, we structure ShopIQ's cognit
 From the "Competence-Based Autonomy" paper, we map belief strength to supervision levels:
 
 ```python
-# ShopIQ Autonomy Mapping for Shopify Operations
+# Frame Autonomy Mapping for Shopify Operations
 
 SHOPIFY_TASK_BELIEFS = {
     # HIGH AUTONOMY (strength > 0.7) - Execute independently
@@ -153,9 +153,9 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Any
 import json
 
-class ShopIQShopifyAgent:
+class FrameShopifyAgent:
     """
-    ShopIQ Agent for Shopify using Forrest Hosten's cognitive architecture.
+    Frame Agent for Shopify using Forrest Hosten's cognitive architecture.
     """
 
     def __init__(self, shopify_credentials: Dict):
@@ -345,7 +345,7 @@ class ShopIQShopifyAgent:
         """
         wm = self.working_memory
 
-        prompt = f"""You are ShopIQ, an AI business analyst for e-commerce sellers on Shopify.
+        prompt = f"""You are Frame, an AI business analyst for e-commerce sellers on Shopify.
 
 # WORKING MEMORY STATE
 
@@ -543,7 +543,7 @@ Include the AI maturity badge at the end.
         response = await openai.ChatCompletion.acreate(
             model="gpt-4-turbo",
             messages=[
-                {"role": "system", "content": "You are ShopIQ generating weekly business intelligence."},
+                {"role": "system", "content": "You are Frame generating weekly business intelligence."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.7
@@ -814,7 +814,7 @@ Following Forrest's AI Years framework:
 ```python
 # Metrics following Forrest's AI Years framework
 
-SHOPIQ_METRICS = {
+FRAME_METRICS = {
     "ai_maturity": {
         "age_ai_years": "Validated cycles / 18,000",
         "geometric_mean_reliability": "Product of step reliabilities ^ (1/n)",
@@ -858,7 +858,7 @@ SHOPIQ_METRICS = {
 
 ## Summary
 
-This architecture enables ShopIQ to:
+This architecture enables Frame to:
 
 1. **Maintain Cognitive Context** - Three-column working memory keeps relevant information accessible
 2. **Learn Autonomy Gradually** - Belief strength determines supervision level
@@ -866,4 +866,4 @@ This architecture enables ShopIQ to:
 4. **Track Maturity** - AI Years framework measures real competence development
 5. **Scale Responsibly** - Phased implementation ensures quality at each stage
 
-The key insight from Forrest's research: **competence should be earned through validated experience, not assumed**. This architecture ensures ShopIQ builds trust incrementally while protecting sellers from AI errors.
+The key insight from Forrest's research: **competence should be earned through validated experience, not assumed**. This architecture ensures Frame builds trust incrementally while protecting sellers from AI errors.

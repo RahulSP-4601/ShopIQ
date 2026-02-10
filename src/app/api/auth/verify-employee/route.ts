@@ -3,7 +3,7 @@ import { jwtVerify } from "jose";
 import { timingSafeEqual } from "crypto";
 import prisma from "@/lib/prisma";
 
-const EMPLOYEE_SESSION_COOKIE = "shopiq_employee_session";
+const EMPLOYEE_SESSION_COOKIE = "frame_employee_session";
 
 function getSecretKey() {
   const secret = process.env.SESSION_SECRET;

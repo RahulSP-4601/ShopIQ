@@ -165,7 +165,7 @@ export function CookiePreferencesModal() {
 
             <CategoryCard
               title="Analytics Cookies"
-              description="Help us understand how you use ShopIQ to improve our services."
+              description="Help us understand how you use Frame to improve our services."
               enabled={analytics}
               onChange={setAnalytics}
               icon={

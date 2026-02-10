@@ -51,7 +51,7 @@ export function Navbar() {
         <Link href="/" className="flex items-center gap-3 group">
           <Image
             src="/logo.png"
-            alt="ShopIQ"
+            alt="Frame"
             width={82}
             height={82}
             className="transition-transform duration-200 group-hover:scale-105"
@@ -59,7 +59,7 @@ export function Navbar() {
           />
           <div className="flex flex-col">
             <span className="text-xl font-bold text-slate-900 tracking-tight">
-              ShopIQ
+              Frame
             </span>
             <span className="text-[11px] text-teal-600 font-semibold tracking-wider uppercase -mt-0.5">
               Analytics

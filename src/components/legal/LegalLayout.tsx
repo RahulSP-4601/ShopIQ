@@ -70,16 +70,16 @@ export function LegalLayout({
             <Link href="/" className="flex items-center gap-2 sm:gap-3">
               <Image
                 src="/logo.png"
-                alt="ShopIQ"
+                alt="Frame"
                 width={36}
                 height={36}
                 className="object-contain sm:w-10 sm:h-10"
               />
               <div className="hidden sm:block">
-                <span className="text-lg font-semibold text-slate-900">ShopIQ</span>
+                <span className="text-lg font-semibold text-slate-900">Frame</span>
                 <span className="ml-2 text-xs font-medium text-slate-400">ANALYTICS</span>
               </div>
-              <span className="sm:hidden text-base font-semibold text-slate-900">ShopIQ</span>
+              <span className="sm:hidden text-base font-semibold text-slate-900">Frame</span>
             </Link>
             <Link
               href="/"
@@ -236,7 +236,7 @@ export function LegalLayout({
             </div>
             {/* Copyright */}
             <p className="text-sm text-slate-500 text-center sm:text-left">
-              &copy; {new Date().getFullYear()} ShopIQ. All rights reserved.
+              &copy; {new Date().getFullYear()} Frame. All rights reserved.
             </p>
           </div>
         </div>

@@ -19,7 +19,7 @@ export default function CookiePolicyPage() {
   return (
     <LegalLayout
       title="Cookie Policy"
-      subtitle="Learn how ShopIQ uses cookies and similar technologies to improve your experience and analyze site usage."
+      subtitle="Learn how Frame uses cookies and similar technologies to improve your experience and analyze site usage."
       lastUpdated="January 26, 2026"
       sections={sections}
     >
@@ -46,7 +46,7 @@ export default function CookiePolicyPage() {
 
       <LegalSection id="how-we-use" title="How We Use Cookies">
         <p>
-          ShopIQ uses cookies to improve your experience, understand how you use our platform, and to personalize
+          Frame uses cookies to improve your experience, understand how you use our platform, and to personalize
           content. Specifically, we use cookies to:
         </p>
 
@@ -354,20 +354,20 @@ export default function CookiePolicyPage() {
           <div className="grid sm:grid-cols-2 gap-6">
             <div>
               <h3 className="font-semibold text-slate-900 mb-2">Email</h3>
-              <a href="mailto:privacy@shopiq.com" className="text-teal-600 hover:underline">
-                privacy@shopiq.com
+              <a href="mailto:privacy@frame.com" className="text-teal-600 hover:underline">
+                privacy@frame.com
               </a>
             </div>
             <div>
               <h3 className="font-semibold text-slate-900 mb-2">Data Protection Officer</h3>
-              <a href="mailto:dpo@shopiq.com" className="text-teal-600 hover:underline">
-                dpo@shopiq.com
+              <a href="mailto:dpo@frame.com" className="text-teal-600 hover:underline">
+                dpo@frame.com
               </a>
             </div>
             <div className="sm:col-span-2">
               <h3 className="font-semibold text-slate-900 mb-2">Mailing Address</h3>
               <p className="text-slate-600">
-                ShopIQ Analytics Inc.<br />
+                Frame Inc.<br />
                 123 Commerce Street, Suite 500<br />
                 San Francisco, CA 94105<br />
                 United States

@@ -60,12 +60,12 @@ export async function sendSalesWelcomeEmail({
   await resend.emails.send({
     from: FROM_EMAIL,
     to: email,
-    subject: "Welcome to ShopIQ Sales Team",
+    subject: "Welcome to Frame Sales Team",
     html: `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 16px;">
         <h2 style="color: #111827; margin-bottom: 16px;">Hello ${safeName},</h2>
         <p style="color: #4b5563; line-height: 1.6;">
-          You've been added to the <strong>ShopIQ</strong> sales team. Please set up your password to access your sales dashboard.
+          You've been added to the <strong>Frame</strong> sales team. Please set up your password to access your sales dashboard.
         </p>
         <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin: 24px 0;">
           <p style="margin: 0 0 8px; color: #6b7280; font-size: 14px;">Email</p>
@@ -104,12 +104,12 @@ export async function sendPasswordResetEmail({
   await resend.emails.send({
     from: FROM_EMAIL,
     to: email,
-    subject: "Reset Your ShopIQ Password",
+    subject: "Reset Your Frame Password",
     html: `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 16px;">
         <h2 style="color: #111827; margin-bottom: 16px;">Hello ${safeName},</h2>
         <p style="color: #4b5563; line-height: 1.6;">
-          We received a request to reset your password for your <strong>ShopIQ</strong> account.
+          We received a request to reset your password for your <strong>Frame</strong> account.
         </p>
         <a href="${safeResetUrl}" style="display: inline-block; background: #2563eb; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: 500; font-size: 14px; margin: 24px 0;">
           Reset Password

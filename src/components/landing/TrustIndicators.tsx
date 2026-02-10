@@ -2,14 +2,14 @@
 
 const testimonials = [
   {
-    quote: "ShopIQ helped us identify that our electronics sell 3x better on Amazon than Flipkart. We reallocated inventory and saw a 40% revenue increase.",
+    quote: "Frame helped us identify that our electronics sell 3x better on Amazon than Flipkart. We reallocated inventory and saw a 40% revenue increase.",
     author: "Priya Sharma",
     role: "Founder, TechGear India",
     metric: "$2.4M Revenue",
     color: "from-teal-500 to-emerald-500",
   },
   {
-    quote: "Managing 5 marketplaces was a nightmare until ShopIQ. Now I get all my insights in one place and actually understand my business.",
+    quote: "Managing 5 marketplaces was a nightmare until Frame. Now I get all my insights in one place and actually understand my business.",
     author: "Rajesh Kumar",
     role: "CEO, FashionFirst",
     metric: "$5.1M Revenue",
