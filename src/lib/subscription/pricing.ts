@@ -8,20 +8,26 @@ export const PRICING = {
 /**
  * Calculate monthly subscription price based on marketplace count.
  * Base price covers up to INCLUDED_MARKETPLACES connections.
+ *
+ * @returns Price in paise (smallest currency unit, integer).
+ *          e.g. ₹999 → 99900, ₹1448 → 144800
  */
 export function calculateMonthlyPrice(marketplaceCount: number): number {
   if (marketplaceCount <= 0) return 0;
-  if (marketplaceCount <= PRICING.INCLUDED_MARKETPLACES)
-    return PRICING.BASE_PRICE;
-  return (
-    PRICING.BASE_PRICE +
-    (marketplaceCount - PRICING.INCLUDED_MARKETPLACES) *
-      PRICING.ADDITIONAL_PRICE
-  );
+  const priceInRupees =
+    marketplaceCount <= PRICING.INCLUDED_MARKETPLACES
+      ? PRICING.BASE_PRICE
+      : PRICING.BASE_PRICE +
+        (marketplaceCount - PRICING.INCLUDED_MARKETPLACES) *
+          PRICING.ADDITIONAL_PRICE;
+  // Multiply in rupees (whole numbers) then round to guarantee an integer.
+  // All PRICING constants are whole numbers so the result is always exact.
+  return Math.round(priceInRupees * 100);
 }
 
 /**
- * Get price breakdown for display
+ * Get price breakdown for display.
+ * All prices returned in paise (smallest currency unit).
  */
 export function getPriceBreakdown(marketplaceCount: number): {
   basePrice: number;
@@ -43,16 +49,17 @@ export function getPriceBreakdown(marketplaceCount: number): {
     marketplaceCount - PRICING.INCLUDED_MARKETPLACES
   );
   return {
-    basePrice: PRICING.BASE_PRICE,
+    basePrice: PRICING.BASE_PRICE * 100,
     additionalCount,
-    additionalPrice: additionalCount * PRICING.ADDITIONAL_PRICE,
+    additionalPrice: additionalCount * PRICING.ADDITIONAL_PRICE * 100,
     totalPrice: calculateMonthlyPrice(marketplaceCount),
   };
 }
 
 /**
- * Format price for display
+ * Format price for display.
+ * @param priceInPaise - Price in paise (smallest currency unit)
  */
-export function formatPrice(price: number): string {
-  return `${PRICING.CURRENCY_SYMBOL}${Math.round(price)}`;
+export function formatPrice(priceInPaise: number): string {
+  return `${PRICING.CURRENCY_SYMBOL}${Math.round(priceInPaise / 100)}`;
 }

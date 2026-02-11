@@ -33,6 +33,7 @@ export default function AccountMarketplacesPage() {
   const [error, setError] = useState("");
   const [showShopifyModal, setShowShopifyModal] = useState(false);
   const [shopifyDomain, setShopifyDomain] = useState("");
+  const [isCanceling, setIsCanceling] = useState(false);
 
   // Refs for modal accessibility
   const modalRef = useRef<HTMLDivElement>(null);
@@ -391,6 +392,32 @@ export default function AccountMarketplacesPage() {
     return updatePromise;
   };
 
+  const handleCancelSubscription = async () => {
+    if (!confirm("Are you sure you want to cancel your subscription? It will remain active until the end of your current billing period.")) {
+      return;
+    }
+
+    setIsCanceling(true);
+    setError("");
+    try {
+      const response = await fetch("/api/subscription/cancel", {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        setError(data.error || "Failed to cancel subscription");
+        return;
+      }
+
+      // Refresh data to show updated status
+      await fetchData();
+    } catch {
+      setError("Failed to cancel subscription");
+    } finally {
+      setIsCanceling(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -638,7 +665,7 @@ export default function AccountMarketplacesPage() {
                       Monthly Total
                     </span>
                     <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-emerald-500">
-                      {PRICING.CURRENCY_SYMBOL}{calculateMonthlyPrice(connectedCount)}
+                      {PRICING.CURRENCY_SYMBOL}{Math.round(calculateMonthlyPrice(connectedCount) / 100)}
                     </span>
                   </div>
                 </div>
@@ -648,6 +675,16 @@ export default function AccountMarketplacesPage() {
                     Next billing:{" "}
                     {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
                   </p>
+                )}
+
+                {subscription?.status === "ACTIVE" && (
+                  <button
+                    onClick={handleCancelSubscription}
+                    disabled={isCanceling}
+                    className="mt-4 w-full py-2 px-3 rounded-lg text-xs font-medium bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50"
+                  >
+                    {isCanceling ? "Canceling..." : "Cancel Subscription"}
+                  </button>
                 )}
               </div>
             </div>

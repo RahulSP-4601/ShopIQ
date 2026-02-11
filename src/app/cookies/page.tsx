@@ -214,7 +214,7 @@ export default function CookiePolicyPage() {
             <p>We use various service providers to enhance our platform:</p>
             <LegalList
               items={[
-                "Stripe - Payment processing",
+                "Razorpay - Payment processing",
                 "Intercom - Customer support chat",
                 "Cloudflare - Security and performance",
               ]}

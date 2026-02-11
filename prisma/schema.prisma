@@ -181,9 +181,11 @@ model Subscription {
   currentPeriodStart DateTime @default(now())
   currentPeriodEnd   DateTime @default(dbgenerated("(NOW() + '30 days'::interval)")) // Default to 30 days from creation
 
-  // Payment info (for Stripe integration later)
-  stripeCustomerId     String?
-  stripeSubscriptionId String?
+  // Payment info (Razorpay)
+  razorpayCustomerId     String?
+  razorpaySubscriptionId String?
+  razorpayPlanId         String?
+  razorpaySyncPending    Boolean  @default(false) // True when DB pricing diverges from Razorpay plan
 
   // Timestamps
   createdAt DateTime @default(now())
@@ -194,6 +196,7 @@ enum SubscriptionStatus {
   TRIAL
   ACTIVE
   PAST_DUE
+  PENDING_CANCELLATION
   CANCELED
   UNPAID
   PAUSED
@@ -564,4 +567,30 @@ model WebhookEvent {
 
   @@unique([marketplace, eventId])
   @@index([processedAt]) // For TTL/cleanup of old events
+}
+
+// ============================================
+// PAYMENT WEBHOOK DEDUPLICATION
+// ============================================
+
+model PaymentWebhookEvent {
+  id          String   @id @default(cuid())
+  provider    String   // "razorpay"
+  eventId     String   // Provider-specific event identifier
+  eventType   String   // e.g., "subscription.activated", "payment.failed"
+  processedAt DateTime @default(now())
+
+  @@unique([provider, eventId])
+  @@index([processedAt]) // For TTL/cleanup of old events
+}
+
+// ============================================
+// RAZORPAY PLAN CACHE (Cross-Instance Dedup)
+// ============================================
+
+model RazorpayPlan {
+  id             String   @id @default(cuid())
+  amountInPaise  Int      @unique // Monthly amount in paise — one plan per unique price point
+  razorpayPlanId String   // Razorpay plan ID (e.g., "plan_xxx")
+  createdAt      DateTime @default(now())
 }

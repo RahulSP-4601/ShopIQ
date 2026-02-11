@@ -27,8 +27,8 @@ export async function POST(request: NextRequest) {
 
     const { marketplaceCount } = result.data;
 
-    // Calculate pricing
-    const totalPrice = calculateMonthlyPrice(marketplaceCount);
+    // Calculate pricing (returns paise)
+    const totalPricePaise = calculateMonthlyPrice(marketplaceCount);
 
     // Calculate billing period (1 month from now)
     const currentPeriodStart = new Date();
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
         status: "ACTIVE",
         basePrice: PRICING.BASE_PRICE,
         additionalPrice: PRICING.ADDITIONAL_PRICE,
-        totalPrice,
+        totalPrice: totalPricePaise / 100,
         marketplaceCount,
       };
       if (isTrialConversion || !existingSubscription) {
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
           status: "ACTIVE",
           basePrice: PRICING.BASE_PRICE,
           additionalPrice: PRICING.ADDITIONAL_PRICE,
-          totalPrice,
+          totalPrice: totalPricePaise / 100,
           marketplaceCount,
           currentPeriodStart,
           currentPeriodEnd,
@@ -106,18 +106,19 @@ export async function POST(request: NextRequest) {
             });
 
             if (!existingCommission) {
-              // Use integer cents arithmetic to avoid floating-point precision errors
-              const rate = Number(salesClient.salesMember.commissionRate);
-              const totalPriceCents = Math.round(Number(totalPrice) * 100);
-              const commissionCents = Math.round(totalPriceCents * rate / 100);
-              const commissionAmount = commissionCents / 100;
+              // commissionRate is stored as Decimal(5,2) — always whole-number percent (e.g., 10 = 10%).
+              // Always divide by 100 to get the fractional multiplier.
+              const rawRate = Number(salesClient.salesMember.commissionRate);
+              const normalizedRate = (Number.isFinite(rawRate) ? rawRate : 0) / 100;
+              const commissionPaise = Math.round(totalPricePaise * normalizedRate);
+              const commissionAmount = commissionPaise / 100;
 
               await tx.commission.create({
                 data: {
                   salesMemberId: salesClient.salesMemberId,
                   salesClientId: salesClient.id,
                   amount: commissionAmount,
-                  note: `Subscription purchase (client:${salesClient.id}) — ${PRICING.CURRENCY_SYMBOL}${Math.round(Number(totalPrice))}/mo`,
+                  note: `Subscription purchase (client:${salesClient.id}) — ${PRICING.CURRENCY_SYMBOL}${Math.round(totalPricePaise / 100)}/mo`,
                   period: "INITIAL",
                 },
               });

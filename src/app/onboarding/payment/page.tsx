@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { PRICING, calculateMonthlyPrice } from "@/lib/subscription/pricing";
@@ -14,8 +14,12 @@ interface Connection {
   externalName?: string;
 }
 
-// Centralized demo mode check
-const isDemo = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+declare global {
+  interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Razorpay: any;
+  }
+}
 
 export default function OnboardingPaymentPage() {
   const router = useRouter();
@@ -23,15 +27,76 @@ export default function OnboardingPaymentPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState("");
+  const [razorpayLoaded, setRazorpayLoaded] = useState(false);
+  const mountedRef = useRef(true);
 
-  // Dummy card state
-  const [cardNumber, setCardNumber] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [cvv, setCvv] = useState("");
-  const [cardName, setCardName] = useState("");
+  // Track component mount state for async callbacks
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
+
+  // Load Razorpay Checkout.js script
+  useEffect(() => {
+    const onLoad = (e: Event) => {
+      const el = e.target as HTMLScriptElement | null;
+      if (el) el.dataset.errored = "false";
+      if (mountedRef.current) setRazorpayLoaded(true);
+    };
+    const onError = (e: Event) => {
+      const el = e.target as HTMLScriptElement | null;
+      if (el) el.dataset.errored = "true";
+      if (mountedRef.current) setError("Failed to load payment gateway. Please refresh the page.");
+    };
+
+    // Already loaded and available on window
+    if (typeof window !== "undefined" && window.Razorpay) {
+      setRazorpayLoaded(true);
+      return;
+    }
+
+    // Script element exists — check if it previously failed
+    let existingScript = document.getElementById("razorpay-script") as HTMLScriptElement | null;
+    if (existingScript) {
+      if (existingScript.dataset.errored === "true") {
+        // Prior load failed — remove stale element so we can create a fresh one below
+        existingScript.remove();
+        existingScript = null;
+      } else {
+        // Attach listeners FIRST to avoid the race where window.Razorpay becomes
+        // available between our check and addEventListener calls.
+        existingScript.addEventListener("load", onLoad);
+        existingScript.addEventListener("error", onError);
+        // Re-check: if Razorpay loaded between the outer check and listener attach,
+        // the load event already fired and won't re-fire — handle it synchronously.
+        if (window.Razorpay) {
+          setRazorpayLoaded(true);
+        }
+        return () => {
+          existingScript!.removeEventListener("load", onLoad);
+          existingScript!.removeEventListener("error", onError);
+        };
+      }
+    }
+
+    const script = document.createElement("script");
+    script.id = "razorpay-script";
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.dataset.errored = "false";
+    script.addEventListener("load", onLoad);
+    script.addEventListener("error", onError);
+    document.body.appendChild(script);
+
+    return () => {
+      script.removeEventListener("load", onLoad);
+      script.removeEventListener("error", onError);
+    };
+  }, []);
 
   useEffect(() => {
     fetchConnections();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchConnections = async () => {
@@ -50,7 +115,6 @@ export default function OnboardingPaymentPage() {
 
       const data = await response.json();
 
-      // Guard against missing or invalid data
       if (!data.connections || !Array.isArray(data.connections)) {
         console.error("Invalid connections data received:", data);
         setError("Invalid data received. Please refresh the page.");
@@ -62,7 +126,6 @@ export default function OnboardingPaymentPage() {
       );
       setConnections(connected);
 
-      // If no connections, redirect back
       if (connected.length === 0) {
         router.push("/onboarding/connect");
       }
@@ -77,80 +140,141 @@ export default function OnboardingPaymentPage() {
   const connectedCount = connections.length;
   const additionalCount = Math.max(0, connectedCount - PRICING.INCLUDED_MARKETPLACES);
   const additionalPrice = additionalCount * PRICING.ADDITIONAL_PRICE;
-  const totalPrice = calculateMonthlyPrice(connectedCount);
+  const totalPricePaise = calculateMonthlyPrice(connectedCount);
+  const totalPriceDisplay = Math.round(totalPricePaise / 100);
 
-  const formatCardNumber = (value: string) => {
-    const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
-    const matches = v.match(/\d{4,16}/g);
-    const match = (matches && matches[0]) || "";
-    const parts = [];
-    for (let i = 0, len = match.length; i < len; i += 4) {
-      parts.push(match.substring(i, i + 4));
-    }
-    // Return cleaned numeric string (or formatted parts) instead of raw input
-    return parts.length ? parts.join(" ") : v;
-  };
-
-  const formatExpiry = (value: string) => {
-    const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
-    if (v.length >= 2) {
-      return v.substring(0, 2) + "/" + v.substring(2, 4);
-    }
-    return v;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Basic validation
-    if (!cardNumber || !expiry || !cvv || !cardName) {
-      setError("Please fill in all card details");
+  const handlePayment = async () => {
+    if (!razorpayLoaded) {
+      setError("Payment gateway is still loading. Please wait.");
       return;
     }
 
     setIsProcessing(true);
     setError("");
 
-    if (isDemo) {
-      // DEMO MODE: No real payment is processed.
-      // Card details are NOT sent to any payment processor or stored.
-      // This creates a DB-only subscription record.
-      console.warn(
-        "[DEMO] Payment not integrated — subscription created in DB only, no charge"
-      );
-      // Simulate processing delay for UX
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-    } else {
-      // TODO: Replace with real Stripe integration before production launch.
-      setError("Payment integration not available — this feature is coming soon.");
-      setIsProcessing(false);
-      return;
-    }
-
     try {
-      // Create subscription
-      const response = await fetch("/api/subscription/create", {
+      // Step 1: Create Razorpay subscription on server
+      const checkoutRes = await fetch("/api/subscription/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ marketplaceCount: connectedCount }),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || "Payment failed");
+      if (!checkoutRes.ok) {
+        const errData = await checkoutRes.json().catch(() => ({}));
+        setError(errData.error || "Failed to create subscription");
         setIsProcessing(false);
         return;
       }
 
-      // Reset processing state before navigation
-      setIsProcessing(false);
+      const checkoutData = await checkoutRes.json();
 
-      // Redirect to chat
-      router.push("/chat");
+      // Validate required fields before initializing Razorpay
+      if (!checkoutData?.razorpayKeyId || !checkoutData?.subscriptionId) {
+        console.error(
+          "Checkout response missing required fields:",
+          { razorpayKeyId: checkoutData?.razorpayKeyId, subscriptionId: checkoutData?.subscriptionId }
+        );
+        setError("Invalid checkout response. Please try again.");
+        setIsProcessing(false);
+        return;
+      }
+
+      // Step 2: Open Razorpay Checkout modal
+      const options = {
+        key: checkoutData.razorpayKeyId,
+        subscription_id: checkoutData.subscriptionId,
+        name: "Frame",
+        description: `Frame Pro - ${connectedCount} marketplace${connectedCount > 1 ? "s" : ""}`,
+        image: "/logo.png",
+        handler: async (response: {
+          razorpay_payment_id: string;
+          razorpay_subscription_id: string;
+          razorpay_signature: string;
+        }) => {
+          // Step 3: Verify payment on server
+          try {
+            const verifyRes = await fetch("/api/subscription/verify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(response),
+            });
+
+            if (!mountedRef.current) return;
+
+            if (!verifyRes.ok) {
+              const errData = await verifyRes.json().catch(() => ({}));
+              if (mountedRef.current) {
+                setError(errData.error || "Payment verification failed");
+                setIsProcessing(false);
+              }
+              return;
+            }
+
+            const verifyData = await verifyRes.json();
+
+            // Success — redirect to chat
+            if (mountedRef.current) {
+              if (verifyData.redirect) {
+                router.push(verifyData.redirect);
+              } else {
+                router.push("/chat?checkout=success");
+              }
+            }
+          } catch (err) {
+            console.error("Payment verification error:", err);
+            if (mountedRef.current) {
+              setError("Payment verification failed. Please contact support.");
+              setIsProcessing(false);
+            }
+          }
+        },
+        prefill: {
+          name: checkoutData.name,
+          email: checkoutData.email,
+        },
+        theme: {
+          color: "#14B8A6", // teal-500 — matches Frame branding
+        },
+        modal: {
+          ondismiss: () => {
+            if (mountedRef.current) setIsProcessing(false);
+          },
+          confirm_close: true,
+        },
+        notes: {
+          marketplaceCount: String(connectedCount),
+        },
+      };
+
+      if (!window.Razorpay) {
+        console.error("window.Razorpay is not available despite razorpayLoaded=true");
+        setError("Payment gateway failed to initialize. Please refresh the page.");
+        setIsProcessing(false);
+        return;
+      }
+
+      try {
+        const rzp = new window.Razorpay(options);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        rzp.on("payment.failed", (response: any) => {
+          if (!mountedRef.current) return;
+          setError(
+            response.error?.description || "Payment failed. Please try again."
+          );
+          setIsProcessing(false);
+        });
+        rzp.open();
+      } catch (rzpError) {
+        console.error("Razorpay initialization/open failed:", rzpError);
+        if (!mountedRef.current) return;
+        setError("Payment initiation failed. Please try again or contact support.");
+        setIsProcessing(false);
+        return;
+      }
     } catch (error) {
-      console.error("Payment failed:", error);
-      setError("Payment failed. Please try again.");
+      console.error("Payment error:", error);
+      setError("Failed to initiate payment. Please try again.");
       setIsProcessing(false);
     }
   };
@@ -214,7 +338,7 @@ export default function OnboardingPaymentPage() {
           Complete Your Setup
         </h1>
         <p className="mt-3 text-lg text-slate-600">
-          Review your plan and enter payment details
+          Review your plan and complete payment
         </p>
       </div>
 
@@ -282,7 +406,7 @@ export default function OnboardingPaymentPage() {
                 Total per month
               </span>
               <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-emerald-500">
-                {PRICING.CURRENCY_SYMBOL}{totalPrice}
+                {PRICING.CURRENCY_SYMBOL}{totalPriceDisplay}
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-2">
@@ -312,153 +436,63 @@ export default function OnboardingPaymentPage() {
           </Link>
         </div>
 
-        {/* Payment Form */}
+        {/* Payment Section */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-lg p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-slate-900">
-              Payment Details
-            </h2>
-            {isDemo && (
-              <span className="px-2 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-medium">
-                Demo Mode
-              </span>
-            )}
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">
+            Payment
+          </h2>
+
+          <div className="mb-6 p-4 rounded-xl bg-slate-50 border border-slate-200">
+            <div className="flex items-center gap-3 mb-3">
+              <svg className="w-6 h-6 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                />
+              </svg>
+              <span className="text-sm font-medium text-slate-700">Secure payment via Razorpay</span>
+            </div>
+            <p className="text-xs text-slate-500">
+              Pay using UPI, Credit/Debit Cards, Netbanking, or Wallets.
+              Your payment details are processed securely by Razorpay.
+            </p>
           </div>
 
-          {/* Demo mode notice */}
-          {isDemo && (
-            <div className="mb-4 p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 text-xs">
-              This is a demo. Card details are not processed or stored. Enter any
-              test values to continue.
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Card Name */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                Name on Card
-              </label>
-              <input
-                type="text"
-                value={cardName}
-                onChange={(e) => setCardName(e.target.value)}
-                placeholder="John Doe"
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
-              />
-            </div>
-
-            {/* Card Number */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                Card Number
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={cardNumber}
-                  onChange={(e) =>
-                    setCardNumber(formatCardNumber(e.target.value))
-                  }
-                  placeholder="4242 4242 4242 4242"
-                  maxLength={19}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-12 text-slate-900 placeholder:text-slate-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
-                />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex gap-1">
-                  <svg className="w-8 h-5" viewBox="0 0 32 20" fill="none">
-                    <rect width="32" height="20" rx="3" fill="#1A1F71" />
-                    <path fill="#F7B600" d="M13 14l2-8h2l-2 8h-2z" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            {/* Expiry and CVV */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Expiry Date
-                </label>
-                <input
-                  type="text"
-                  value={expiry}
-                  onChange={(e) => setExpiry(formatExpiry(e.target.value))}
-                  placeholder="MM/YY"
-                  maxLength={5}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  CVV
-                </label>
-                <input
-                  type="text"
-                  value={cvv}
-                  onChange={(e) =>
-                    setCvv(e.target.value.replace(/\D/g, "").slice(0, 4))
-                  }
-                  placeholder="123"
-                  maxLength={4}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
-                />
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isProcessing}
-              className="w-full flex items-center justify-center gap-2 mt-6 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 px-6 py-4 text-base font-semibold text-white shadow-lg shadow-teal-500/25 hover:from-teal-600 hover:to-emerald-600 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-            >
-              {isProcessing ? (
-                <>
-                  <svg
-                    className="animate-spin h-5 w-5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                    />
-                  </svg>
-                  <span>Processing...</span>
-                </>
-              ) : (
-                <>
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                    />
-                  </svg>
-                  <span>Start Subscription - {PRICING.CURRENCY_SYMBOL}{totalPrice}/mo</span>
-                </>
-              )}
-            </button>
-
-            {/* Trust badges */}
-            <div className="flex items-center justify-center gap-4 mt-4 text-xs text-slate-400">
-              <div className="flex items-center gap-1">
+          {/* Pay Button */}
+          <button
+            onClick={handlePayment}
+            disabled={isProcessing || !razorpayLoaded}
+            className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 px-6 py-4 text-base font-semibold text-white shadow-lg shadow-teal-500/25 hover:from-teal-600 hover:to-emerald-600 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          >
+            {isProcessing ? (
+              <>
                 <svg
-                  className="w-4 h-4"
+                  className="animate-spin h-5 w-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  />
+                </svg>
+                <span>Processing...</span>
+              </>
+            ) : (
+              <>
+                <svg
+                  className="w-5 h-5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -467,31 +501,38 @@ export default function OnboardingPaymentPage() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
                   />
                 </svg>
-                <span>SSL Secured</span>
-              </div>
-              {isDemo && (
-                <div className="flex items-center gap-1">
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <span>Demo Mode</span>
-                </div>
-              )}
+                <span>Pay {PRICING.CURRENCY_SYMBOL}{totalPriceDisplay}/mo</span>
+              </>
+            )}
+          </button>
+
+          {/* Payment methods */}
+          <div className="flex items-center justify-center gap-4 mt-4 text-xs text-slate-400">
+            <div className="flex items-center gap-1">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                />
+              </svg>
+              <span>SSL Secured</span>
             </div>
-          </form>
+          </div>
+
+          <div className="flex items-center justify-center gap-3 mt-3 text-xs text-slate-400">
+            <span>UPI</span>
+            <span className="text-slate-300">|</span>
+            <span>Cards</span>
+            <span className="text-slate-300">|</span>
+            <span>Netbanking</span>
+            <span className="text-slate-300">|</span>
+            <span>Wallets</span>
+          </div>
         </div>
       </div>
     </div>
