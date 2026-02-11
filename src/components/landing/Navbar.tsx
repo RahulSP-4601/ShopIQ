@@ -128,7 +128,7 @@ export function Navbar() {
 
       {/* Mobile Menu Panel */}
       {mobileMenuOpen && (
-        <div className="lg:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-xl border-b border-slate-200 shadow-lg animate-menu-slide-down">
+        <div className="lg:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-xl border-b border-slate-200 shadow-lg animate-menu-slide-down max-h-[calc(100vh-6rem)] overflow-y-auto">
           <div className="max-w-7xl mx-auto px-6 py-4 space-y-1">
             {navLinks.map((link) => (
               <a

@@ -315,7 +315,7 @@ export default function TrialSetupPage() {
                       type="button"
                       onClick={() => toggleMarketplace(mp.id)}
                       disabled={disabled}
-                      className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all cursor-pointer ${
+                      className={`flex flex-col items-center gap-2 p-2 sm:p-4 rounded-xl border-2 transition-all cursor-pointer ${
                         selected
                           ? "border-blue-500 bg-blue-50"
                           : disabled

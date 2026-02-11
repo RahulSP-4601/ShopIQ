@@ -13,7 +13,7 @@ const questions = [
 
 export function ExampleQuestions() {
   return (
-    <section id="questions" className="py-24 bg-gradient-to-b from-slate-50 to-white">
+    <section id="questions" className="py-12 md:py-20 lg:py-24 bg-gradient-to-b from-slate-50 to-white">
       <div className="mx-auto max-w-6xl px-6">
         <div className="text-center fade-up">
           <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-1.5 text-sm text-emerald-700 mb-4">
@@ -44,7 +44,7 @@ export function ExampleQuestions() {
 function QuestionCard({ question, index }: { question: string; index: number }) {
   return (
     <div
-      className="fade-up group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white px-6 py-5 shadow-lg shadow-slate-100 transition-all duration-300 hover:shadow-xl hover:shadow-emerald-100 hover:border-emerald-200 hover:-translate-y-1 cursor-pointer"
+      className="fade-up group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white px-4 py-3 sm:px-6 sm:py-5 shadow-lg shadow-slate-100 transition-all duration-300 hover:shadow-xl hover:shadow-emerald-100 hover:border-emerald-200 hover:-translate-y-1 cursor-pointer"
       style={{ animationDelay: `${index * 0.05}s` }}
     >
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-100 to-teal-100 transition-all duration-300 group-hover:from-emerald-500 group-hover:to-teal-600 group-hover:shadow-lg group-hover:shadow-emerald-500/25">

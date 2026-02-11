@@ -34,7 +34,7 @@ export function HowItWorks() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
-    <section id="how-it-works" className="py-24 bg-gradient-to-b from-white via-slate-50 to-white">
+    <section id="how-it-works" className="py-12 md:py-20 lg:py-24 bg-gradient-to-b from-white via-slate-50 to-white">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         {/* Header */}
         <div className="text-center fade-up max-w-2xl mx-auto">
@@ -54,7 +54,7 @@ export function HowItWorks() {
           {/* Connection line - desktop only */}
           <div className="hidden lg:block absolute top-16 left-0 right-0 h-0.5 bg-gradient-to-r from-teal-200 via-violet-200 to-orange-200" />
 
-          <div className="grid gap-12 lg:grid-cols-3 lg:gap-8">
+          <div className="grid gap-6 md:gap-12 lg:grid-cols-3 lg:gap-8">
             {steps.map((step, index) => (
               <div
                 key={index}

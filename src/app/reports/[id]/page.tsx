@@ -32,7 +32,7 @@ export default async function ReportDetailPage({
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto max-w-4xl px-6 py-4">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <a href="/chat" className="flex items-center gap-2">
@@ -77,7 +77,7 @@ export default async function ReportDetailPage({
       </header>
 
       {/* Content */}
-      <main className="mx-auto max-w-4xl px-6 py-8">
+      <main className="mx-auto max-w-4xl px-4 sm:px-6 py-8">
         <ReportView report={report} />
       </main>
     </div>

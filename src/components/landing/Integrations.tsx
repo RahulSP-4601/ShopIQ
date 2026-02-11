@@ -158,7 +158,7 @@ export function Integrations() {
   }, []);
 
   return (
-    <section id="integrations" className="py-28 relative overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-50">
+    <section id="integrations" className="py-12 md:py-20 lg:py-28 relative overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-50">
       {/* Subtle gradient orbs */}
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-teal-100/40 to-emerald-100/30 rounded-full blur-3xl" />
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gradient-to-tr from-blue-100/30 to-indigo-100/20 rounded-full blur-3xl" />
@@ -173,7 +173,7 @@ export function Integrations() {
             </span>
             Powered by Real-Time Sync
           </div>
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
             <span className="text-slate-900">Your </span>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-600">Command Center</span>
           </h2>
@@ -184,9 +184,9 @@ export function Integrations() {
         </div>
 
         {/* Integration Hub Visualization */}
-        <div className="fade-up flex justify-center overflow-hidden -mb-[280px] sm:-mb-[200px] md:-mb-[100px] lg:-mb-[50px] xl:mb-0">
+        <div className="fade-up flex justify-center overflow-hidden -mb-[200px] sm:-mb-[150px] md:-mb-[80px] lg:-mb-[30px] xl:mb-0">
           {/* Responsive scaling wrapper */}
-          <div className="transform scale-[0.42] sm:scale-[0.55] md:scale-[0.7] lg:scale-[0.85] xl:scale-100 origin-top transition-transform duration-300">
+          <div className="transform scale-[0.38] sm:scale-[0.50] md:scale-[0.7] lg:scale-[0.85] xl:scale-100 origin-top transition-transform duration-300">
             <div
               className="relative"
               style={{

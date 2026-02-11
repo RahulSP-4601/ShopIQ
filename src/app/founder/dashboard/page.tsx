@@ -336,7 +336,7 @@ export default function FounderDashboardPage() {
           </div>
         )}
         {/* Tabs + Add Member */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-8">
           <div className="flex gap-1 bg-gray-100 border border-gray-200 rounded-lg p-1 w-fit">
             {(["team", "clients"] as const).map((t) => (
               <button
@@ -417,15 +417,15 @@ export default function FounderDashboardPage() {
                 </h2>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full text-xs sm:text-sm">
                   <thead>
                     <tr className="border-b border-gray-200 text-gray-500">
-                      <th className="text-left px-5 py-3 font-medium">Name</th>
-                      <th className="text-left px-5 py-3 font-medium">Email</th>
-                      <th className="text-left px-5 py-3 font-medium">Clients</th>
-                      <th className="text-left px-5 py-3 font-medium">Commission</th>
-                      <th className="text-left px-5 py-3 font-medium">Joined</th>
-                      <th className="text-right px-5 py-3 font-medium">Action</th>
+                      <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Name</th>
+                      <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Email</th>
+                      <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Clients</th>
+                      <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Commission</th>
+                      <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Joined</th>
+                      <th className="text-right px-2 py-2 sm:px-5 sm:py-3 font-medium">Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -438,12 +438,12 @@ export default function FounderDashboardPage() {
                     ) : (
                       approvedMembers.map((m) => (
                         <tr key={m.id} className="border-b border-gray-100 hover:bg-gray-50">
-                          <td className="px-5 py-3 font-medium text-gray-900">{m.name}</td>
-                          <td className="px-5 py-3 text-gray-600">{m.email}</td>
-                          <td className="px-5 py-3 text-gray-900">{m.clientCount}</td>
-                          <td className="px-5 py-3 text-green-600 font-medium">${m.totalCommission.toFixed(2)}</td>
-                          <td className="px-5 py-3 text-gray-500">{formatDate(m.createdAt)}</td>
-                          <td className="px-5 py-3 text-right">
+                          <td className="px-2 py-2 sm:px-5 sm:py-3 font-medium text-gray-900">{m.name}</td>
+                          <td className="px-2 py-2 sm:px-5 sm:py-3 text-gray-600">{m.email}</td>
+                          <td className="px-2 py-2 sm:px-5 sm:py-3 text-gray-900">{m.clientCount}</td>
+                          <td className="px-2 py-2 sm:px-5 sm:py-3 text-green-600 font-medium">${m.totalCommission.toFixed(2)}</td>
+                          <td className="px-2 py-2 sm:px-5 sm:py-3 text-gray-500">{formatDate(m.createdAt)}</td>
+                          <td className="px-2 py-2 sm:px-5 sm:py-3 text-right">
                             <button
                               onClick={() => openMemberDetail(m)}
                               className="text-blue-600 hover:text-blue-800 text-sm font-medium cursor-pointer"
@@ -541,7 +541,7 @@ export default function FounderDashboardPage() {
                     ))}
                   </select>
                 </div>
-                <div className="flex gap-6">
+                <div className="flex flex-wrap gap-3 sm:gap-6">
                   <div>
                     <p className="text-sm text-gray-500">Total Clients</p>
                     <p className="text-2xl font-bold text-gray-900">{selectedMember.clientCount}</p>
@@ -613,14 +613,14 @@ export default function FounderDashboardPage() {
                       <h3 className="font-semibold text-gray-900">Clients ({memberClients.length})</h3>
                     </div>
                     <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
+                      <table className="w-full text-xs sm:text-sm">
                         <thead>
                           <tr className="border-b border-gray-200 text-gray-500">
-                            <th className="text-left px-5 py-3 font-medium">Name</th>
-                            <th className="text-left px-5 py-3 font-medium">Email</th>
-                            <th className="text-left px-5 py-3 font-medium">Phone</th>
-                            <th className="text-left px-5 py-3 font-medium">Status</th>
-                            <th className="text-left px-5 py-3 font-medium">Date</th>
+                            <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Name</th>
+                            <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Email</th>
+                            <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Phone</th>
+                            <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Status</th>
+                            <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Date</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -631,10 +631,10 @@ export default function FounderDashboardPage() {
                           ) : (
                             memberClients.map((c) => (
                               <tr key={c.id} className="border-b border-gray-100">
-                                <td className="px-5 py-3 text-gray-900">{c.name}</td>
-                                <td className="px-5 py-3 text-gray-600">{c.email}</td>
-                                <td className="px-5 py-3 text-gray-600">{c.phone || "—"}</td>
-                                <td className="px-5 py-3">
+                                <td className="px-2 py-2 sm:px-5 sm:py-3 text-gray-900">{c.name}</td>
+                                <td className="px-2 py-2 sm:px-5 sm:py-3 text-gray-600">{c.email}</td>
+                                <td className="px-2 py-2 sm:px-5 sm:py-3 text-gray-600">{c.phone || "—"}</td>
+                                <td className="px-2 py-2 sm:px-5 sm:py-3">
                                   <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${
                                     c.status === "CONVERTED" ? "bg-green-100 text-green-700"
                                       : c.status === "CONTACTED" ? "bg-blue-100 text-blue-700"
@@ -642,7 +642,7 @@ export default function FounderDashboardPage() {
                                       : "bg-yellow-100 text-yellow-700"
                                   }`}>{c.status}</span>
                                 </td>
-                                <td className="px-5 py-3 text-gray-500">{formatDate(c.createdAt)}</td>
+                                <td className="px-2 py-2 sm:px-5 sm:py-3 text-gray-500">{formatDate(c.createdAt)}</td>
                               </tr>
                             ))
                           )}
@@ -696,12 +696,12 @@ export default function FounderDashboardPage() {
                       </span>
                     </div>
                     <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
+                      <table className="w-full text-xs sm:text-sm">
                         <thead>
                           <tr className="border-b border-gray-200 text-gray-500">
-                            <th className="text-left px-5 py-3 font-medium">Amount</th>
-                            <th className="text-left px-5 py-3 font-medium">Note</th>
-                            <th className="text-left px-5 py-3 font-medium">Date</th>
+                            <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Amount</th>
+                            <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Note</th>
+                            <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Date</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -712,9 +712,9 @@ export default function FounderDashboardPage() {
                           ) : (
                             filteredComm.map((c) => (
                               <tr key={c.id} className="border-b border-gray-100">
-                                <td className="px-5 py-3 text-green-600 font-medium">${Number(c.amount).toFixed(2)}</td>
-                                <td className="px-5 py-3 text-gray-600">{c.note || "—"}</td>
-                                <td className="px-5 py-3 text-gray-500">{formatDate(c.createdAt)}</td>
+                                <td className="px-2 py-2 sm:px-5 sm:py-3 text-green-600 font-medium">${Number(c.amount).toFixed(2)}</td>
+                                <td className="px-2 py-2 sm:px-5 sm:py-3 text-gray-600">{c.note || "—"}</td>
+                                <td className="px-2 py-2 sm:px-5 sm:py-3 text-gray-500">{formatDate(c.createdAt)}</td>
                               </tr>
                             ))
                           )}
@@ -735,15 +735,15 @@ export default function FounderDashboardPage() {
               <h2 className="text-lg font-semibold text-gray-900">All Clients ({allClients.length})</h2>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-xs sm:text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 text-gray-500">
-                    <th className="text-left px-5 py-3 font-medium">Name</th>
-                    <th className="text-left px-5 py-3 font-medium">Email</th>
-                    <th className="text-left px-5 py-3 font-medium">Phone</th>
-                    <th className="text-left px-5 py-3 font-medium">Sales Member</th>
-                    <th className="text-left px-5 py-3 font-medium">Status</th>
-                    <th className="text-left px-5 py-3 font-medium">Date</th>
+                    <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Name</th>
+                    <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Email</th>
+                    <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Phone</th>
+                    <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Sales Member</th>
+                    <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Status</th>
+                    <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Date</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -754,11 +754,11 @@ export default function FounderDashboardPage() {
                   ) : (
                     allClients.map((c) => (
                       <tr key={c.id} className="border-b border-gray-100 hover:bg-gray-50">
-                        <td className="px-5 py-3 text-gray-900">{c.name}</td>
-                        <td className="px-5 py-3 text-gray-600">{c.email}</td>
-                        <td className="px-5 py-3 text-gray-600">{c.phone || "—"}</td>
-                        <td className="px-5 py-3 text-blue-600 font-medium">{c.salesMember?.name || "—"}</td>
-                        <td className="px-5 py-3">
+                        <td className="px-2 py-2 sm:px-5 sm:py-3 text-gray-900">{c.name}</td>
+                        <td className="px-2 py-2 sm:px-5 sm:py-3 text-gray-600">{c.email}</td>
+                        <td className="px-2 py-2 sm:px-5 sm:py-3 text-gray-600">{c.phone || "—"}</td>
+                        <td className="px-2 py-2 sm:px-5 sm:py-3 text-blue-600 font-medium">{c.salesMember?.name || "—"}</td>
+                        <td className="px-2 py-2 sm:px-5 sm:py-3">
                           <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${
                             c.status === "CONVERTED" ? "bg-green-100 text-green-700"
                               : c.status === "CONTACTED" ? "bg-blue-100 text-blue-700"
@@ -766,7 +766,7 @@ export default function FounderDashboardPage() {
                               : "bg-yellow-100 text-yellow-700"
                           }`}>{c.status}</span>
                         </td>
-                        <td className="px-5 py-3 text-gray-500">{formatDate(c.createdAt)}</td>
+                        <td className="px-2 py-2 sm:px-5 sm:py-3 text-gray-500">{formatDate(c.createdAt)}</td>
                       </tr>
                     ))
                   )}

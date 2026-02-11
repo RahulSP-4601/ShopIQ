@@ -16,7 +16,7 @@ export function CTA() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
-    <section id="pricing" className="py-24 bg-gradient-to-b from-slate-50 via-white to-slate-50">
+    <section id="pricing" className="py-12 md:py-20 lg:py-24 bg-gradient-to-b from-slate-50 via-white to-slate-50">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         {/* Header */}
         <div className="text-center fade-up max-w-2xl mx-auto mb-16">
@@ -29,7 +29,7 @@ export function CTA() {
         </div>
 
         {/* Single Pricing Card */}
-        <div className="max-w-sm mx-auto fade-up">
+        <div className="w-full max-w-sm mx-auto fade-up">
           <div className="relative group">
             {/* Ambient glow behind card */}
             <div className="absolute -inset-3 bg-gradient-to-b from-teal-400/20 to-emerald-400/10 rounded-[40px] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
@@ -148,7 +148,7 @@ export function CTA() {
 
         {/* Bottom CTA banner */}
         <div className="fade-up mt-24">
-          <div className="rounded-3xl bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 p-12 text-center relative overflow-hidden">
+          <div className="rounded-3xl bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 p-6 sm:p-8 md:p-12 text-center relative overflow-hidden">
             {/* Decorative gradient orbs */}
             <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-500/20 rounded-full blur-3xl" />
             <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-500/20 rounded-full blur-3xl" />

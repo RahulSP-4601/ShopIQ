@@ -8,7 +8,7 @@ export function Hero() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
-    <section className="relative pt-28 pb-20 overflow-hidden">
+    <section className="relative pt-16 md:pt-24 lg:pt-28 pb-12 md:pb-16 lg:pb-20 overflow-hidden">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-teal-50/50 via-white to-white" />
 
@@ -19,7 +19,7 @@ export function Hero() {
       <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
         <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
           {/* Main headline */}
-          <h1 className="fade-up text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 leading-[1.1]">
+          <h1 className="fade-up text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 leading-[1.1]">
             The AI Analyst for
             <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-600">All Your Marketplaces</span>
@@ -215,7 +215,7 @@ function HeroDemo() {
               <div className="h-3 w-3 rounded-full bg-green-400" />
             </div>
             <div className="flex-1 flex justify-center">
-              <div className="flex items-center gap-2 h-7 rounded-lg bg-white border border-slate-200 px-3 w-64">
+              <div className="flex items-center gap-2 h-7 rounded-lg bg-white border border-slate-200 px-3 w-full sm:w-64">
                 <svg className="w-3 h-3 text-teal-500" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                 </svg>

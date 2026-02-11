@@ -139,7 +139,7 @@ function RevenueMetrics({
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-6">
       <h2 className="mb-4 text-lg font-semibold text-slate-900">Revenue Overview</h2>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <MetricCard
           label="Total Revenue"
           value={formatCurrency(Number(metrics.totalRevenue) || 0)}
@@ -181,7 +181,7 @@ function ProductMetrics({
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-6">
       <h2 className="mb-4 text-lg font-semibold text-slate-900">Product Performance</h2>
-      <div className="grid gap-4 sm:grid-cols-3 mb-6">
+      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 mb-6">
         <MetricCard
           label="Total Products"
           value={String(metrics.totalProducts || 0)}
@@ -255,7 +255,7 @@ function CustomerMetrics({
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-6">
       <h2 className="mb-4 text-lg font-semibold text-slate-900">Customer Insights</h2>
-      <div className="grid gap-4 sm:grid-cols-4 mb-6">
+      <div className="grid gap-4 grid-cols-2 sm:grid-cols-4 mb-6">
         <MetricCard
           label="Total Customers"
           value={String(metrics.totalCustomers || 0)}

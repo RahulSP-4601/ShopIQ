@@ -294,7 +294,7 @@ export default function SalesDashboardPage() {
         {/* Referral Link */}
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
           <h2 className="text-sm font-medium text-gray-500 mb-2">Your Referral Link</h2>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <code className="flex-1 bg-gray-50 border border-gray-200 text-sm text-gray-700 px-4 py-2.5 rounded-lg truncate">
               {profile?.refCode
                 ? `${origin}?ref=${profile.refCode}`
@@ -350,7 +350,7 @@ export default function SalesDashboardPage() {
                 <h2 className="text-sm font-medium text-gray-500">Conversions — {formatMonthLabel(selectedMonth)}</h2>
                 <span className="text-sm font-medium text-gray-700">{totalSoFar} total</span>
               </div>
-              <div className="flex items-end gap-px h-40">
+              <div className="flex items-end gap-px h-32 sm:h-40">
                 {dailyData.cumulative.map((count, i) => {
                   const isFuture = count === -1;
                   const hadSaleToday = dailyData.counts[i] > 0;
@@ -399,15 +399,15 @@ export default function SalesDashboardPage() {
             </button>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-xs sm:text-sm">
               <thead>
                 <tr className="border-b border-gray-200 text-gray-500">
-                  <th className="text-left px-5 py-3 font-medium">Name</th>
-                  <th className="text-left px-5 py-3 font-medium">Email</th>
-                  <th className="text-left px-5 py-3 font-medium">Phone</th>
-                  <th className="text-left px-5 py-3 font-medium">Status</th>
-                  <th className="text-left px-5 py-3 font-medium">Date</th>
-                  <th className="text-left px-5 py-3 font-medium">Action</th>
+                  <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Name</th>
+                  <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Email</th>
+                  <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Phone</th>
+                  <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Status</th>
+                  <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Date</th>
+                  <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -420,10 +420,10 @@ export default function SalesDashboardPage() {
                 ) : (
                   filteredClients.map((c) => (
                     <tr key={c.id} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="px-5 py-3 text-gray-900">{c.name}</td>
-                      <td className="px-5 py-3 text-gray-600">{c.email}</td>
-                      <td className="px-5 py-3 text-gray-600">{c.phone || "—"}</td>
-                      <td className="px-5 py-3">
+                      <td className="px-2 py-2 sm:px-5 sm:py-3 text-gray-900">{c.name}</td>
+                      <td className="px-2 py-2 sm:px-5 sm:py-3 text-gray-600">{c.email}</td>
+                      <td className="px-2 py-2 sm:px-5 sm:py-3 text-gray-600">{c.phone || "—"}</td>
+                      <td className="px-2 py-2 sm:px-5 sm:py-3">
                         {c.status === "CONVERTED" ? (
                           <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">CONVERTED</span>
                         ) : c.clientUserId && c.trialSentAt ? (() => {
@@ -441,8 +441,8 @@ export default function SalesDashboardPage() {
                           }`}>{c.status}</span>
                         )}
                       </td>
-                      <td className="px-5 py-3 text-gray-500">{new Date(c.createdAt).toLocaleDateString()}</td>
-                      <td className="px-5 py-3">
+                      <td className="px-2 py-2 sm:px-5 sm:py-3 text-gray-500">{new Date(c.createdAt).toLocaleDateString()}</td>
+                      <td className="px-2 py-2 sm:px-5 sm:py-3">
                         {c.status === "CONVERTED" ? (
                           <span className="text-xs text-green-600 font-medium">Subscribed</span>
                         ) : !c.trialToken && c.status === "PENDING" ? (
@@ -479,20 +479,20 @@ export default function SalesDashboardPage() {
               </span>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-xs sm:text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 text-gray-500">
-                    <th className="text-left px-5 py-3 font-medium">Amount</th>
-                    <th className="text-left px-5 py-3 font-medium">Note</th>
-                    <th className="text-left px-5 py-3 font-medium">Date</th>
+                    <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Amount</th>
+                    <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Note</th>
+                    <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Date</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredCommissions.map((c) => (
                     <tr key={c.id} className="border-b border-gray-100">
-                      <td className="px-5 py-3 text-green-600 font-medium">${Number(c.amount).toFixed(2)}</td>
-                      <td className="px-5 py-3 text-gray-600">{c.note || "—"}</td>
-                      <td className="px-5 py-3 text-gray-500">{new Date(c.createdAt).toLocaleDateString()}</td>
+                      <td className="px-2 py-2 sm:px-5 sm:py-3 text-green-600 font-medium">${Number(c.amount).toFixed(2)}</td>
+                      <td className="px-2 py-2 sm:px-5 sm:py-3 text-gray-600">{c.note || "—"}</td>
+                      <td className="px-2 py-2 sm:px-5 sm:py-3 text-gray-500">{new Date(c.createdAt).toLocaleDateString()}</td>
                     </tr>
                   ))}
                 </tbody>
