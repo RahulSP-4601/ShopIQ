@@ -11,8 +11,6 @@ const footerLinks = {
       { name: "Features", href: "#features" },
       { name: "Integrations", href: "#integrations" },
       { name: "Pricing", href: "#pricing" },
-      { name: "Changelog", href: "/changelog" },
-      { name: "API Docs", href: "/docs" },
     ],
   },
   company: {
@@ -21,18 +19,7 @@ const footerLinks = {
       { name: "About", href: "/about" },
       { name: "Blog", href: "/blog" },
       { name: "Careers", href: "/careers" },
-      { name: "Press", href: "/press" },
       { name: "Contact", href: "/contact" },
-    ],
-  },
-  resources: {
-    title: "Resources",
-    links: [
-      { name: "Help Center", href: "/help" },
-      { name: "Community", href: "/community" },
-      { name: "Guides", href: "/guides" },
-      { name: "Case Studies", href: "/case-studies" },
-      { name: "Status", href: "/status" },
     ],
   },
   legal: {
@@ -84,7 +71,7 @@ export function Footer() {
     <footer className="bg-white border-t border-slate-100">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         {/* Main footer content */}
-        <div className="py-10 sm:py-16 grid grid-cols-1 sm:grid-cols-2 gap-8 lg:grid-cols-6">
+        <div className="py-10 sm:py-16 grid grid-cols-1 sm:grid-cols-2 gap-8 lg:grid-cols-5">
           {/* Brand column */}
           <div className="col-span-2">
             <Link href="/" className="flex items-center gap-2.5 group">
