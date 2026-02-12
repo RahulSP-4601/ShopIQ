@@ -7,6 +7,7 @@ import { syncFlipkart } from "./flipkart-sync";
 import { syncBigCommerce } from "./bigcommerce-sync";
 import { syncSquare } from "./square-sync";
 import { syncSnapDeal } from "./snapdeal-sync";
+import { syncPrestaShop } from "./prestashop-sync";
 import { SyncResult } from "./types";
 
 /**
@@ -30,6 +31,8 @@ export async function syncConnection(
       return syncSquare(connection);
     case "SNAPDEAL":
       return syncSnapDeal(connection);
+    case "PRESTASHOP":
+      return syncPrestaShop(connection);
     default:
       return {
         ordersSynced: 0,
@@ -96,6 +99,7 @@ export async function syncAllConnections(): Promise<void> {
           "BIGCOMMERCE",
           "SQUARE",
           "SNAPDEAL",
+          "PRESTASHOP",
         ],
       },
     },

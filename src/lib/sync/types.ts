@@ -228,3 +228,57 @@ export function mapSnapDealProductStatus(
   return "ACTIVE";
 }
 
+// ============================================
+// PRESTASHOP STATUS MAPPING
+// ============================================
+
+/**
+ * PrestaShop order states (default IDs):
+ * 1 = Awaiting check payment, 2 = Payment accepted,
+ * 3 = Processing in progress, 4 = Shipped,
+ * 5 = Delivered, 6 = Canceled, 7 = Refunded,
+ * 8 = Payment error, 9 = On backorder (paid),
+ * 10 = Awaiting bank wire, 11 = Awaiting PayPal payment,
+ * 12 = Remote payment accepted, 13 = Awaiting cod validation
+ */
+export function mapPrestaShopOrderStatus(
+  stateId: number
+): UnifiedOrderStatus {
+  switch (stateId) {
+    case 5:
+      return "DELIVERED";
+    case 4:
+      return "SHIPPED";
+    case 2: // Payment accepted
+    case 12: // Remote payment accepted
+      return "CONFIRMED";
+    case 6:
+      return "CANCELLED";
+    case 7: // Refunded — mapped to CANCELLED for consistency with BigCommerce
+      return "CANCELLED";
+    case 1: // Awaiting check payment
+    case 3: // Processing in progress
+    case 8: // Payment error
+    case 9: // On backorder (paid)
+    case 10: // Awaiting bank wire
+    case 11: // Awaiting PayPal payment
+    case 13: // Awaiting cod validation
+    default:
+      return "PENDING";
+  }
+}
+
+export function mapPrestaShopProductStatus(
+  active: boolean | number | string,
+  quantity: number
+): UnifiedProductStatus {
+  // PrestaShop uses "0"/"1" strings or boolean for active flag
+  if (!active || active === "0" || active === 0) {
+    return "INACTIVE";
+  }
+  if (quantity <= 0) {
+    return "OUT_OF_STOCK";
+  }
+  return "ACTIVE";
+}
+

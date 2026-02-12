@@ -19,10 +19,23 @@ export default function TrialConnectPage() {
   const [isLoadingConnections, setIsLoadingConnections] = useState(true);
   const [showShopifyModal, setShowShopifyModal] = useState(false);
   const [shopifyDomain, setShopifyDomain] = useState("");
+  const [showPrestaShopModal, setShowPrestaShopModal] = useState(false);
+  const [prestaShopUrl, setPrestaShopUrl] = useState("");
+  const [prestaShopApiKey, setPrestaShopApiKey] = useState("");
 
   const modalRef = useRef<HTMLDivElement>(null);
   const shopifyInputRef = useRef<HTMLInputElement>(null);
   const connectButtonRef = useRef<HTMLButtonElement>(null);
+  const prestaShopModalRef = useRef<HTMLDivElement>(null);
+  const prestaShopUrlRef = useRef<HTMLInputElement>(null);
+  const prestaShopApiKeyRef = useRef<HTMLInputElement>(null);
+
+  const closeShopifyModal = useCallback(() => {
+    setShowShopifyModal(false);
+    setShopifyDomain("");
+    setError("");
+    connectButtonRef.current?.focus();
+  }, []);
 
   useEffect(() => {
     if (!showShopifyModal) return;
@@ -30,9 +43,7 @@ export default function TrialConnectPage() {
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        setShowShopifyModal(false);
-        setShopifyDomain("");
-        connectButtonRef.current?.focus();
+        closeShopifyModal();
       }
       if (e.key === "Tab" && modalRef.current) {
         const focusable = modalRef.current.querySelectorAll<HTMLElement>(
@@ -53,13 +64,45 @@ export default function TrialConnectPage() {
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [showShopifyModal]);
+  }, [showShopifyModal, closeShopifyModal]);
 
-  const closeShopifyModal = useCallback(() => {
-    setShowShopifyModal(false);
-    setShopifyDomain("");
+  const closePrestaShopModal = useCallback(() => {
+    setShowPrestaShopModal(false);
+    setPrestaShopUrl("");
+    setPrestaShopApiKey("");
+    setError("");
     connectButtonRef.current?.focus();
   }, []);
+
+  // PrestaShop modal keyboard accessibility
+  useEffect(() => {
+    if (!showPrestaShopModal) return;
+    setTimeout(() => prestaShopUrlRef.current?.focus(), 0);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        closePrestaShopModal();
+      }
+      if (e.key === "Tab" && prestaShopModalRef.current) {
+        const focusable = prestaShopModalRef.current.querySelectorAll<HTMLElement>(
+          'button, input, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [showPrestaShopModal, closePrestaShopModal]);
 
   const fetchConnections = useCallback(async () => {
     setError("");
@@ -146,6 +189,12 @@ export default function TrialConnectPage() {
       return;
     }
 
+    if (marketplace === "PRESTASHOP") {
+      connectButtonRef.current = document.activeElement instanceof HTMLButtonElement ? document.activeElement : null;
+      setShowPrestaShopModal(true);
+      return;
+    }
+
     setLoading(marketplace);
     setError("");
     try {
@@ -163,6 +212,13 @@ export default function TrialConnectPage() {
       // Handle OAuth redirect (for Flipkart and future OAuth marketplaces)
       if (data.requiresOAuth && data.oauthUrl) {
         window.location.href = data.oauthUrl;
+        return;
+      }
+
+      // Handle credentials-based marketplaces
+      if (data.requiresCredentials) {
+        setError("This marketplace requires credentials that must be entered during setup. Please disconnect and reconnect to provide them.");
+        setLoading(null);
         return;
       }
 
@@ -212,6 +268,65 @@ export default function TrialConnectPage() {
       await fetchConnections();
     } catch {
       setError("Failed to connect to Shopify");
+      setLoading(null);
+    }
+  };
+
+  const handlePrestaShopConnect = async () => {
+    if (!prestaShopUrl.trim() || !prestaShopApiKey.trim()) {
+      setError("Please enter both store URL and API key");
+      return;
+    }
+
+    // Client-side URL validation and normalization
+    let normalizedUrl: string;
+    try {
+      const urlStr = prestaShopUrl.trim();
+      const withProtocol = urlStr.includes("://") ? urlStr : `https://${urlStr}`;
+      const parsed = new URL(withProtocol);
+      if (parsed.protocol !== "https:") {
+        setError("Please enter a valid PrestaShop store URL (HTTPS required)");
+        return;
+      }
+      if (!parsed.hostname || !parsed.hostname.includes(".")) {
+        setError("Please enter a valid PrestaShop store URL");
+        return;
+      }
+      normalizedUrl = parsed.origin;
+    } catch {
+      setError("Please enter a valid PrestaShop store URL");
+      return;
+    }
+
+    setError("");
+    setLoading("PRESTASHOP");
+
+    try {
+
+      const response = await fetch("/api/auth/prestashop", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          storeUrl: normalizedUrl,
+          apiKey: prestaShopApiKey.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || "Failed to connect");
+        setLoading(null);
+        return;
+      }
+
+      setShowPrestaShopModal(false);
+      setPrestaShopUrl("");
+      setPrestaShopApiKey("");
+      setLoading(null);
+      await fetchConnections();
+    } catch {
+      setError("Failed to connect to PrestaShop");
       setLoading(null);
     }
   };
@@ -367,6 +482,90 @@ export default function TrialConnectPage() {
                   className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-medium hover:from-teal-600 hover:to-emerald-600 transition-colors disabled:opacity-50"
                 >
                   {loading === "SHOPIFY" ? "Connecting..." : "Connect"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* PrestaShop Modal */}
+        {showPrestaShopModal && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="prestashop-modal-title"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) closePrestaShopModal();
+            }}
+          >
+            <div ref={prestaShopModalRef} className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-xl bg-[#DF0067]/10 flex items-center justify-center">
+                  <svg className="w-7 h-7" viewBox="0 0 48 48" fill="none">
+                    <rect width="48" height="48" rx="8" fill="#DF0067" />
+                    <path d="M24 8c-8.837 0-16 7.163-16 16s7.163 16 16 16 16-7.163 16-16S32.837 8 24 8zm0 28c-6.627 0-12-5.373-12-12S17.373 12 24 12s12 5.373 12 12-5.373 12-12 12z" fill="#fff" />
+                    <path d="M24 16c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8-3.582-8-8-8zm0 12c-2.209 0-4-1.791-4-4s1.791-4 4-4 4 1.791 4 4-1.791 4-4 4z" fill="#fff" />
+                    <circle cx="24" cy="24" r="2" fill="#fff" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 id="prestashop-modal-title" className="text-lg font-semibold text-slate-900">Connect PrestaShop</h3>
+                  <p className="text-sm text-slate-500">Enter your store URL and API key</p>
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <label htmlFor="prestashop-url" className="block text-sm font-medium text-slate-700 mb-1.5">Store URL</label>
+                <input
+                  ref={prestaShopUrlRef}
+                  id="prestashop-url"
+                  type="text"
+                  value={prestaShopUrl}
+                  onChange={(e) => setPrestaShopUrl(e.target.value)}
+                  placeholder="https://your-store.com"
+                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      prestaShopApiKeyRef.current?.focus();
+                    }
+                  }}
+                />
+              </div>
+
+              <div className="mb-4">
+                <label htmlFor="prestashop-key" className="block text-sm font-medium text-slate-700 mb-1.5">API Key</label>
+                <input
+                  ref={prestaShopApiKeyRef}
+                  id="prestashop-key"
+                  type="password"
+                  value={prestaShopApiKey}
+                  onChange={(e) => setPrestaShopApiKey(e.target.value)}
+                  placeholder="Your PrestaShop API key"
+                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !loading) handlePrestaShopConnect();
+                  }}
+                />
+                <p className="mt-1.5 text-xs text-slate-500">
+                  Find your API key in PrestaShop Admin &rarr; Advanced Parameters &rarr; Webservice
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={closePrestaShopModal}
+                  className="flex-1 py-3 px-4 rounded-xl border border-slate-200 text-slate-700 font-medium hover:bg-slate-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handlePrestaShopConnect}
+                  disabled={loading === "PRESTASHOP"}
+                  className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-medium hover:from-teal-600 hover:to-emerald-600 transition-colors disabled:opacity-50"
+                >
+                  {loading === "PRESTASHOP" ? "Connecting..." : "Connect"}
                 </button>
               </div>
             </div>

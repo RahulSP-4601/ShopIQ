@@ -137,6 +137,14 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // For PrestaShop, signal that credentials are needed (no OAuth redirect)
+    if (marketplace === "PRESTASHOP") {
+      return NextResponse.json({
+        success: true,
+        requiresCredentials: true,
+      });
+    }
+
     // For other marketplaces, create a stub connection (simulating OAuth success)
     const marketplaceName = marketplace.replaceAll("_", " ");
     const connection = await prisma.marketplaceConnection.upsert({
