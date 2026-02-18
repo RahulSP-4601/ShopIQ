@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 import prisma from "@/lib/prisma";
 import { createUserSession } from "@/lib/auth/session";
 import {
@@ -8,6 +9,14 @@ import {
   resetFailures,
 } from "@/lib/rate-limit";
 
+/**
+ * Mask rate-limit key for logging by hashing with SHA-256.
+ * Prevents PII exposure in logs while maintaining debuggability.
+ */
+function maskRateLimitKey(key: string): string {
+  return crypto.createHash("sha256").update(key).digest("hex").slice(0, 16);
+}
+
 export async function POST(request: NextRequest) {
   try {
     const clientIP = getClientIP(request);
@@ -16,7 +25,7 @@ export async function POST(request: NextRequest) {
     const rateLimitKey = clientIP ? `trial-login:${clientIP}` : "trial-login:unknown-ip";
 
     // Check rate limit before processing (stricter limits for unknown IP)
-    const rateLimit = checkRateLimit(rateLimitKey, {
+    const rateLimit = await checkRateLimit(rateLimitKey, {
       maxRequests: clientIP ? 10 : 3, // Stricter limit for unknown IP
       windowMs: 60 * 1000,
       maxFailures: clientIP ? 5 : 2, // Fewer failures allowed for unknown IP
@@ -53,8 +62,19 @@ export async function POST(request: NextRequest) {
     });
 
     if (!salesClient?.clientUserId) {
-      // Record failed attempt for this IP
-      recordFailure(rateLimitKey);
+      // Record failed attempt for this IP (fail-fast to prevent brute-force bypass when store is down)
+      try {
+        await recordFailure(rateLimitKey);
+      } catch (recordError) {
+        // Rate-limit store is unavailable - fail-fast to preserve security
+        const msg = recordError instanceof Error ? recordError.message : String(recordError);
+        const maskedKey = maskRateLimitKey(rateLimitKey);
+        console.error(`[CRITICAL] Rate-limit store unavailable for key ${maskedKey}...:`, msg);
+        return NextResponse.json(
+          { error: "Service temporarily unavailable" },
+          { status: 503 }
+        );
+      }
       return NextResponse.json({ error: "Invalid token" }, { status: 400 });
     }
 
@@ -85,8 +105,13 @@ export async function POST(request: NextRequest) {
       name: user.name,
     });
 
-    // Reset failure count on successful login
-    resetFailures(rateLimitKey);
+    // Reset failure count on successful login (fire-and-forget, don't block success)
+    resetFailures(rateLimitKey).catch((resetError) => {
+      // Log but don't fail the login if reset fails
+      const msg = resetError instanceof Error ? resetError.message : String(resetError);
+      const maskedKey = maskRateLimitKey(rateLimitKey);
+      console.error(`Failed to reset rate limit failures for key ${maskedKey}...:`, msg);
+    });
 
     const redirect =
       user.marketplaceConns.length > 0 ? "/chat" : "/trial/connect";

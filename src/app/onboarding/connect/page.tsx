@@ -399,7 +399,7 @@ export default function OnboardingConnectPage() {
       setError("Please connect at least 1 marketplace to continue");
       return;
     }
-    router.push("/onboarding/payment");
+    router.push("/onboarding/profile");
   };
 
   return (
@@ -411,13 +411,20 @@ export default function OnboardingConnectPage() {
             1
           </div>
           <span className="text-sm font-medium text-slate-900">
-            Connect Marketplaces
+            Marketplaces
           </span>
         </div>
         <div className="w-12 h-0.5 bg-slate-200" />
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-sm font-semibold">
             2
+          </div>
+          <span className="text-sm font-medium text-slate-400">Your Business</span>
+        </div>
+        <div className="w-12 h-0.5 bg-slate-200" />
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-sm font-semibold">
+            3
           </div>
           <span className="text-sm font-medium text-slate-400">Payment</span>
         </div>
@@ -542,7 +549,7 @@ export default function OnboardingConnectPage() {
           disabled={connectedCount < 1}
           className="flex items-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-semibold text-lg shadow-lg shadow-teal-500/25 hover:from-teal-600 hover:to-emerald-600 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
-          <span>Continue to Payment</span>
+          <span>Continue to Your Business</span>
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"

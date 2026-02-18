@@ -16,6 +16,9 @@ interface ChatMessageProps {
   content: string;
   isLoading?: boolean;
   attachments?: MessageAttachment[];
+  messageId?: string;
+  feedback?: "positive" | "negative" | null;
+  onFeedback?: (messageId: string, rating: "positive" | "negative") => void;
 }
 
 export function ChatMessage({
@@ -23,6 +26,9 @@ export function ChatMessage({
   content,
   isLoading,
   attachments,
+  messageId,
+  feedback,
+  onFeedback,
 }: ChatMessageProps) {
   const isUser = role === "USER";
 
@@ -196,6 +202,68 @@ export function ChatMessage({
             {content && (
               <div className="whitespace-pre-wrap text-sm leading-relaxed">
                 {content}
+              </div>
+            )}
+
+            {/* Feedback buttons (assistant messages only) */}
+            {!isUser && messageId && onFeedback && (
+              <div className="mt-2 flex items-center gap-1.5 pt-1 border-t border-slate-200/50">
+                <button
+                  type="button"
+                  onClick={() => onFeedback(messageId, "positive")}
+                  className={cn(
+                    "p-1 rounded transition-colors",
+                    feedback === "positive"
+                      ? "text-emerald-600"
+                      : "text-slate-300 hover:text-emerald-500"
+                  )}
+                  title="Helpful"
+                  aria-label="Helpful"
+                  aria-pressed={feedback === "positive"}
+                >
+                  <svg
+                    aria-hidden="true"
+                    className="h-3.5 w-3.5"
+                    fill={feedback === "positive" ? "currentColor" : "none"}
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14z"
+                    />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onFeedback(messageId, "negative")}
+                  className={cn(
+                    "p-1 rounded transition-colors",
+                    feedback === "negative"
+                      ? "text-red-500"
+                      : "text-slate-300 hover:text-red-400"
+                  )}
+                  title="Not helpful"
+                  aria-label="Not helpful"
+                  aria-pressed={feedback === "negative"}
+                >
+                  <svg
+                    aria-hidden="true"
+                    className="h-3.5 w-3.5"
+                    fill={feedback === "negative" ? "currentColor" : "none"}
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3H10z"
+                    />
+                  </svg>
+                </button>
               </div>
             )}
           </>

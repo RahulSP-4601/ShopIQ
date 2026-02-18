@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import { UnifiedOrderStatus, Prisma } from "@prisma/client";
+import { getCached, setCache, buildCacheKey } from "./cache";
 
 export interface RevenueMetrics {
   totalRevenue: number;
@@ -27,6 +28,13 @@ export async function getRevenueMetrics(
   startDate?: Date,
   endDate?: Date
 ): Promise<RevenueMetrics> {
+  const cacheKey = buildCacheKey(userId, "revenue", {
+    start: startDate?.toISOString(),
+    end: endDate?.toISOString(),
+  });
+  const cached = getCached<RevenueMetrics>(cacheKey);
+  if (cached) return cached;
+
   const where: Prisma.UnifiedOrderWhereInput = {
     userId,
     status: { not: UnifiedOrderStatus.CANCELLED },
@@ -38,20 +46,22 @@ export async function getRevenueMetrics(
     if (endDate) where.orderedAt.lte = endDate;
   }
 
-  const result = await prisma.unifiedOrder.aggregate({
+  const aggregation = await prisma.unifiedOrder.aggregate({
     where,
     _sum: { totalAmount: true },
     _count: { _all: true },
   });
 
-  const totalRevenue = Number(result._sum?.totalAmount || 0);
-  const totalOrders = result._count?._all ?? 0;
+  const totalRevenue = Number(aggregation._sum?.totalAmount || 0);
+  const totalOrders = aggregation._count?._all ?? 0;
 
-  return {
+  const result: RevenueMetrics = {
     totalRevenue,
     totalOrders,
     avgOrderValue: totalOrders > 0 ? totalRevenue / totalOrders : 0,
   };
+  setCache(cacheKey, result);
+  return result;
 }
 
 export async function getTopProducts(
@@ -60,6 +70,14 @@ export async function getTopProducts(
   startDate?: Date,
   endDate?: Date
 ): Promise<ProductMetrics[]> {
+  const cacheKey = buildCacheKey(userId, "topProducts", {
+    limit,
+    start: startDate?.toISOString(),
+    end: endDate?.toISOString(),
+  });
+  const cached = getCached<ProductMetrics[]>(cacheKey);
+  if (cached) return cached;
+
   const orderWhere: Prisma.UnifiedOrderWhereInput = {
     userId,
     status: { not: UnifiedOrderStatus.CANCELLED },
@@ -77,7 +95,10 @@ export async function getTopProducts(
   });
 
   const orderIds = orders.map((o) => o.id);
-  if (orderIds.length === 0) return [];
+  if (orderIds.length === 0) {
+    setCache(cacheKey, []);
+    return [];
+  }
 
   const items = await prisma.unifiedOrderItem.findMany({
     where: { orderId: { in: orderIds } },
@@ -117,19 +138,25 @@ export async function getTopProducts(
     .sort((a, b) => b[1].revenue - a[1].revenue)
     .slice(0, limit);
 
-  return sortedProducts.map(([key, aggregate]) => ({
+  const topProductsResult = sortedProducts.map(([key, aggregate]) => ({
     productId: key,
     title: aggregate.title,
     revenue: aggregate.revenue,
     unitsSold: aggregate.unitsSold,
     orderCount: aggregate.orderIds.size,
   }));
+  setCache(cacheKey, topProductsResult);
+  return topProductsResult;
 }
 
 export async function getTopCustomers(
   userId: string,
   limit = 10
 ): Promise<CustomerMetrics[]> {
+  const cacheKey = buildCacheKey(userId, "topCustomers", { limit });
+  const cached = getCached<CustomerMetrics[]>(cacheKey);
+  if (cached) return cached;
+
   const orders = await prisma.unifiedOrder.findMany({
     where: {
       userId,
@@ -163,7 +190,7 @@ export async function getTopCustomers(
     customerMap.set(order.customerEmail, existing);
   }
 
-  return Array.from(customerMap.entries())
+  const topCustomersResult = Array.from(customerMap.entries())
     .sort((a, b) => b[1].totalSpent - a[1].totalSpent)
     .slice(0, limit)
     .map(([email, data]) => ({
@@ -172,6 +199,8 @@ export async function getTopCustomers(
       totalSpent: data.totalSpent,
       ordersCount: data.ordersCount,
     }));
+  setCache(cacheKey, topCustomersResult);
+  return topCustomersResult;
 }
 
 export async function getDailyRevenue(
@@ -179,15 +208,27 @@ export async function getDailyRevenue(
   startDate?: Date,
   endDate?: Date
 ): Promise<{ date: string; revenue: number; orders: number }[]> {
-  const end = endDate || new Date();
-  const start = startDate || new Date(new Date().setDate(new Date().getDate() - 30));
-  start.setHours(0, 0, 0, 0);
-  end.setHours(23, 59, 59, 999);
+  // Resolve the effective date range first (compute defaults before building cache key)
+  // to ensure the cache key always reflects the actual query range.
+  // Clone incoming dates to prevent mutating caller's Date objects.
+  const resolvedEndDate = endDate ? new Date(endDate.getTime()) : new Date();
+  const resolvedStartDate = startDate
+    ? new Date(startDate.getTime())
+    : new Date(new Date().setDate(new Date().getDate() - 30));
+  resolvedStartDate.setHours(0, 0, 0, 0);
+  resolvedEndDate.setHours(23, 59, 59, 999);
+
+  const cacheKey = buildCacheKey(userId, "dailyRevenue", {
+    start: resolvedStartDate.toISOString(),
+    end: resolvedEndDate.toISOString(),
+  });
+  const cached = getCached<{ date: string; revenue: number; orders: number }[]>(cacheKey);
+  if (cached) return cached;
 
   const orders = await prisma.unifiedOrder.findMany({
     where: {
       userId,
-      orderedAt: { gte: start, lte: end },
+      orderedAt: { gte: resolvedStartDate, lte: resolvedEndDate },
       status: { not: UnifiedOrderStatus.CANCELLED },
     },
     select: {
@@ -207,19 +248,20 @@ export async function getDailyRevenue(
     });
   }
 
-  const result: { date: string; revenue: number; orders: number }[] = [];
-  const currentDate = new Date(start);
+  const dailyResult: { date: string; revenue: number; orders: number }[] = [];
+  const currentDate = new Date(resolvedStartDate);
 
-  while (currentDate <= end) {
+  while (currentDate <= resolvedEndDate) {
     const dateStr = currentDate.toISOString().split("T")[0];
-    result.push({
+    dailyResult.push({
       date: dateStr,
       ...(dailyMap.get(dateStr) || { revenue: 0, orders: 0 }),
     });
     currentDate.setDate(currentDate.getDate() + 1);
   }
 
-  return result;
+  setCache(cacheKey, dailyResult);
+  return dailyResult;
 }
 
 export async function getStoreContext(userId: string): Promise<string> {

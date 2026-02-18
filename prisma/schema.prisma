@@ -7,6 +7,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 // ============================================
@@ -32,6 +33,9 @@ model User {
   resetTokenHash   String?   @unique
   resetTokenExpiry DateTime?
 
+  // AI bootstrap tracking
+  bootstrappedAt DateTime?
+
   // Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -44,6 +48,13 @@ model User {
   unifiedProducts  UnifiedProduct[]
   conversations    Conversation[]
   reports          Report[]
+  businessProfile  BusinessProfile?
+  beliefs              Belief[]
+  notes                Note[]
+  alerts               Alert[]
+  messageFeedbacks     MessageFeedback[]
+  weeklyBriefings      WeeklyBriefing[]
+  aiMaturitySnapshots  AiMaturitySnapshot[]
 
   @@index([email])
 }
@@ -234,6 +245,7 @@ model Message {
 
   // Attachments (files, audio recordings)
   attachments Attachment[]
+  feedback    MessageFeedback?
 
   createdAt DateTime @default(now())
 
@@ -593,4 +605,180 @@ model RazorpayPlan {
   amountInPaise  Int      @unique // Monthly amount in paise — one plan per unique price point
   razorpayPlanId String   // Razorpay plan ID (e.g., "plan_xxx")
   createdAt      DateTime @default(now())
+}
+
+// ============================================
+// AI COGNITIVE ARCHITECTURE (Phase 2)
+// ============================================
+
+// Context-conditional belief graph — tracks Frax's confidence per task domain
+model Belief {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  statement  String // e.g., "analyze_revenue", "forecast_demand"
+  contextKey String @default("*") // Pipe-delimited context: "ethnic_wear|weekend" or "*" for global
+
+  strength       Float  @default(0.5) // 0.0 to 1.0
+  autonomyMode   String @default("PROPOSAL") // AUTONOMOUS | PROPOSAL | GUIDANCE_SEEKING
+  validatedCycles Int   @default(0) // For AI Years calculation
+
+  lastValidatedAt DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([userId, statement, contextKey])
+  @@index([userId])
+  @@index([userId, strength])
+  // CHECK constraint for strength (0.0-1.0) is enforced via raw SQL migration (see migrations folder)
+}
+
+// TTL-based notes — Frax's short-term memory (Column 2 of working memory)
+model Note {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  content      String @db.Text
+  basePriority Float  @default(0.5) // 0.0 to 1.0
+  status       String @default("ACTIVE") // ACTIVE | DISMISSED | EXPIRED | ACTED_ON
+  source       String @default("ai") // ai | system | alert
+
+  ttlHours  Int      @default(24)
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, status])
+  @@index([userId, expiresAt])
+  @@index([expiresAt])
+  // CHECK constraint for basePriority (0.0-1.0) is enforced via raw SQL migration (see migrations folder)
+}
+
+// Proactive alerts — detected by background cron, surfaced in chat
+model Alert {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type     String // stockout | demand_surge | revenue_anomaly | return_pattern
+  severity String @default("medium") // low | medium | high | critical
+  title    String
+  body     String @db.Text
+  metadata Json?
+  dedupKey String? // Deterministic key from metadata for atomic dedup via unique constraint; NULL allows multiple alerts
+
+  status     String    @default("pending") // pending | surfaced | dismissed | resolved
+  surfacedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, type, dedupKey]) // Atomic dedup: prevents duplicate alerts per user+type+metadata
+  @@index([userId, status])
+  @@index([userId, createdAt])
+  @@index([userId, type, createdAt])
+  @@index([createdAt])
+}
+
+enum FeedbackRating {
+  POSITIVE @map("positive")
+  NEGATIVE @map("negative")
+}
+
+// Thumbs up/down feedback on assistant messages — drives belief updates
+// INVARIANT: MessageFeedback.userId must match Message.conversation.userId.
+// Enforced in the service layer (src/lib/ai/feedback.ts) — verify ownership before insert/upsert.
+model MessageFeedback {
+  id        String  @id @default(cuid())
+  messageId String  @unique
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  rating FeedbackRating
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// Weekly AI-generated business briefing — emailed to sellers
+model WeeklyBriefing {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  weekStart   DateTime
+  metricsData Json
+  narrative   String   @db.Text
+  maturity    Json
+
+  emailSentAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@unique([userId, weekStart])
+  @@index([userId])
+}
+
+// AI maturity progression snapshots — tracks Frax's growth over time
+model AiMaturitySnapshot {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  geometricMeanReliability Float
+  stage                    String // Infant | Apprentice | Professional | Expert
+  aiYears                  Float
+  totalBeliefs             Int
+  highConfidenceCount      Int
+  lowConfidenceCount       Int
+  totalValidatedCycles     Int
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+// ============================================
+// BUSINESS PROFILE (Birth System - Phase 3)
+// ============================================
+
+enum IndustryType {
+  FASHION
+  ELECTRONICS
+  HOME_GARDEN
+  FOOD_BEVERAGE
+  HEALTH_BEAUTY
+  SPORTS_OUTDOOR
+  TOYS_GAMES
+  BOOKS_MEDIA
+  AUTOMOTIVE
+  JEWELRY
+  HANDMADE_CRAFT
+  PET_SUPPLIES
+  OTHER
+}
+
+enum BusinessSize {
+  SOLO
+  SMALL
+  MEDIUM
+  LARGE
+}
+
+model BusinessProfile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  industry        IndustryType
+  businessSize    BusinessSize
+  primaryCategory String?
+  targetMarket    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

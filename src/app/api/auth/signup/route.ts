@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { hashPassword, validatePassword } from "@/lib/auth/password";
 import { createUserSession } from "@/lib/auth/session";
+import { checkRateLimit, getClientIP } from "@/lib/rate-limit";
 
 const signupSchema = z
   .object({
@@ -24,6 +25,30 @@ const signupSchema = z
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = getClientIP(request);
+    if (!ip) {
+      console.warn(
+        `Signup rate-limit: unable to determine client IP (user-agent: ${request.headers.get("user-agent") || "unknown"})`
+      );
+      return NextResponse.json(
+        { error: "Unable to determine client identity. Please try again." },
+        { status: 400 }
+      );
+    }
+    const { allowed, retryAfterMs } = await checkRateLimit(`signup:${ip}`, {
+      maxRequests: 3,
+      windowMs: 60_000,
+    });
+    if (!allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        {
+          status: 429,
+          headers: { "Retry-After": String(Math.ceil((retryAfterMs ?? 60_000) / 1000)) },
+        }
+      );
+    }
+
     const body = await request.json();
 
     const result = signupSchema.safeParse(body);

@@ -310,7 +310,7 @@ export default function OnboardingPaymentPage() {
       {/* Progress indicator */}
       <div className="flex items-center justify-center gap-4 mb-8">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-teal-500 text-white flex items-center justify-center text-sm font-semibold">
+          <div className="w-8 h-8 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center text-sm font-semibold">
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path
                 fillRule="evenodd"
@@ -319,14 +319,27 @@ export default function OnboardingPaymentPage() {
               />
             </svg>
           </div>
-          <span className="text-sm font-medium text-slate-500">
+          <span className="text-sm font-medium text-teal-600">
             Marketplaces
           </span>
         </div>
-        <div className="w-12 h-0.5 bg-teal-500" />
+        <div className="w-12 h-0.5 bg-teal-400" />
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center text-sm font-semibold">
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fillRule="evenodd"
+                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </div>
+          <span className="text-sm font-medium text-teal-600">Your Business</span>
+        </div>
+        <div className="w-12 h-0.5 bg-teal-400" />
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-gradient-to-r from-teal-500 to-emerald-500 text-white flex items-center justify-center text-sm font-semibold">
-            2
+            3
           </div>
           <span className="text-sm font-medium text-slate-900">Payment</span>
         </div>

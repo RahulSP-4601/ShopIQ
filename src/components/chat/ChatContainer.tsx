@@ -195,8 +195,8 @@ export function ChatContainer({
               </h2>
               <p className="mt-1 text-sm text-slate-500">
                 {isConnected
-                  ? `Ask me anything about ${storeName}`
-                  : "Your AI-powered analytics assistant"}
+                  ? `Ask Frax anything about ${storeName}`
+                  : "Meet Frax, your AI-powered analytics assistant"}
               </p>
             </div>
 

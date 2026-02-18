@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { syncAllConnections } from "@/lib/sync/sync-manager";
 
+// Vercel serverless max duration (seconds) — sync touches all marketplace APIs
+export const maxDuration = 300;
+
 export async function GET(request: NextRequest) {
   // Verify cron secret — Vercel Cron sends this as a Bearer token
   const authHeader = request.headers.get("Authorization");

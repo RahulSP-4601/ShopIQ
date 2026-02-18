@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserSession } from "@/lib/auth/session";
 import prisma from "@/lib/prisma";
-import { generateReport } from "@/lib/gemini/client";
+import { generateReport } from "@/lib/ai/client";
 import {
   generateRevenueSummaryData,
   generateProductAnalysisData,

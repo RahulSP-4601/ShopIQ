@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import prisma from "@/lib/prisma";
 import { cleanupExpiredRevocations } from "@/lib/auth/session";
+import { expireOldNotes, cleanupOldNotes } from "@/lib/ai/memory/notes";
+import { cleanupOldAlerts } from "@/lib/ai/alerts/manager";
+import { cleanupOldSnapshots } from "@/lib/ai/memory/maturity";
+
+// Vercel serverless max duration (seconds)
+export const maxDuration = 120;
 
 /**
  * Scheduled cleanup cron job.
@@ -12,6 +18,10 @@ import { cleanupExpiredRevocations } from "@/lib/auth/session";
  * 3. Old WebhookEvent dedup record cleanup (default: 7 days)
  * 4. AuditLog PII pseudonymization (nullify ipAddress/userAgent past retention period)
  * 5. Old AuditLog cleanup (default: 365 days, configurable via AUDIT_LOG_RETENTION_DAYS)
+ * 6. Expire active notes past TTL
+ * 7. Cleanup old dismissed/expired notes (>30 days)
+ * 8. Cleanup old dismissed/resolved alerts (>30 days)
+ * 9. Cleanup old AI maturity snapshots (>365 days)
  */
 
 function safeParseIntEnv(envVar: string | undefined, fallback: number): number {
@@ -146,6 +156,46 @@ export async function GET(request: NextRequest) {
     const msg = error instanceof Error ? error.message : "Unknown error";
     console.error(`AuditLog cleanup failed: ${msg}`);
     results.auditLogsError = msg;
+  }
+
+  // 6. Expire active notes past TTL
+  try {
+    const expired = await expireOldNotes();
+    results.notesExpired = expired;
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : "Unknown error";
+    console.error(`Note expiration failed: ${msg}`);
+    results.notesExpiredError = msg;
+  }
+
+  // 7. Cleanup old dismissed/expired notes (>30 days)
+  try {
+    const notesCleaned = await cleanupOldNotes(30);
+    results.notesCleaned = notesCleaned;
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : "Unknown error";
+    console.error(`Notes cleanup failed: ${msg}`);
+    results.notesCleanedError = msg;
+  }
+
+  // 8. Cleanup old dismissed/resolved alerts (>30 days)
+  try {
+    const alertsCleaned = await cleanupOldAlerts(30);
+    results.alertsCleaned = alertsCleaned;
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : "Unknown error";
+    console.error(`Alerts cleanup failed: ${msg}`);
+    results.alertsCleanedError = msg;
+  }
+
+  // 9. Cleanup old AI maturity snapshots (>365 days)
+  try {
+    const snapshotsCleaned = await cleanupOldSnapshots(365);
+    results.maturitySnapshotsCleaned = snapshotsCleaned;
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : "Unknown error";
+    console.error(`Maturity snapshot cleanup failed: ${msg}`);
+    results.maturitySnapshotsCleanedError = msg;
   }
 
   // Determine if any step failed

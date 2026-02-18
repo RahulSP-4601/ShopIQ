@@ -10,10 +10,10 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
-    "@prisma/adapter-pg": "^7.2.0",
-    "@prisma/client": "^7.2.0",
+    "@prisma/adapter-pg": "^5.22.0",
+    "@prisma/client": "^5.22.0",
     "@supabase/supabase-js": "^2.90.1",
+    "@upstash/redis": "^1.36.2",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "cookie": "^1.1.1",
@@ -36,7 +36,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.2",
-    "prisma": "^7.2.0",
+    "prisma": "^5.22.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
