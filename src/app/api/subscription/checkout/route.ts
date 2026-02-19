@@ -3,7 +3,7 @@ import { z } from "zod";
 import prisma from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { getUserSession } from "@/lib/auth/session";
-import { razorpay, getOrCreateCustomer, getOrCreatePlan, createSubscription, cancelSubscription } from "@/lib/razorpay/client";
+import { getRazorpay, getOrCreateCustomer, getOrCreatePlan, createSubscription, cancelSubscription } from "@/lib/razorpay/client";
 import { calculateMonthlyPrice } from "@/lib/subscription/pricing";
 
 const checkoutSchema = z.object({
@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
       // before returning it to the client (it may have been cancelled/expired externally).
       try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const rzpSub = await (razorpay.subscriptions as any).fetch(lockResult.subscriptionId);
+        const rzpSub = await (getRazorpay().subscriptions as any).fetch(lockResult.subscriptionId);
         const usableStates = new Set(["created", "authenticated", "active"]);
         if (rzpSub?.status && usableStates.has(rzpSub.status)) {
           return NextResponse.json({

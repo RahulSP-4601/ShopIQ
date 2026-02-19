@@ -2,22 +2,26 @@ import Razorpay from "razorpay";
 import crypto from "crypto";
 import prisma from "@/lib/prisma";
 
-// ── Fail-fast validation ──────────────────────────────────
-if (!process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID) {
-  throw new Error("NEXT_PUBLIC_RAZORPAY_KEY_ID environment variable is not set");
-}
-if (!process.env.RAZORPAY_KEY_SECRET) {
-  throw new Error("RAZORPAY_KEY_SECRET environment variable is not set");
-}
-if (!process.env.RAZORPAY_WEBHOOK_SECRET) {
-  throw new Error("RAZORPAY_WEBHOOK_SECRET environment variable is not set");
+// ── Razorpay Instance (lazy) ──────────────────────────────
+let razorpayClient: Razorpay | null = null;
+
+function getRazorpay(): Razorpay {
+  if (!razorpayClient) {
+    if (!process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID) {
+      throw new Error("NEXT_PUBLIC_RAZORPAY_KEY_ID environment variable is not set");
+    }
+    if (!process.env.RAZORPAY_KEY_SECRET) {
+      throw new Error("RAZORPAY_KEY_SECRET environment variable is not set");
+    }
+    razorpayClient = new Razorpay({
+      key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET,
+    });
+  }
+  return razorpayClient;
 }
 
-// ── Razorpay Instance ─────────────────────────────────────
-export const razorpay = new Razorpay({
-  key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+export { getRazorpay };
 
 // ── Plan Management ───────────────────────────────────────
 
@@ -107,7 +111,7 @@ async function getOrCreatePlanInternal(amountInRupees: number, amountInPaise: nu
 
   while (!existing) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const plans = await (razorpay.plans as any).all({ count: PAGE_SIZE, skip });
+    const plans = await (getRazorpay().plans as any).all({ count: PAGE_SIZE, skip });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     existing = plans.items?.find((p: any) =>
       p.item?.amount === amountInPaise &&
@@ -131,7 +135,7 @@ async function getOrCreatePlanInternal(amountInRupees: number, amountInPaise: nu
 
   // Create new plan on Razorpay
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const plan = await (razorpay.plans as any).create({
+  const plan = await (getRazorpay().plans as any).create({
     period: "monthly",
     interval: 1,
     item: {
@@ -192,7 +196,7 @@ export async function getOrCreateCustomer(
     try {
       // Verify customer still exists
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const customer = await (razorpay.customers as any).fetch(existingCustomerId);
+      const customer = await (getRazorpay().customers as any).fetch(existingCustomerId);
       if (customer?.id) {
         return existingCustomerId;
       }
@@ -214,7 +218,7 @@ export async function getOrCreateCustomer(
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const customer = await (razorpay.customers as any).create({
+  const customer = await (getRazorpay().customers as any).create({
     name: trimmedName,
     email: trimmedEmail,
     notes: { source: "frame" },
@@ -254,7 +258,7 @@ export async function createSubscription(params: {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const subscription = await (razorpay.subscriptions as any).create({
+  const subscription = await (getRazorpay().subscriptions as any).create({
     plan_id: params.planId,
     customer_id: params.customerId,
     total_count: params.totalCount ?? 0, // 0 = infinite recurring
@@ -276,7 +280,7 @@ export async function cancelSubscription(
   cancelAtCycleEnd = true
 ): Promise<void> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (razorpay.subscriptions as any).cancel(subscriptionId, cancelAtCycleEnd);
+  await (getRazorpay().subscriptions as any).cancel(subscriptionId, cancelAtCycleEnd);
 }
 
 /**
@@ -287,7 +291,7 @@ export async function updateSubscriptionPlan(
   newPlanId: string
 ): Promise<void> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (razorpay.subscriptions as any).update(subscriptionId, {
+  await (getRazorpay().subscriptions as any).update(subscriptionId, {
     plan_id: newPlanId,
   });
 }
