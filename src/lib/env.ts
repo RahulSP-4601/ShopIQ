@@ -5,7 +5,6 @@
 const REQUIRED_VARS = [
   "DATABASE_URL",
   "SESSION_SECRET",
-  "OPENAI_API_KEY",
   "CRON_SECRET",
 ];
 
