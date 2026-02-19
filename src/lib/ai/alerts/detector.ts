@@ -139,7 +139,7 @@ export async function detectStockoutRisk(userId: string, signal?: AbortSignal): 
   for (const item of items) {
     // Only union productId and sku to avoid merging distinct products with same title
     const structuredIds = [item.productId, item.sku].filter(
-      (id) => id != null && id !== ""
+      (id): id is string => id != null && id !== ""
     );
 
     let canonicalKey: string;
@@ -166,7 +166,7 @@ export async function detectStockoutRisk(userId: string, signal?: AbortSignal): 
   // Check each product by resolving to canonical key via alias map
   for (const product of products) {
     const ids = [product.id, product.sku, product.title].filter(
-      (id) => id != null && id !== ""
+      (id): id is string => id != null && id !== ""
     );
 
     // Resolve to canonical root using union-find and look up total sold

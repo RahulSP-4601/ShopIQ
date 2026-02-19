@@ -80,7 +80,7 @@ async function processFeedbackForBeliefs(
       const statement = TOOL_BELIEF_MAP[tc.name];
       if (statement && !processedStatements.has(statement)) {
         processedStatements.add(statement);
-        await updateBeliefStrength(userId, statement, outcome, "*", tx);
+        await updateBeliefStrength(userId, statement, outcome, "*", tx as Parameters<typeof updateBeliefStrength>[4]);
       }
     }
   } else {
@@ -90,7 +90,7 @@ async function processFeedbackForBeliefs(
       "general_conversation",
       outcome,
       "*",
-      tx
+      tx as Parameters<typeof updateBeliefStrength>[4]
     );
   }
 }

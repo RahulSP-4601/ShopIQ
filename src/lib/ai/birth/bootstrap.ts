@@ -67,7 +67,7 @@ export async function cleanupBootstrapForUser(userId: string): Promise<void> {
       // Delete all notes with source="system" (bootstrap creates a system welcome note)
       prisma.note.deleteMany({ where: { userId, source: "system" } }),
       // Delete maturity snapshots (bootstrap creates initial snapshot)
-      prisma.maturitySnapshot.deleteMany({ where: { userId } }),
+      prisma.aiMaturitySnapshot.deleteMany({ where: { userId } }),
     ]);
     console.log(`Bootstrap cleanup completed for user ${userId}`);
   } catch (error) {
@@ -140,7 +140,7 @@ export async function bootstrapBeliefs(userId: string): Promise<void> {
     }
 
     // 3. Analyze first-sync data for data-derived beliefs
-    await createDataDerivedBeliefs(userId, profile);
+    await createDataDerivedBeliefs(userId);
 
     // 4. Create welcome note
     const industryLabel = INDUSTRY_LABELS[industry] || "General Retail";
@@ -242,7 +242,6 @@ function getCurrencyMultipliers(): Record<string, number> {
 
 async function createDataDerivedBeliefs(
   userId: string,
-  profile: Awaited<ReturnType<typeof prisma.businessProfile.findUnique>>
 ): Promise<void> {
   const [productCount, orderCount, connectionCount, lowStockCount, avgOrderResult] =
     await Promise.all([
@@ -287,17 +286,13 @@ async function createDataDerivedBeliefs(
   if (avgOrderResult._avg?.totalAmount != null) {
     const avgOrderValue = Number(avgOrderResult._avg.totalAmount);
 
-    // Get user's currency from profile or most recent order
-    let currency = profile?.currency;
-    if (!currency) {
-      // Fallback: detect from latest order if profile has no currency set
-      const latestOrder = await prisma.unifiedOrder.findFirst({
-        where: { userId },
-        select: { currency: true },
-        orderBy: { createdAt: "desc" },
-      });
-      currency = latestOrder?.currency || "USD";
-    }
+    // Detect currency from most recent order (BusinessProfile has no currency field)
+    const latestOrder = await prisma.unifiedOrder.findFirst({
+      where: { userId },
+      select: { currency: true },
+      orderBy: { createdAt: "desc" },
+    });
+    const currency = latestOrder?.currency || "USD";
 
     // Get currency multipliers (with fallback to static rates)
     const currencyMultipliers = getCurrencyMultipliers();
