@@ -3,7 +3,7 @@ import crypto from "crypto";
 const SHOPIFY_API_KEY = process.env.SHOPIFY_API_KEY!;
 const SHOPIFY_API_SECRET = process.env.SHOPIFY_API_SECRET!;
 const SHOPIFY_SCOPES = process.env.SHOPIFY_SCOPES || "read_orders,read_products,read_customers";
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL!;
+const APP_URL = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL!;
 
 // Encryption key for tokens - key is hashed to 32 bytes via SHA-256 for AES-256-GCM
 // TOKEN_ENCRYPTION_KEY is required — no fallback to avoid using shared secrets

@@ -113,8 +113,15 @@ export async function POST(request: NextRequest) {
         name: user.name,
       });
 
+      // Check for a redirect param (e.g., from OAuth flows like Shopify)
+      const url = new URL(request.url);
+      const redirectParam = url.searchParams.get("redirect");
+
       let redirect = "/chat";
-      if (user.marketplaceConns.length === 0) {
+      if (redirectParam && redirectParam.startsWith("/") && !redirectParam.startsWith("//")) {
+        // Trusted relative redirect — resume the interrupted flow
+        redirect = redirectParam;
+      } else if (user.marketplaceConns.length === 0) {
         redirect = "/onboarding/connect";
       } else if (
         !user.subscription ||

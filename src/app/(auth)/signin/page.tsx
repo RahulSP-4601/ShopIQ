@@ -1,11 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function SignInPage() {
+  return (
+    <Suspense>
+      <SignInForm />
+    </Suspense>
+  );
+}
+
+function SignInForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -29,7 +38,12 @@ export default function SignInPage() {
     setError("");
 
     try {
-      const response = await fetch("/api/auth/signin", {
+      const redirectParam = searchParams.get("redirect") || "";
+      const signinUrl = redirectParam
+        ? `/api/auth/signin?redirect=${encodeURIComponent(redirectParam)}`
+        : "/api/auth/signin";
+
+      const response = await fetch(signinUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
