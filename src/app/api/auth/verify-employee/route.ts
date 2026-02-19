@@ -6,9 +6,9 @@ import prisma from "@/lib/prisma";
 const EMPLOYEE_SESSION_COOKIE = "frame_employee_session";
 
 function getSecretKey() {
-  const secret = process.env.SESSION_SECRET;
+  const secret = process.env.JWT_SIGNING_SECRET || process.env.SESSION_SECRET;
   if (!secret) {
-    throw new Error("SESSION_SECRET is not set");
+    throw new Error("JWT_SIGNING_SECRET (or SESSION_SECRET) is not set");
   }
   return new TextEncoder().encode(secret);
 }
