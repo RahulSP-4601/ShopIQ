@@ -105,18 +105,21 @@ export async function POST(request: NextRequest) {
       throw createError;
     }
 
-    // Send welcome email with reset link (non-blocking)
-    const origin = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
+    // Send welcome email with reset link — must await so Vercel doesn't kill the request
+    const origin = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
     const resetUrl = `${origin}/reset-password?token=${resetToken}`;
-    sendSalesWelcomeEmail({
-      name: employee.name,
-      email: employee.email,
-      resetUrl,
-      dashboardUrl: `${origin}/sales/dashboard`,
-      expiryHours: 24, // Matches INVITE_TOKEN_TTL (24 hours)
-    }).catch((err) => {
-      console.error("Failed to send welcome email:", err instanceof Error ? err.message : err);
-    });
+    try {
+      await sendSalesWelcomeEmail({
+        name: employee.name,
+        email: employee.email,
+        resetUrl,
+        dashboardUrl: `${origin}/sales/dashboard`,
+        expiryHours: 24, // Matches INVITE_TOKEN_TTL (24 hours)
+      });
+    } catch (emailErr) {
+      console.error("Failed to send welcome email:", emailErr instanceof Error ? emailErr.message : emailErr);
+      // Employee was created successfully — don't fail the whole request over email
+    }
 
     return NextResponse.json(
       {
