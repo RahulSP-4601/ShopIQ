@@ -88,6 +88,137 @@ export async function sendSalesWelcomeEmail({
   });
 }
 
+export async function sendTrialInviteEmail({
+  name,
+  email,
+  trialLink,
+}: {
+  name: string;
+  email: string;
+  trialLink: string;
+}) {
+  const resend = getResend();
+  const safeName = escapeHtml(name);
+  const safeTrialLink = sanitizeUrl(trialLink);
+
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to: email,
+    subject: "Free 1 Month Access — Set Up Your Frame Account",
+    html: `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 520px; margin: 0 auto; padding: 32px 16px;">
+        <div style="text-align: center; margin-bottom: 24px;">
+          <h1 style="color: #111827; font-size: 24px; margin: 0;">Free 1 Month Access</h1>
+          <p style="color: #6b7280; font-size: 15px; margin-top: 8px;">Your free trial of Frame is ready</p>
+        </div>
+
+        <p style="color: #374151; line-height: 1.6; font-size: 15px;">
+          Hi ${safeName},
+        </p>
+        <p style="color: #374151; line-height: 1.6; font-size: 15px;">
+          You've been invited to try <strong>Frame</strong> — an AI-powered platform that brings all your marketplace analytics into one place. Enjoy <strong>1 month of free access</strong> to explore everything Frame has to offer.
+        </p>
+
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 20px; margin: 24px 0;">
+          <p style="color: #166534; font-weight: 600; font-size: 15px; margin: 0 0 12px;">How to get started:</p>
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 6px 12px 6px 0; vertical-align: top; color: #166534; font-weight: 700; font-size: 15px;">1.</td>
+              <td style="padding: 6px 0; color: #374151; font-size: 14px; line-height: 1.5;">Click the button below to open your free trial form</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 12px 6px 0; vertical-align: top; color: #166534; font-weight: 700; font-size: 15px;">2.</td>
+              <td style="padding: 6px 0; color: #374151; font-size: 14px; line-height: 1.5;">Set your password and choose 2 marketplaces to connect</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 12px 6px 0; vertical-align: top; color: #166534; font-weight: 700; font-size: 15px;">3.</td>
+              <td style="padding: 6px 0; color: #374151; font-size: 14px; line-height: 1.5;">Connect your stores and start asking questions to your AI analyst</td>
+            </tr>
+          </table>
+        </div>
+
+        <div style="text-align: center; margin: 28px 0;">
+          <a href="${safeTrialLink}" style="display: inline-block; background: linear-gradient(135deg, #14b8a6, #059669); color: #fff; text-decoration: none; padding: 14px 32px; border-radius: 10px; font-weight: 600; font-size: 15px;">
+            Set Up Your Account
+          </a>
+        </div>
+
+        <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px 16px; margin: 20px 0;">
+          <p style="margin: 0; color: #6b7280; font-size: 12px;">Or copy and paste this link into your browser:</p>
+          <p style="margin: 4px 0 0; color: #2563eb; font-size: 12px; word-break: break-all;">${escapeHtml(safeTrialLink)}</p>
+        </div>
+
+        <p style="color: #9ca3af; font-size: 12px; margin-top: 28px; text-align: center;">
+          This trial link is valid for 30 days. If you didn't expect this email, you can safely ignore it.
+        </p>
+      </div>
+    `,
+  });
+}
+
+export async function sendTrialAccountReadyEmail({
+  name,
+  email,
+  dashboardUrl,
+}: {
+  name: string;
+  email: string;
+  dashboardUrl: string;
+}) {
+  const resend = getResend();
+  const safeName = escapeHtml(name);
+  const safeDashboardUrl = sanitizeUrl(dashboardUrl);
+
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to: email,
+    subject: "Your Frame Account Is Ready",
+    html: `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 520px; margin: 0 auto; padding: 32px 16px;">
+        <div style="text-align: center; margin-bottom: 24px;">
+          <h1 style="color: #111827; font-size: 24px; margin: 0;">Welcome to Frame!</h1>
+          <p style="color: #6b7280; font-size: 15px; margin-top: 8px;">Your account has been set up successfully</p>
+        </div>
+
+        <p style="color: #374151; line-height: 1.6; font-size: 15px;">
+          Hi ${safeName},
+        </p>
+        <p style="color: #374151; line-height: 1.6; font-size: 15px;">
+          Your Frame account is ready. You now have <strong>30 days of free access</strong> to connect your marketplaces and get AI-powered insights for your business.
+        </p>
+
+        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 20px; margin: 24px 0;">
+          <p style="color: #1e40af; font-weight: 600; font-size: 15px; margin: 0 0 12px;">What you can do now:</p>
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 6px 12px 6px 0; vertical-align: top; color: #1e40af; font-size: 15px;">&#10003;</td>
+              <td style="padding: 6px 0; color: #374151; font-size: 14px; line-height: 1.5;">Connect your Shopify, eBay, Etsy, Flipkart &amp; other stores</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 12px 6px 0; vertical-align: top; color: #1e40af; font-size: 15px;">&#10003;</td>
+              <td style="padding: 6px 0; color: #374151; font-size: 14px; line-height: 1.5;">Ask your AI analyst anything about your sales and inventory</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 12px 6px 0; vertical-align: top; color: #1e40af; font-size: 15px;">&#10003;</td>
+              <td style="padding: 6px 0; color: #374151; font-size: 14px; line-height: 1.5;">Get automated reports, alerts, and demand forecasts</td>
+            </tr>
+          </table>
+        </div>
+
+        <div style="text-align: center; margin: 28px 0;">
+          <a href="${safeDashboardUrl}" style="display: inline-block; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; text-decoration: none; padding: 14px 32px; border-radius: 10px; font-weight: 600; font-size: 15px;">
+            Go to Dashboard
+          </a>
+        </div>
+
+        <p style="color: #9ca3af; font-size: 12px; margin-top: 28px; text-align: center;">
+          Need help? Just reply to this email and our team will assist you.
+        </p>
+      </div>
+    `,
+  });
+}
+
 export async function sendPasswordResetEmail({
   email,
   name,

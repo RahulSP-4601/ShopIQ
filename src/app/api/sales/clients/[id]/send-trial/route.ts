@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { requireApprovedSalesMember } from "@/lib/auth/session";
+import { sendTrialInviteEmail } from "@/lib/email";
 import crypto from "crypto";
 
 export async function POST(
@@ -45,8 +46,26 @@ export async function POST(
       return NextResponse.json({ error: "Trial already sent to this client" }, { status: 400 });
     }
 
-    const origin = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
-    const trialLink = `${origin}/trial/${trialToken}`;
+    // Never trust Host header in production — only use configured APP_URL
+    const origin = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL ||
+      (process.env.NODE_ENV !== "production" ? request.nextUrl.origin : undefined);
+    const trialLink = origin ? `${origin}/trial/${trialToken}` : undefined;
+
+    // Send trial invite email to client — must await so Vercel doesn't kill the request
+    if (trialLink) {
+      try {
+        await sendTrialInviteEmail({
+          name: salesClient.name,
+          email: salesClient.email,
+          trialLink,
+        });
+      } catch (emailErr) {
+        console.error("Failed to send trial invite email:", emailErr instanceof Error ? emailErr.message : emailErr);
+        // Trial was created successfully — don't fail the whole request over email
+      }
+    } else {
+      console.error("APP_URL is not configured — skipping trial invite email");
+    }
 
     return NextResponse.json({ success: true, trialLink });
   } catch {

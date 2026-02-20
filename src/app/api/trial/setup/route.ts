@@ -3,6 +3,7 @@ import { Prisma, MarketplaceType } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { hashPassword, validatePassword } from "@/lib/auth/password";
 import { createUserSession } from "@/lib/auth/session";
+import { sendTrialAccountReadyEmail } from "@/lib/email";
 
 const VALID_MARKETPLACES: string[] = [
   "SHOPIFY", "AMAZON", "EBAY", "ETSY", "WOOCOMMERCE",
@@ -137,6 +138,24 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "An account with this email already exists" }, { status: 400 });
       }
       throw txError;
+    }
+
+    // Send account ready email — must await so Vercel doesn't kill the request
+    // Never trust Host header in production — only use configured APP_URL
+    const origin = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL ||
+      (process.env.NODE_ENV !== "production" ? request.nextUrl.origin : undefined);
+    if (origin) {
+      try {
+        await sendTrialAccountReadyEmail({
+          name: user.name,
+          email: user.email,
+          dashboardUrl: `${origin}/chat`,
+        });
+      } catch (emailErr) {
+        console.error("Failed to send trial account ready email:", emailErr instanceof Error ? emailErr.message : emailErr);
+      }
+    } else {
+      console.error("APP_URL is not configured — skipping trial account ready email");
     }
 
     // Create session (auto-login) - non-fatal, account is already created
