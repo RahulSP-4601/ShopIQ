@@ -2,7 +2,6 @@
 import { ChatCompletionTool } from "openai/resources/chat/completions";
 import {
   getRevenueMetrics,
-  getTopProducts,
   getTopCustomers,
   getDailyRevenue,
 } from "@/lib/metrics/calculator";
@@ -476,12 +475,43 @@ export async function executeTool(
     switch (toolName) {
       case "get_revenue_metrics": {
         const { start, end } = resolvePeriod(args.period as string);
-        const metrics = await getRevenueMetrics(userId, start, end);
+        const [metrics, revenueOrders] = await Promise.all([
+          getRevenueMetrics(userId, start, end),
+          prisma.unifiedOrder.findMany({
+            where: {
+              userId,
+              orderedAt: { gte: start, lte: end },
+              status: { not: UnifiedOrderStatus.CANCELLED },
+            },
+            select: { marketplace: true, totalAmount: true },
+          }),
+        ]);
+
+        const revenueByMarketplace = new Map<string, { revenue: number; orders: number }>();
+        for (const order of revenueOrders) {
+          const existing = revenueByMarketplace.get(order.marketplace) || { revenue: 0, orders: 0 };
+          existing.revenue += Number(order.totalAmount || 0);
+          existing.orders += 1;
+          revenueByMarketplace.set(order.marketplace, existing);
+        }
+
+        const marketplaceBreakdown = Array.from(revenueByMarketplace.entries())
+          .map(([marketplace, data]) => ({
+            marketplace,
+            revenue: Math.round(data.revenue * 100) / 100,
+            orders: data.orders,
+            avgOrderValue: data.orders > 0
+              ? Math.round((data.revenue / data.orders) * 100) / 100
+              : 0,
+          }))
+          .sort((a, b) => b.revenue - a.revenue);
+
         return JSON.stringify({
           period: args.period,
           totalRevenue: metrics.totalRevenue,
           totalOrders: metrics.totalOrders,
           avgOrderValue: metrics.avgOrderValue,
+          marketplaceBreakdown,
         });
       }
 
@@ -490,10 +520,85 @@ export async function executeTool(
         const { start, end } = resolvePeriod(
           (args.period as string) || "last_30_days"
         );
-        const products = await getTopProducts(userId, limit, start, end);
+
+        const topOrders = await prisma.unifiedOrder.findMany({
+          where: {
+            userId,
+            orderedAt: { gte: start, lte: end },
+            status: { not: UnifiedOrderStatus.CANCELLED },
+          },
+          select: { id: true, marketplace: true },
+        });
+
+        const topOrderIds = topOrders.map((o) => o.id);
+        if (topOrderIds.length === 0) {
+          return JSON.stringify({
+            period: args.period || "last_30_days",
+            products: [],
+          });
+        }
+
+        const orderMarketplaceMap = new Map<string, string>();
+        for (const o of topOrders) {
+          orderMarketplaceMap.set(o.id, o.marketplace);
+        }
+
+        const topItems = await prisma.unifiedOrderItem.findMany({
+          where: { orderId: { in: topOrderIds } },
+          select: {
+            title: true,
+            sku: true,
+            unitPrice: true,
+            quantity: true,
+            totalPrice: true,
+            orderId: true,
+          },
+        });
+
+        const topProductMap = new Map<
+          string,
+          {
+            title: string;
+            revenue: number;
+            unitsSold: number;
+            orderIds: Set<string>;
+            marketplaces: Set<string>;
+          }
+        >();
+
+        for (let idx = 0; idx < topItems.length; idx++) {
+          const item = topItems[idx];
+          const key = item.sku || item.title || `_unknown_${item.orderId}_${idx}`;
+          const existing = topProductMap.get(key) || {
+            title: item.title || "Unknown product",
+            revenue: 0,
+            unitsSold: 0,
+            orderIds: new Set<string>(),
+            marketplaces: new Set<string>(),
+          };
+          existing.revenue += Number(item.totalPrice || 0);
+          existing.unitsSold += item.quantity ?? 0;
+          existing.orderIds.add(item.orderId);
+          const mp = orderMarketplaceMap.get(item.orderId);
+          if (mp) existing.marketplaces.add(mp);
+          topProductMap.set(key, existing);
+        }
+
+        const topProductsList = Array.from(topProductMap.entries())
+          .map(([sku, data]) => ({
+            sku,
+            title: data.title,
+            revenue: Math.round(data.revenue * 100) / 100,
+            unitsSold: data.unitsSold,
+            orderCount: data.orderIds.size,
+            marketplaces: Array.from(data.marketplaces),
+          }))
+          .sort((a, b) => b.revenue - a.revenue)
+          .slice(0, limit);
+
         return JSON.stringify({
           period: args.period || "last_30_days",
-          products,
+          products: topProductsList,
         });
       }
 
@@ -508,9 +613,38 @@ export async function executeTool(
           (args.period as string) || "last_14_days"
         );
         const daily = await getDailyRevenue(userId, start, end);
+
+        // Per-marketplace daily breakdown
+        const dailyMpOrders = await prisma.unifiedOrder.findMany({
+          where: {
+            userId,
+            orderedAt: { gte: start, lte: end },
+            status: { not: UnifiedOrderStatus.CANCELLED },
+          },
+          select: { orderedAt: true, totalAmount: true, marketplace: true },
+        });
+
+        const dailyByMarketplace = new Map<string, { revenue: number; orders: number }>();
+        for (const order of dailyMpOrders) {
+          const mp = order.marketplace;
+          const existing = dailyByMarketplace.get(mp) || { revenue: 0, orders: 0 };
+          existing.revenue += Number(order.totalAmount || 0);
+          existing.orders += 1;
+          dailyByMarketplace.set(mp, existing);
+        }
+
+        const marketplaceTotals = Array.from(dailyByMarketplace.entries())
+          .map(([marketplace, data]) => ({
+            marketplace,
+            revenue: Math.round(data.revenue * 100) / 100,
+            orders: data.orders,
+          }))
+          .sort((a, b) => b.revenue - a.revenue);
+
         return JSON.stringify({
           period: args.period || "last_14_days",
           daily,
+          marketplaceTotals,
         });
       }
 
@@ -565,6 +699,7 @@ export async function executeTool(
             title: true,
             inventory: true,
             sku: true,
+            marketplace: true,
           },
           take: limit,
           orderBy: { inventory: "asc" },
@@ -647,10 +782,59 @@ export async function executeTool(
           );
         }
 
-        const [currentMetrics, previousMetrics] = await Promise.all([
+        // Fetch aggregate metrics + per-marketplace orders for both periods
+        const [currentMetrics, previousMetrics, currentMpOrders, previousMpOrders] = await Promise.all([
           getRevenueMetrics(userId, currentStart, currentEnd),
           getRevenueMetrics(userId, previousStart, previousEnd),
+          prisma.unifiedOrder.findMany({
+            where: {
+              userId,
+              orderedAt: { gte: currentStart, lte: currentEnd },
+              status: { not: UnifiedOrderStatus.CANCELLED },
+            },
+            select: { marketplace: true, totalAmount: true },
+          }),
+          prisma.unifiedOrder.findMany({
+            where: {
+              userId,
+              orderedAt: { gte: previousStart, lte: previousEnd },
+              status: { not: UnifiedOrderStatus.CANCELLED },
+            },
+            select: { marketplace: true, totalAmount: true },
+          }),
         ]);
+
+        // Build per-marketplace maps
+        function buildMpMap(mpOrders: { marketplace: string; totalAmount: Prisma.Decimal | null }[]) {
+          const map = new Map<string, { revenue: number; orders: number }>();
+          for (const o of mpOrders) {
+            const existing = map.get(o.marketplace) || { revenue: 0, orders: 0 };
+            existing.revenue += Number(o.totalAmount || 0);
+            existing.orders += 1;
+            map.set(o.marketplace, existing);
+          }
+          return map;
+        }
+
+        const currentMpMap = buildMpMap(currentMpOrders);
+        const previousMpMap = buildMpMap(previousMpOrders);
+        const allMarketplaces = new Set([...currentMpMap.keys(), ...previousMpMap.keys()]);
+
+        const marketplaceComparison = Array.from(allMarketplaces).map((mp) => {
+          const curr = currentMpMap.get(mp) || { revenue: 0, orders: 0 };
+          const prev = previousMpMap.get(mp) || { revenue: 0, orders: 0 };
+          const revChange = prev.revenue > 0
+            ? ((curr.revenue - prev.revenue) / prev.revenue) * 100
+            : curr.revenue > 0 ? 100 : 0;
+          return {
+            marketplace: mp,
+            currentRevenue: Math.round(curr.revenue * 100) / 100,
+            currentOrders: curr.orders,
+            previousRevenue: Math.round(prev.revenue * 100) / 100,
+            previousOrders: prev.orders,
+            revenueChangePercent: Math.round(revChange * 10) / 10,
+          };
+        }).sort((a, b) => b.currentRevenue - a.currentRevenue);
 
         const revenueChange =
           previousMetrics.totalRevenue > 0
@@ -701,6 +885,7 @@ export async function executeTool(
             ordersChangePercent: Math.round(ordersChange * 10) / 10,
             aovChangePercent: Math.round(aovChange * 10) / 10,
           },
+          marketplaceComparison,
         });
       }
 
@@ -719,7 +904,7 @@ export async function executeTool(
             orderedAt: { gte: start, lte: end },
             status: { not: UnifiedOrderStatus.CANCELLED },
           },
-          select: { id: true },
+          select: { id: true, marketplace: true },
           take: ORDER_QUERY_LIMIT,
         });
 
@@ -732,6 +917,11 @@ export async function executeTool(
             products: [],
             note: "No orders found in this period.",
           });
+        }
+
+        const profitOrderMpMap = new Map<string, string>();
+        for (const o of orders) {
+          profitOrderMpMap.set(o.id, o.marketplace);
         }
 
         const items = await prisma.unifiedOrderItem.findMany({
@@ -753,6 +943,7 @@ export async function executeTool(
             revenue: number;
             unitsSold: number;
             orderIds: Set<string>;
+            marketplaces: Set<string>;
           }
         >();
 
@@ -765,10 +956,13 @@ export async function executeTool(
             revenue: 0,
             unitsSold: 0,
             orderIds: new Set<string>(),
+            marketplaces: new Set<string>(),
           };
           existing.revenue += Number(item.totalPrice || 0);
           existing.unitsSold += item.quantity ?? 0;
           existing.orderIds.add(item.orderId);
+          const mp = profitOrderMpMap.get(item.orderId);
+          if (mp) existing.marketplaces.add(mp);
           productMap.set(key, existing);
         }
 
@@ -783,6 +977,7 @@ export async function executeTool(
                 ? Math.round((data.revenue / data.unitsSold) * 100) / 100
                 : 0,
             orderCount: data.orderIds.size,
+            marketplaces: Array.from(data.marketplaces),
           }))
           .sort((a, b) => {
             if (sortBy === "units_sold") return b.unitsSold - a.unitsSold;
@@ -904,8 +1099,8 @@ export async function executeTool(
           (args.period as string) || "last_30_days"
         );
 
-        const orders = await prisma.unifiedOrder.groupBy({
-          by: ["status"],
+        const statusOrders = await prisma.unifiedOrder.groupBy({
+          by: ["status", "marketplace"],
           where: {
             userId,
             orderedAt: { gte: start, lte: end },
@@ -914,27 +1109,62 @@ export async function executeTool(
           _sum: { totalAmount: true },
         });
 
-        const totalOrders = orders.reduce(
-          (s, o) => s + o._count._all,
-          0
-        );
+        // Overall breakdown by status
+        const statusMap = new Map<string, { count: number; revenue: number }>();
+        for (const o of statusOrders) {
+          const existing = statusMap.get(o.status) || { count: 0, revenue: 0 };
+          existing.count += o._count._all;
+          existing.revenue += Number(o._sum.totalAmount || 0);
+          statusMap.set(o.status, existing);
+        }
 
-        const breakdown = orders
-          .map((o) => ({
-            status: o.status,
-            count: o._count._all,
-            revenue: Math.round(Number(o._sum.totalAmount || 0) * 100) / 100,
-            percentage:
-              totalOrders > 0
-                ? Math.round((o._count._all / totalOrders) * 1000) / 10
-                : 0,
+        const totalOrders = Array.from(statusMap.values()).reduce((s, v) => s + v.count, 0);
+
+        const breakdown = Array.from(statusMap.entries())
+          .map(([status, data]) => ({
+            status,
+            count: data.count,
+            revenue: Math.round(data.revenue * 100) / 100,
+            percentage: totalOrders > 0
+              ? Math.round((data.count / totalOrders) * 1000) / 10
+              : 0,
           }))
           .sort((a, b) => b.count - a.count);
+
+        // Per-marketplace breakdown
+        const mpStatusMap = new Map<string, Map<string, { count: number; revenue: number }>>();
+        for (const o of statusOrders) {
+          let mpMap = mpStatusMap.get(o.marketplace);
+          if (!mpMap) {
+            mpMap = new Map();
+            mpStatusMap.set(o.marketplace, mpMap);
+          }
+          const existing = mpMap.get(o.status) || { count: 0, revenue: 0 };
+          existing.count += o._count._all;
+          existing.revenue += Number(o._sum.totalAmount || 0);
+          mpMap.set(o.status, existing);
+        }
+
+        const byMarketplace = Array.from(mpStatusMap.entries()).map(([mp, sMap]) => {
+          const mpTotal = Array.from(sMap.values()).reduce((s, v) => s + v.count, 0);
+          return {
+            marketplace: mp,
+            totalOrders: mpTotal,
+            statuses: Array.from(sMap.entries())
+              .map(([status, data]) => ({
+                status,
+                count: data.count,
+                revenue: Math.round(data.revenue * 100) / 100,
+              }))
+              .sort((a, b) => b.count - a.count),
+          };
+        }).sort((a, b) => b.totalOrders - a.totalOrders);
 
         return JSON.stringify({
           period: args.period || "last_30_days",
           totalOrders,
           breakdown,
+          byMarketplace,
         });
       }
 
