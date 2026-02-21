@@ -1,5 +1,8 @@
 "use client";
 
+import { memo } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
 
 export interface MessageAttachment {
@@ -20,6 +23,110 @@ interface ChatMessageProps {
   feedback?: "positive" | "negative" | null;
   onFeedback?: (messageId: string, rating: "positive" | "negative") => void;
 }
+
+const MarkdownContent = memo(function MarkdownContent({
+  content,
+}: {
+  content: string;
+}) {
+  return (
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      components={{
+        h1: ({ children }) => (
+          <h3 className="text-base font-bold text-slate-900 mt-4 mb-2 first:mt-0">
+            {children}
+          </h3>
+        ),
+        h2: ({ children }) => (
+          <h4 className="text-[0.9rem] font-bold text-slate-900 mt-3.5 mb-1.5 first:mt-0">
+            {children}
+          </h4>
+        ),
+        h3: ({ children }) => (
+          <h5 className="text-sm font-semibold text-slate-800 mt-3 mb-1 first:mt-0">
+            {children}
+          </h5>
+        ),
+        p: ({ children }) => (
+          <p className="text-sm leading-relaxed mb-2 last:mb-0">{children}</p>
+        ),
+        strong: ({ children }) => (
+          <strong className="font-semibold text-slate-900">{children}</strong>
+        ),
+        ul: ({ children }) => (
+          <ul className="text-sm space-y-1 mb-2 last:mb-0 ml-5 list-disc marker:text-emerald-500">
+            {children}
+          </ul>
+        ),
+        ol: ({ children }) => (
+          <ol className="text-sm space-y-1 mb-2 last:mb-0 ml-5 list-decimal marker:text-emerald-500">
+            {children}
+          </ol>
+        ),
+        li: ({ children }) => (
+          <li className="leading-relaxed text-sm pl-1">{children}</li>
+        ),
+        code: ({ className, children }) => {
+          const hasLanguage = className?.includes("language-");
+          const text = String(children).replace(/\n$/, "");
+          const isBlock = hasLanguage || text.includes("\n");
+          if (isBlock) {
+            return (
+              <pre className="bg-slate-800 text-slate-100 rounded-lg px-4 py-3 text-xs overflow-x-auto my-2">
+                <code>{children}</code>
+              </pre>
+            );
+          }
+          return (
+            <code className="bg-slate-200/70 text-emerald-700 px-1.5 py-0.5 rounded text-xs font-mono">
+              {children}
+            </code>
+          );
+        },
+        pre: ({ children }) => <>{children}</>,
+        blockquote: ({ children }) => (
+          <blockquote className="border-l-4 border-emerald-400 pl-3 my-2 text-sm text-slate-600 italic">
+            {children}
+          </blockquote>
+        ),
+        hr: () => <hr className="my-3 border-slate-200" />,
+        table: ({ children }) => (
+          <div className="overflow-x-auto my-2 rounded-lg border border-slate-200">
+            <table className="min-w-full text-xs">{children}</table>
+          </div>
+        ),
+        thead: ({ children }) => (
+          <thead className="bg-slate-50 border-b border-slate-200">
+            {children}
+          </thead>
+        ),
+        th: ({ children }) => (
+          <th className="px-3 py-2 text-left font-semibold text-slate-700">
+            {children}
+          </th>
+        ),
+        td: ({ children }) => (
+          <td className="px-3 py-2 text-slate-600 border-t border-slate-100">
+            {children}
+          </td>
+        ),
+        a: ({ href, children }) => (
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-emerald-600 hover:text-emerald-700 underline underline-offset-2"
+          >
+            {children}
+          </a>
+        ),
+      }}
+    >
+      {content}
+    </ReactMarkdown>
+  );
+});
 
 export function ChatMessage({
   role,
@@ -200,9 +307,13 @@ export function ChatMessage({
 
             {/* Message content */}
             {content && (
-              <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                {content}
-              </div>
+              isUser ? (
+                <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                  {content}
+                </div>
+              ) : (
+                <MarkdownContent content={content} />
+              )
             )}
 
             {/* Feedback buttons (assistant messages only) */}
