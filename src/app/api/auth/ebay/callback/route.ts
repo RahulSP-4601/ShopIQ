@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { exchangeCodeForToken, encryptToken } from "@/lib/ebay/oauth";
 import { EbayClient } from "@/lib/ebay/client";
 import { getUserSession } from "@/lib/auth/session";
+import { consumeOAuthReturnPath } from "@/lib/auth/oauth-return";
 
 function clearNonceCookie(response: NextResponse): NextResponse {
   // Must specify path to match how cookie was set in /api/auth/ebay
@@ -128,7 +129,7 @@ export async function GET(request: NextRequest) {
     // and will be picked up in the next sync cycle.
 
     return clearNonceCookie(
-      NextResponse.redirect(new URL("/onboarding/connect", request.url))
+      NextResponse.redirect(new URL(await consumeOAuthReturnPath(), request.url))
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";

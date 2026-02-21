@@ -5,6 +5,7 @@ import { exchangeCodeForToken, encryptToken } from "@/lib/bigcommerce/oauth";
 import { BigCommerceClient } from "@/lib/bigcommerce/client";
 import { registerWebhooks } from "@/lib/bigcommerce/webhooks";
 import { getUserSession } from "@/lib/auth/session";
+import { consumeOAuthReturnPath } from "@/lib/auth/oauth-return";
 
 function clearNonceCookie(response: NextResponse): NextResponse {
   // Must specify path to match how cookie was set in /api/auth/bigcommerce
@@ -143,7 +144,7 @@ export async function GET(request: NextRequest) {
     // and will be picked up in the next sync cycle.
 
     return clearNonceCookie(
-      NextResponse.redirect(new URL("/onboarding/connect", request.url))
+      NextResponse.redirect(new URL(await consumeOAuthReturnPath(), request.url))
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";

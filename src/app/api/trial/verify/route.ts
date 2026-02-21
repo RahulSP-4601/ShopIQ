@@ -1,10 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { checkRateLimit, getClientIP } from "@/lib/rate-limit";
 
 const TRIAL_DURATION_DAYS = 30;
 
 export async function GET(request: NextRequest) {
   try {
+    // Rate limit: 60 req/60s per IP (defense-in-depth — token is UUID v4 so brute-force is infeasible)
+    const clientIP = getClientIP(request);
+    const rateLimitKey = clientIP
+      ? `trial-verify:${clientIP}`
+      : "trial-verify:unknown-ip";
+    const rateLimit = await checkRateLimit(rateLimitKey, {
+      maxRequests: clientIP ? 60 : 10,
+      windowMs: 60 * 1000,
+    });
+
+    if (!rateLimit.allowed) {
+      const retryAfter = Math.ceil((rateLimit.retryAfterMs || 1000) / 1000);
+      return NextResponse.json(
+        { valid: false },
+        { status: 429, headers: { "Retry-After": String(retryAfter) } }
+      );
+    }
+
     const token = request.nextUrl.searchParams.get("token");
 
     if (!token) {

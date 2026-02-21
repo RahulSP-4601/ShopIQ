@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { exchangeCodeForToken, encryptToken } from "@/lib/flipkart/oauth";
 import { FlipkartClient } from "@/lib/flipkart/client";
 import { getUserSession } from "@/lib/auth/session";
+import { consumeOAuthReturnPath } from "@/lib/auth/oauth-return";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -98,7 +99,8 @@ export async function GET(request: NextRequest) {
     // to avoid serverless runtime timeouts. The connection is marked as CONNECTED
     // and will be picked up in the next sync cycle.
 
-    return NextResponse.redirect(new URL("/onboarding/connect", request.url));
+    const returnPath = await consumeOAuthReturnPath();
+    return NextResponse.redirect(new URL(returnPath, request.url));
   } catch (error) {
     // Log safe, actionable context — redact URLs/tokens from message
     const name = error instanceof Error ? error.name : "Error";

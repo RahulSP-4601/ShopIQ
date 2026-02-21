@@ -211,6 +211,8 @@ export default function TrialConnectPage() {
 
       // Handle OAuth redirect (for Flipkart and future OAuth marketplaces)
       if (data.requiresOAuth && data.oauthUrl) {
+        // Set cookie so OAuth callback redirects back here instead of /onboarding/connect
+        document.cookie = "frame_oauth_return=/trial/connect; path=/; max-age=600; SameSite=Lax";
         window.location.href = data.oauthUrl;
         return;
       }
@@ -259,6 +261,8 @@ export default function TrialConnectPage() {
         setShowShopifyModal(false);
         setShopifyDomain("");
         setLoading(null);
+        // Set cookie so OAuth callback redirects back here instead of /onboarding/connect
+        document.cookie = "frame_oauth_return=/trial/connect; path=/; max-age=600; SameSite=Lax";
         window.location.href = data.oauthUrl;
         return;
       }

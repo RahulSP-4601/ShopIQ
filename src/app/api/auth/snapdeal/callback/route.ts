@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { encryptToken, getClientId, getAuthToken } from "@/lib/snapdeal/oauth";
 import { SnapDealClient } from "@/lib/snapdeal/client";
 import { getUserSession } from "@/lib/auth/session";
+import { consumeOAuthReturnPath } from "@/lib/auth/oauth-return";
 
 function clearNonceCookie(response: NextResponse): NextResponse {
   response.cookies.delete({ name: "snapdeal_nonce", path: "/" });
@@ -132,7 +133,7 @@ export async function GET(request: NextRequest) {
     // and will be picked up in the next sync cycle.
 
     return clearNonceCookie(
-      NextResponse.redirect(new URL("/onboarding/connect", request.url))
+      NextResponse.redirect(new URL(await consumeOAuthReturnPath(), request.url))
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";

@@ -10,6 +10,7 @@ import {
 import { ShopifyClient } from "@/lib/shopify/client";
 import { getUserSession } from "@/lib/auth/session";
 import { registerWebhooks } from "@/lib/shopify/webhooks";
+import { consumeOAuthReturnPath } from "@/lib/auth/oauth-return";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -127,8 +128,9 @@ export async function GET(request: NextRequest) {
     // to avoid serverless runtime timeouts. The connection is marked as CONNECTED
     // and will be picked up in the next sync cycle.
 
-    // Redirect back to onboarding connect page to allow connecting more marketplaces
-    return NextResponse.redirect(new URL("/onboarding/connect", request.url));
+    // Redirect back to connect page (trial or onboarding based on cookie)
+    const returnPath = await consumeOAuthReturnPath();
+    return NextResponse.redirect(new URL(returnPath, request.url));
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     const name = error instanceof Error ? error.name : "Error";

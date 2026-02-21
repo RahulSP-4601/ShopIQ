@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { exchangeCodeForToken, encryptToken } from "@/lib/etsy/oauth";
 import { EtsyClient } from "@/lib/etsy/client";
 import { getUserSession } from "@/lib/auth/session";
+import { consumeOAuthReturnPath } from "@/lib/auth/oauth-return";
 
 function clearEtsyCookies(response: NextResponse): NextResponse {
   // Must specify path to match how cookies were set in /api/auth/etsy
@@ -138,7 +139,7 @@ export async function GET(request: NextRequest) {
     // and will be picked up in the next sync cycle.
 
     return clearEtsyCookies(
-      NextResponse.redirect(new URL("/onboarding/connect", request.url))
+      NextResponse.redirect(new URL(await consumeOAuthReturnPath(), request.url))
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
