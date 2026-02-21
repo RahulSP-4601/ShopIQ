@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getStore } from "@/lib/auth/session";
+import { getUserSession } from "@/lib/auth/session";
 import prisma from "@/lib/prisma";
 
 export async function GET(
@@ -7,16 +7,16 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const store = await getStore();
+    const session = await getUserSession();
 
-    if (!store) {
+    if (!session) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
     const { id } = await params;
 
     const report = await prisma.report.findFirst({
-      where: { id, storeId: store.id },
+      where: { id, userId: session.userId },
     });
 
     if (!report) {
@@ -37,16 +37,16 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const store = await getStore();
+    const session = await getUserSession();
 
-    if (!store) {
+    if (!session) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
     const { id } = await params;
 
     const report = await prisma.report.findFirst({
-      where: { id, storeId: store.id },
+      where: { id, userId: session.userId },
     });
 
     if (!report) {

@@ -3,154 +3,122 @@
 const features = [
   {
     icon: (
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-      />
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.061 12.061 0 0116.5 7.605" />
+      </svg>
     ),
-    color: "emerald",
-    title: "Ask in Plain English",
-    description:
-      "No complex queries or filters. Just ask questions like you would to a human analyst and get instant answers.",
+    title: "Unified Dashboard",
+    description: "See revenue, orders, and inventory across all marketplaces in one view. No more switching between tabs.",
+    color: "from-teal-500 to-emerald-500",
+    bgColor: "bg-teal-50",
+    iconColor: "text-teal-600",
   },
   {
     icon: (
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-      />
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+      </svg>
     ),
-    color: "emerald",
-    title: "Revenue Analytics",
-    description:
-      "Track sales trends, compare periods, identify top performers, and understand what drives your revenue growth.",
+    title: "AI-Powered Insights",
+    description: "Ask questions in plain English. Get instant answers about revenue, products, and customers across all channels.",
+    color: "from-violet-500 to-purple-500",
+    bgColor: "bg-violet-50",
+    iconColor: "text-violet-600",
   },
   {
     icon: (
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-      />
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+      </svg>
     ),
-    color: "emerald",
-    title: "Product Performance",
-    description:
-      "Discover your best sellers, identify underperformers, and get recommendations to optimize your product mix.",
+    title: "Cross-Channel Comparison",
+    description: "Compare performance between Amazon, Flipkart, Snapdeal, and others. Find what works best where.",
+    color: "from-blue-500 to-indigo-500",
+    bgColor: "bg-blue-50",
+    iconColor: "text-blue-600",
   },
   {
     icon: (
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-      />
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
+      </svg>
     ),
-    color: "emerald",
-    title: "Customer Insights",
-    description:
-      "Understand customer behavior, segment your audience, and identify your most valuable customers.",
+    title: "Inventory Intelligence",
+    description: "Track stock levels across all channels. Get alerts before stockouts and optimize allocation automatically.",
+    color: "from-amber-500 to-orange-500",
+    bgColor: "bg-amber-50",
+    iconColor: "text-amber-600",
   },
   {
     icon: (
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-      />
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+      </svg>
     ),
-    color: "emerald",
-    title: "Auto-Generated Reports",
-    description:
-      "Get weekly and monthly reports delivered automatically with key metrics and actionable recommendations.",
+    title: "Automated Reports",
+    description: "Get daily, weekly, and monthly reports delivered automatically. Track KPIs and growth metrics effortlessly.",
+    color: "from-rose-500 to-pink-500",
+    bgColor: "bg-rose-50",
+    iconColor: "text-rose-600",
   },
   {
     icon: (
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M13 10V3L4 14h7v7l9-11h-7z"
-      />
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+      </svg>
     ),
-    color: "emerald",
-    title: "Real-Time Sync",
-    description:
-      "Your data syncs automatically from Shopify. Always up-to-date insights without manual exports.",
+    title: "Enterprise Security",
+    description: "SOC 2 compliant, end-to-end encryption, and read-only API access. Your data stays secure and private.",
+    color: "from-emerald-500 to-green-500",
+    bgColor: "bg-emerald-50",
+    iconColor: "text-emerald-600",
   },
 ];
 
 export function Features() {
   return (
-    <section id="features" className="relative py-24">
-      <div className="absolute inset-0 bg-gradient-to-b from-white via-slate-50/80 to-white" />
-      <div className="relative mx-auto max-w-6xl px-6">
-        <div className="text-center fade-up">
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-1.5 text-sm text-emerald-700 mb-4">
+    <section id="features" className="py-12 md:py-20 lg:py-24 bg-white">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center fade-up max-w-2xl mx-auto">
+          <p className="text-sm font-medium text-teal-600 uppercase tracking-wider mb-3">
             Features
-          </div>
-          <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl lg:text-5xl">
-            Everything you need to
-            <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-              {" "}
-              understand your business
-            </span>
+          </p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
+            Everything you need to scale
           </h2>
-          <p className="mt-4 text-lg text-slate-600 max-w-2xl mx-auto">
-            Powerful analytics made simple with conversational AI
+          <p className="mt-4 text-lg text-slate-600">
+            Built for multi-channel sellers who want data-driven decisions without complexity
           </p>
         </div>
 
-        <div className="mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/* Features grid */}
+        <div className="mt-16 grid gap-4 sm:gap-6 md:gap-8 md:grid-cols-2 lg:grid-cols-3">
           {features.map((feature, index) => (
-            <FeatureCard key={index} feature={feature} index={index} />
+            <div
+              key={index}
+              className="fade-up group relative p-6 rounded-2xl border border-slate-100 bg-white hover:border-slate-200 hover:shadow-lg transition-all duration-300"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              {/* Icon */}
+              <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${feature.bgColor} ${feature.iconColor} mb-5 group-hover:scale-110 transition-transform duration-300`}>
+                {feature.icon}
+              </div>
+
+              {/* Content */}
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                {feature.title}
+              </h3>
+              <p className="text-slate-600 leading-relaxed">
+                {feature.description}
+              </p>
+
+              {/* Hover gradient line */}
+              <div className={`absolute bottom-0 left-0 right-0 h-1 rounded-b-2xl bg-gradient-to-r ${feature.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+            </div>
           ))}
         </div>
       </div>
     </section>
-  );
-}
-
-function FeatureCard({
-  feature,
-  index,
-}: {
-  feature: (typeof features)[0];
-  index: number;
-}) {
-  return (
-    <div
-      className="fade-up group relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-lg shadow-slate-100 transition-all duration-500 hover:shadow-xl hover:-translate-y-2 hover:border-slate-200"
-      style={{ animationDelay: `${index * 0.1}s` }}
-    >
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 to-white opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-      <div className="relative">
-        <div
-          className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-${feature.color}-100 to-${feature.color}-50 shadow-lg shadow-${feature.color}-100 transition-transform duration-300 group-hover:scale-110`}
-        >
-          <svg
-            className={`h-7 w-7 text-${feature.color}-600`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            {feature.icon}
-          </svg>
-        </div>
-        <h3 className="mt-5 text-lg font-semibold text-slate-900">
-          {feature.title}
-        </h3>
-        <p className="mt-2 text-slate-600 leading-relaxed">
-          {feature.description}
-        </p>
-      </div>
-    </div>
   );
 }
