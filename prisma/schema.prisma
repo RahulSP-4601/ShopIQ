@@ -54,6 +54,7 @@ model User {
   alerts               Alert[]
   messageFeedbacks     MessageFeedback[]
   weeklyBriefings      WeeklyBriefing[]
+  dailyBriefings       DailyBriefing[]
   aiMaturitySnapshots  AiMaturitySnapshot[]
 
   @@index([email])
@@ -720,6 +721,23 @@ model WeeklyBriefing {
   createdAt   DateTime  @default(now())
 
   @@unique([userId, weekStart])
+  @@index([userId])
+}
+
+// Daily AI-generated "Morning Coffee" briefing — emailed to sellers
+model DailyBriefing {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  reportDate  DateTime  @db.Date // Calendar date (no time component) — enforces one briefing per user per day
+  metricsData Json      // DailyMetrics serialized as JSON
+  narrative   String    @db.Text // AI-generated 3-sentence summary + action
+
+  emailSentAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@unique([userId, reportDate])
   @@index([userId])
 }
 

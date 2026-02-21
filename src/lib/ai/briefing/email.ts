@@ -5,7 +5,7 @@ import type { AiMaturity } from "@/lib/ai/memory/maturity";
 // HTML Email Template for Weekly Briefing
 // -------------------------------------------------------
 
-function getResend() {
+export function getResend() {
   const key = process.env.RESEND_API_KEY;
   if (!key) {
     throw new Error("RESEND_API_KEY is not set");
@@ -13,7 +13,7 @@ function getResend() {
   return new Resend(key);
 }
 
-function getFromEmail(): string {
+export function getFromEmail(): string {
   const fromEmail = process.env.RESEND_FROM_EMAIL;
   if (!fromEmail) {
     throw new Error("RESEND_FROM_EMAIL is not set");
@@ -27,7 +27,7 @@ const ALLOWED_URL_PROTOCOLS = new Set(["https:", "http:"]);
  * Validate and sanitize a dashboard URL to prevent dangerous schemes (e.g., javascript:).
  * Returns the HTML-escaped URL if valid, or '#' as a safe fallback.
  */
-function sanitizeDashboardUrl(url: string): string {
+export function sanitizeDashboardUrl(url: string): string {
   try {
     const parsed = new URL(url);
     if (!ALLOWED_URL_PROTOCOLS.has(parsed.protocol)) {
@@ -39,7 +39,7 @@ function sanitizeDashboardUrl(url: string): string {
   }
 }
 
-function escapeHtml(text: string): string {
+export function escapeHtml(text: string): string {
   return text
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -52,7 +52,7 @@ function escapeHtml(text: string): string {
  * Format currency with defensive handling for NaN/Infinity and proper negative formatting.
  * Returns "$0.00" for non-finite numbers, "-$X.XX" for negatives.
  */
-function formatCurrency(value: number): string {
+export function formatCurrency(value: number): string {
   if (!Number.isFinite(value)) return "$0.00";
   const sign = value < 0 ? "-" : "";
   const abs = Math.abs(value);
@@ -63,7 +63,7 @@ function formatCurrency(value: number): string {
  * Format integer with defensive handling for NaN/Infinity.
  * Returns "0" for non-finite numbers.
  */
-function formatNumber(value: number): string {
+export function formatNumber(value: number): string {
   if (!Number.isFinite(value)) return "0";
   return String(Math.round(value));
 }
@@ -84,7 +84,7 @@ export interface BriefingEmailInput {
 }
 
 // Basic email format validation — catches obviously invalid addresses before calling Resend
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function sendWeeklyBriefingEmail(
   input: BriefingEmailInput
