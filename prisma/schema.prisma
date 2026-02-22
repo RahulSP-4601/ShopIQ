@@ -55,6 +55,8 @@ model User {
   messageFeedbacks     MessageFeedback[]
   weeklyBriefings      WeeklyBriefing[]
   dailyBriefings       DailyBriefing[]
+  biWeeklyBriefings    BiWeeklyBriefing[]
+  monthlyBriefings     MonthlyBriefing[]
   aiMaturitySnapshots  AiMaturitySnapshot[]
 
   @@index([email])
@@ -738,6 +740,41 @@ model DailyBriefing {
   createdAt   DateTime  @default(now())
 
   @@unique([userId, reportDate])
+  @@index([userId])
+}
+
+// Bi-weekly AI briefing — trend analysis over 2 weeks
+model BiWeeklyBriefing {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  periodStart DateTime @db.Date // Monday of the first week
+  periodEnd   DateTime @db.Date // Sunday of the second week
+  metricsData Json
+  narrative   String   @db.Text
+
+  emailSentAt DateTime?
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, periodStart])
+  @@index([userId])
+}
+
+// Monthly AI briefing — strategic review of the full month
+model MonthlyBriefing {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  reportMonth DateTime @db.Date // 1st day of the reported month
+  metricsData Json
+  narrative   String   @db.Text
+
+  emailSentAt DateTime?
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, reportMonth])
   @@index([userId])
 }
 

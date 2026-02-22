@@ -7,12 +7,13 @@ import {
   getFromEmail,
   EMAIL_REGEX,
 } from "./email";
+import { markdownBoldToHtml, formatMarketplace } from "./daily-email";
 
 // -------------------------------------------------------
-// Daily Briefing Email Template
+// Monthly Briefing Email Template
 // -------------------------------------------------------
 
-export interface DailyBriefingEmailInput {
+export interface MonthlyBriefingEmailInput {
   email: string;
   name: string;
   narrative: string;
@@ -21,68 +22,57 @@ export interface DailyBriefingEmailInput {
   orders: number;
   aov: number;
   winnerPlatform: { marketplace: string; revenue: number } | null;
+  marketplaceBreakdown: Array<{
+    marketplace: string;
+    revenue: number;
+    orders: number;
+    aov: number;
+  }>;
   topProducts: Array<{
     title: string;
     revenue: number;
     unitsSold: number;
     marketplace: string;
   }>;
+  weeklyRevenue: Array<{
+    weekLabel: string;
+    revenue: number;
+    orders: number;
+  }>;
   lowStockProducts: Array<{
     title: string;
     inventory: number | null;
     marketplace: string;
   }>;
+  totalActiveDays: number;
+  daysInMonth: number;
   dashboardUrl: string;
-  dateLabel: string; // e.g. "Feb 21, 2026"
+  monthLabel: string; // e.g. "February"
 }
 
-/**
- * Convert markdown **bold** to <strong> tags after HTML escaping.
- * Only handles **bold** (the only markdown the AI prompt uses).
- */
-export function markdownBoldToHtml(escaped: string): string {
-  // Replace **text** with <strong>text</strong> (non-greedy, no nesting)
-  return escaped.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-}
-
-/** Marketplace display name — capitalizes nicely */
-export function formatMarketplace(mp: string): string {
-  const trimmed = mp.trim();
-  if (!trimmed) return "Marketplace";
-  // MarketplaceType enum values like SHOPIFY, EBAY, FLIPKART → Shopify, eBay, Flipkart
-  const special: Record<string, string> = {
-    EBAY: "eBay",
-    WOOCOMMERCE: "WooCommerce",
-    BIGCOMMERCE: "BigCommerce",
-  };
-  if (special[trimmed]) return special[trimmed];
-  return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
-}
-
-export async function sendDailyBriefingEmail(
-  input: DailyBriefingEmailInput
+export async function sendMonthlyBriefingEmail(
+  input: MonthlyBriefingEmailInput
 ): Promise<void> {
   if (!input.email || !EMAIL_REGEX.test(input.email)) {
     throw new Error(
-      `sendDailyBriefingEmail: invalid email format "${input.email ? input.email.slice(0, 4) + "***" : "(empty)"}"`
+      `sendMonthlyBriefingEmail: invalid email format "${input.email ? input.email.slice(0, 4) + "***" : "(empty)"}"`
     );
   }
 
   const resend = getResend();
   const safeName = escapeHtml(input.name);
 
-  // Strip control characters from dateLabel to prevent email header injection
-  const safeDateLabel = input.dateLabel.replace(/[\r\n\t\x00-\x1f\x7f]/g, "");
-
-  // Convert markdown bold → HTML strong, then split into sentences for structured display
-  const narrativeHtml = markdownBoldToHtml(
-    escapeHtml(input.narrative)
+  const safeMonthLabel = input.monthLabel.replace(
+    /[\r\n\t\x00-\x1f\x7f]/g,
+    ""
   );
-  // Split into sentences — require period + space + uppercase letter or <strong> tag
-  // to avoid breaking on decimals (₹5,200.50) or abbreviations (e.g., vs.)
-  const sentences = narrativeHtml
-    .split(/(?<=\.)\s+(?=[A-Z<])/)
-    .filter((s) => s.trim().length > 0);
+
+  // Convert markdown bold → HTML strong, then split into paragraphs
+  const narrativeHtml = markdownBoldToHtml(escapeHtml(input.narrative));
+  // For monthly narratives (multi-paragraph), split on double newlines first, then sentence breaks
+  const paragraphs = narrativeHtml
+    .split(/\n\n+/)
+    .filter((p) => p.trim().length > 0);
 
   const safeRevenueChangePercent = Number.isFinite(input.revenueChangePercent)
     ? input.revenueChangePercent
@@ -91,6 +81,14 @@ export async function sendDailyBriefingEmail(
   const changeArrow = safeRevenueChangePercent >= 0 ? "&#9650;" : "&#9660;";
   const changeColor = safeRevenueChangePercent >= 0 ? "#a7f3d0" : "#fecaca";
   const changeLabel = `${changeArrow} ${Math.abs(safeRevenueChangePercent).toFixed(1)}%`;
+
+  // Active days badge
+  const safeTotalActiveDays = Number.isFinite(input.totalActiveDays)
+    ? input.totalActiveDays
+    : 0;
+  const safeDaysInMonth = Number.isFinite(input.daysInMonth)
+    ? input.daysInMonth
+    : 30;
 
   // Winner platform badge
   const winnerBadgeHtml = input.winnerPlatform
@@ -102,7 +100,69 @@ export async function sendDailyBriefingEmail(
       </div>`
     : "";
 
-  // Top products with marketplace tags
+  // Marketplace breakdown table
+  const marketplaceTableHtml =
+    input.marketplaceBreakdown.length > 0
+      ? `
+        <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 18px 20px; margin-bottom: 20px;">
+          <h2 style="color: #111827; font-size: 14px; margin: 0 0 12px; font-weight: 700;">&#127760; Marketplace Breakdown</h2>
+          <table role="presentation" style="width: 100%; border-collapse: collapse; font-size: 13px;" cellpadding="0" cellspacing="0">
+            <tr style="border-bottom: 2px solid #e5e7eb;">
+              <th style="padding: 6px 0; text-align: left; color: #6b7280; font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Platform</th>
+              <th style="padding: 6px 0; text-align: right; color: #6b7280; font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Revenue</th>
+              <th style="padding: 6px 0; text-align: right; color: #6b7280; font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Orders</th>
+              <th style="padding: 6px 0; text-align: right; color: #6b7280; font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">AOV</th>
+            </tr>
+            ${input.marketplaceBreakdown
+              .map(
+                (m) =>
+                  `<tr>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #f3f4f6; color: #111827; font-weight: 500;">${escapeHtml(formatMarketplace(m.marketplace))}</td>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #f3f4f6; text-align: right; color: #111827; font-weight: 600;">${formatCurrency(m.revenue)}</td>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #f3f4f6; text-align: right; color: #6b7280;">${formatNumber(m.orders)}</td>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #f3f4f6; text-align: right; color: #6b7280;">${formatCurrency(m.aov)}</td>
+                  </tr>`
+              )
+              .join("")}
+          </table>
+        </div>`
+      : "";
+
+  // Weekly trend table
+  const weeklyTrendHtml =
+    input.weeklyRevenue.length > 0
+      ? `
+        <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 18px 20px; margin-bottom: 20px;">
+          <h2 style="color: #111827; font-size: 14px; margin: 0 0 12px; font-weight: 700;">&#128200; Weekly Trend</h2>
+          <table role="presentation" style="width: 100%; border-collapse: collapse; font-size: 13px;" cellpadding="0" cellspacing="0">
+            <tr style="border-bottom: 2px solid #e5e7eb;">
+              <th style="padding: 6px 0; text-align: left; color: #6b7280; font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Week</th>
+              <th style="padding: 6px 0; text-align: right; color: #6b7280; font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Revenue</th>
+              <th style="padding: 6px 0; text-align: right; color: #6b7280; font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Orders</th>
+            </tr>
+            ${input.weeklyRevenue
+              .map(
+                (w) =>
+                  `<tr>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #f3f4f6; color: #111827; font-weight: 500;">${escapeHtml(w.weekLabel)}</td>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #f3f4f6; text-align: right; color: #111827; font-weight: 600;">${formatCurrency(w.revenue)}</td>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #f3f4f6; text-align: right; color: #6b7280;">${formatNumber(w.orders)}</td>
+                  </tr>`
+              )
+              .join("")}
+          </table>
+        </div>`
+      : "";
+
+  // Narrative section — split by paragraphs for multi-paragraph monthly analysis
+  const narrativeSectionHtml = paragraphs
+    .map(
+      (para, i) =>
+        `<p style="margin: ${i === 0 ? "0" : "12px 0 0 0"}; color: #374151; font-size: 14px; line-height: 1.65;">${para.replace(/\n/g, " ")}</p>`
+    )
+    .join("");
+
+  // Top products
   const topProductsHtml =
     input.topProducts.length > 0
       ? `<table role="presentation" style="width: 100%; border-collapse: collapse;" cellpadding="0" cellspacing="0">
@@ -125,9 +185,9 @@ export async function sendDailyBriefingEmail(
             )
             .join("")}
         </table>`
-      : `<p style="margin: 8px 0; color: #9ca3af; font-size: 13px;">No product sales yesterday.</p>`;
+      : `<p style="margin: 8px 0; color: #9ca3af; font-size: 13px;">No product sales this month.</p>`;
 
-  // Low stock warning with marketplace tags
+  // Low stock warning
   const stockAlertHtml =
     input.lowStockProducts.length > 0
       ? `
@@ -152,14 +212,6 @@ export async function sendDailyBriefingEmail(
         </div>`
       : "";
 
-  // Build narrative section — each sentence gets its own styled paragraph
-  const narrativeSectionHtml = sentences
-    .map(
-      (sentence, i) =>
-        `<p style="margin: ${i === 0 ? "0" : "10px 0 0 0"}; color: #374151; font-size: 14px; line-height: 1.65;">${sentence}</p>`
-    )
-    .join("");
-
   const html = `
 <!DOCTYPE html>
 <html>
@@ -169,17 +221,17 @@ export async function sendDailyBriefingEmail(
 
     <!-- Header -->
     <div style="text-align: center; margin-bottom: 24px;">
-      <p style="margin: 0; font-size: 13px; color: #6b7280; text-transform: uppercase; letter-spacing: 1.5px;">Morning Briefing</p>
-      <h1 style="color: #111827; font-size: 22px; margin: 6px 0 0; font-weight: 700;">${escapeHtml(safeDateLabel)}</h1>
+      <p style="margin: 0; font-size: 13px; color: #6b7280; text-transform: uppercase; letter-spacing: 1.5px;">Monthly Briefing</p>
+      <h1 style="color: #111827; font-size: 22px; margin: 6px 0 0; font-weight: 700;">${escapeHtml(safeMonthLabel)}</h1>
     </div>
 
     <!-- Revenue Card -->
     <div style="background: linear-gradient(135deg, #059669, #0d9488); border-radius: 14px; padding: 28px 24px; color: #fff; margin-bottom: 20px;">
-      <p style="margin: 0 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.75;">Yesterday's Revenue</p>
+      <p style="margin: 0 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.75;">Monthly Revenue</p>
       <p style="margin: 0; font-size: 36px; font-weight: 800; letter-spacing: -0.5px;">${formatCurrency(input.revenue)}</p>
       <p style="margin: 10px 0 0; font-size: 14px;">
         <span style="color: ${changeColor}; font-weight: 600;">${changeLabel}</span>
-        <span style="opacity: 0.75;"> vs previous day</span>
+        <span style="opacity: 0.75;"> vs previous month</span>
       </p>
       <table role="presentation" style="margin-top: 18px; border-collapse: collapse;" cellpadding="0" cellspacing="0">
         <tr>
@@ -187,16 +239,24 @@ export async function sendDailyBriefingEmail(
             <p style="margin: 0; font-size: 11px; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.5px;">Orders</p>
             <p style="margin: 3px 0 0; font-size: 20px; font-weight: 700;">${formatNumber(input.orders)}</p>
           </td>
-          <td style="vertical-align: top;">
+          <td style="padding-right: 28px; vertical-align: top;">
             <p style="margin: 0; font-size: 11px; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.5px;">Avg Order</p>
             <p style="margin: 3px 0 0; font-size: 20px; font-weight: 700;">${formatCurrency(input.aov)}</p>
+          </td>
+          <td style="vertical-align: top;">
+            <p style="margin: 0; font-size: 11px; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.5px;">Active Days</p>
+            <p style="margin: 3px 0 0; font-size: 20px; font-weight: 700;">${formatNumber(safeTotalActiveDays)}/${formatNumber(safeDaysInMonth)}</p>
           </td>
         </tr>
       </table>
       ${winnerBadgeHtml}
     </div>
 
-    <!-- Frax's Morning Briefing -->
+    ${marketplaceTableHtml}
+
+    ${weeklyTrendHtml}
+
+    <!-- Frax's Monthly Analysis -->
     <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 22px 20px; margin-bottom: 20px;">
       <table role="presentation" style="width: 100%; border-collapse: collapse;" cellpadding="0" cellspacing="0">
         <tr>
@@ -204,7 +264,7 @@ export async function sendDailyBriefingEmail(
             <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #8b5cf6, #6d28d9); border-radius: 8px; text-align: center; line-height: 32px; font-size: 16px;">&#9889;</div>
           </td>
           <td style="vertical-align: middle; padding-left: 10px;">
-            <h2 style="color: #111827; font-size: 15px; margin: 0; font-weight: 700;">Frax's Morning Briefing</h2>
+            <h2 style="color: #111827; font-size: 15px; margin: 0; font-weight: 700;">Frax's Monthly Analysis</h2>
           </td>
         </tr>
       </table>
@@ -230,8 +290,8 @@ export async function sendDailyBriefingEmail(
 
     <!-- Footer -->
     <p style="text-align: center; color: #9ca3af; font-size: 11px; margin-top: 32px; line-height: 1.5;">
-      Good morning ${safeName} &#9749;<br>
-      Your daily briefing from <strong>Frame</strong>, powered by <strong>Frax</strong>.
+      Hello ${safeName} &#128202;<br>
+      Your monthly briefing from <strong>Frame</strong>, powered by <strong>Frax</strong>.
     </p>
   </div>
 </body>
@@ -240,13 +300,13 @@ export async function sendDailyBriefingEmail(
   const { error } = await resend.emails.send({
     from: getFromEmail(),
     to: input.email,
-    subject: `${safeDateLabel} — Daily Report Ready`,
+    subject: `${safeMonthLabel} — Monthly Report Ready`,
     html,
   });
 
   if (error) {
     throw new Error(
-      `sendDailyBriefingEmail: Resend API error — ${error.name}: ${error.message}`
+      `sendMonthlyBriefingEmail: Resend API error — ${error.name}: ${error.message}`
     );
   }
 }

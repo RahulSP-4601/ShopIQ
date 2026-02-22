@@ -105,10 +105,7 @@ export async function sendWeeklyBriefingEmail(
     : 0;
 
   const changeArrowHtml = safeRevenueChangePercent >= 0 ? "&#9650;" : "&#9660;";
-  const changeArrowUnicode = safeRevenueChangePercent >= 0 ? "\u25B2" : "\u25BC";
   const changeLabel = `${changeArrowHtml} ${Math.abs(safeRevenueChangePercent).toFixed(1)}%`;
-  const changeLabelPlain = `${changeArrowUnicode} ${Math.abs(safeRevenueChangePercent).toFixed(1)}%`;
-
   const topProductRows = input.topProducts
     .map(
       (p, i) =>
@@ -213,7 +210,7 @@ export async function sendWeeklyBriefingEmail(
   const { error } = await resend.emails.send({
     from: getFromEmail(),
     to: input.email,
-    subject: `Your Weekly Briefing - ${formatCurrency(input.revenue)} revenue ${changeLabelPlain}`,
+    subject: `${input.weekLabel} — Weekly Report Ready`,
     html,
   });
 
