@@ -1,10 +1,7 @@
 import prisma from "@/lib/prisma";
 import OpenAI from "openai";
 import { UnifiedOrderStatus } from "@prisma/client";
-import {
-  getRevenueMetrics,
-  getTopProducts,
-} from "@/lib/metrics/calculator";
+import { getRevenueMetrics } from "@/lib/metrics/calculator";
 
 // -------------------------------------------------------
 // Types
@@ -28,11 +25,13 @@ export interface DailyMetrics {
     title: string;
     revenue: number;
     unitsSold: number;
+    marketplace: string;
   }>;
   lowStockProducts: Array<{
     title: string;
     inventory: number | null;
     sku: string | null;
+    marketplace: string;
   }>;
   alertsSummary: {
     total: number;
@@ -70,14 +69,37 @@ export async function aggregateDailyMetrics(
   const [
     currentMetrics,
     previousMetrics,
-    topProducts,
+    topItemsAgg,
     marketplaceGroups,
     lowStockProducts,
     alertGroups,
   ] = await Promise.all([
     getRevenueMetrics(userId, dayStart, dayEndInclusive),
     getRevenueMetrics(userId, previousDayStart, previousDayEndInclusive),
-    getTopProducts(userId, 3, dayStart, dayEndInclusive),
+    // DB-level aggregation for top products — avoids loading all individual
+    // order items into memory (which can OOM on high-volume stores)
+    prisma.$queryRaw<Array<{
+      product_key: string;
+      title: string;
+      marketplace: string;
+      revenue: number;
+      units_sold: number;
+    }>>`
+      SELECT
+        COALESCE(oi."sku", oi."title", '_unknown') AS product_key,
+        MAX(COALESCE(oi."title", 'Unknown product')) AS title,
+        o."marketplace"::text AS marketplace,
+        SUM(COALESCE(CAST(oi."unitPrice" AS double precision), 0)
+            * COALESCE(oi."quantity", 0)) AS revenue,
+        SUM(COALESCE(oi."quantity", 0))::int AS units_sold
+      FROM "UnifiedOrderItem" oi
+      JOIN "UnifiedOrder" o ON oi."orderId" = o."id"
+      WHERE o."userId" = ${userId}
+        AND o."orderedAt" >= ${dayStart}
+        AND o."orderedAt" <= ${dayEndInclusive}
+        AND o."status" != 'CANCELLED'::"UnifiedOrderStatus"
+      GROUP BY product_key, o."marketplace"
+    `,
     prisma.unifiedOrder.groupBy({
       by: ["marketplace"],
       where: {
@@ -90,7 +112,7 @@ export async function aggregateDailyMetrics(
     }),
     prisma.unifiedProduct.findMany({
       where: { userId, status: "ACTIVE", inventory: { lt: 10 } },
-      select: { title: true, inventory: true, sku: true },
+      select: { title: true, inventory: true, sku: true, marketplace: true },
       orderBy: { inventory: "asc" },
       take: 5,
     }),
@@ -104,9 +126,49 @@ export async function aggregateDailyMetrics(
     }),
   ]);
 
+  // Aggregate DB-level results across marketplaces to find top 3 products
+  const productAgg = new Map<
+    string,
+    { title: string; revenue: number; unitsSold: number; marketplaces: Map<string, number> }
+  >();
+  for (const row of topItemsAgg) {
+    const existing = productAgg.get(row.product_key) || {
+      title: row.title,
+      revenue: 0,
+      unitsSold: 0,
+      marketplaces: new Map<string, number>(),
+    };
+    const rowRevenue = Number(row.revenue) || 0;
+    existing.revenue += rowRevenue;
+    existing.unitsSold += Number(row.units_sold) || 0;
+    existing.marketplaces.set(
+      row.marketplace,
+      (existing.marketplaces.get(row.marketplace) || 0) + rowRevenue
+    );
+    productAgg.set(row.product_key, existing);
+  }
+
+  const topProducts = Array.from(productAgg.values())
+    .sort((a, b) => b.revenue - a.revenue)
+    .slice(0, 3)
+    .map((p) => {
+      // Pick the marketplace with highest revenue for this product
+      let bestMp = "";
+      let bestRev = -1;
+      for (const [mp, rev] of p.marketplaces) {
+        if (rev > bestRev) { bestMp = mp; bestRev = rev; }
+      }
+      return {
+        title: p.title,
+        revenue: p.revenue,
+        unitsSold: p.unitsSold,
+        marketplace: bestMp,
+      };
+    });
+
   // Build per-marketplace breakdown, sorted by revenue descending
   const marketplaceBreakdown: MarketplaceBreakdown[] = marketplaceGroups
-    .map((g) => {
+    .map((g: typeof marketplaceGroups[number]) => {
       const revenue = Number(g._sum.totalAmount || 0);
       const orders = g._count._all;
       return {
@@ -116,7 +178,7 @@ export async function aggregateDailyMetrics(
         aov: orders > 0 ? revenue / orders : 0,
       };
     })
-    .sort((a, b) => b.revenue - a.revenue);
+    .sort((a: MarketplaceBreakdown, b: MarketplaceBreakdown) => b.revenue - a.revenue);
 
   // Winner = highest-revenue marketplace (null if no sales)
   const winnerPlatform =
@@ -160,11 +222,7 @@ export async function aggregateDailyMetrics(
     revenueChangePercent: Math.round(revenueChangePercent * 10) / 10,
     marketplaceBreakdown,
     winnerPlatform,
-    topProducts: topProducts.map((p) => ({
-      title: p.title,
-      revenue: p.revenue,
-      unitsSold: p.unitsSold,
-    })),
+    topProducts,
     lowStockProducts,
     alertsSummary: {
       total: totalAlerts,
@@ -201,20 +259,20 @@ async function generateDailyNarrative(
 Store: ${storeName}
 Report Date: ${metrics.reportDate}
 
-Yesterday's Revenue: $${safe(metrics.revenue.total).toFixed(2)} (${safe(metrics.revenue.orders)} orders, AOV: $${safe(metrics.revenue.aov).toFixed(2)})
-Previous Day: $${safe(metrics.previousDay.total).toFixed(2)} (${safe(metrics.previousDay.orders)} orders)
+Yesterday's Revenue: ₹${safe(metrics.revenue.total).toFixed(2)} (${safe(metrics.revenue.orders)} orders, AOV: ₹${safe(metrics.revenue.aov).toFixed(2)})
+Previous Day: ₹${safe(metrics.previousDay.total).toFixed(2)} (${safe(metrics.previousDay.orders)} orders)
 Day-over-Day Change: ${metrics.revenueChangePercent > 0 ? "+" : ""}${safe(metrics.revenueChangePercent)}%
 
 Per-Marketplace Breakdown:
-${metrics.marketplaceBreakdown.length > 0 ? metrics.marketplaceBreakdown.map((m) => `- ${m.marketplace}: $${safe(m.revenue).toFixed(2)} (${safe(m.orders)} orders, AOV: $${safe(m.aov).toFixed(2)})`).join("\n") : "No marketplace data."}
+${metrics.marketplaceBreakdown.length > 0 ? metrics.marketplaceBreakdown.map((m) => `- ${m.marketplace}: ₹${safe(m.revenue).toFixed(2)} (${safe(m.orders)} orders, AOV: ₹${safe(m.aov).toFixed(2)})`).join("\n") : "No marketplace data."}
 
-Winner Platform: ${metrics.winnerPlatform ? `${metrics.winnerPlatform.marketplace} with $${safe(metrics.winnerPlatform.revenue).toFixed(2)}` : "No sales yesterday"}
+Winner Platform: ${metrics.winnerPlatform ? `${metrics.winnerPlatform.marketplace} with ₹${safe(metrics.winnerPlatform.revenue).toFixed(2)}` : "No sales yesterday"}
 
 Top 3 Products:
-${metrics.topProducts.length > 0 ? metrics.topProducts.map((p, i) => `${i + 1}. ${p.title}: $${safe(p.revenue).toFixed(2)} (${safe(p.unitsSold)} units)`).join("\n") : "No product sales."}
+${metrics.topProducts.length > 0 ? metrics.topProducts.map((p, i) => `${i + 1}. ${p.title} [${p.marketplace}]: ₹${safe(p.revenue).toFixed(2)} (${safe(p.unitsSold)} units)`).join("\n") : "No product sales."}
 
 Low Stock Alert:
-${metrics.lowStockProducts.length > 0 ? metrics.lowStockProducts.map((p) => `- ${p.title}: ${safe(p.inventory)} units remaining`).join("\n") : "No low-stock products."}
+${metrics.lowStockProducts.length > 0 ? metrics.lowStockProducts.map((p) => `- ${p.title} [${p.marketplace}]: ${safe(p.inventory)} units remaining`).join("\n") : "No low-stock products."}
 
 Alerts Yesterday: ${safe(metrics.alertsSummary.total)} total (${safe(metrics.alertsSummary.stockout)} stockout, ${safe(metrics.alertsSummary.demandSurge)} demand surge, ${safe(metrics.alertsSummary.revenueAnomaly)} revenue anomaly)
 `;
@@ -233,7 +291,7 @@ Alerts Yesterday: ${safe(metrics.alertsSummary.total)} total (${safe(metrics.ale
 - Sentence 1: Yesterday's headline number and how it compares to the day before (up/down/flat).
 - Sentence 2: Call out the winning marketplace platform and what drove it (or the top product if single marketplace).
 - Sentence 3: ONE specific, highest-impact action for today — be concrete (e.g., "Restock X before it sells out" or "Run a flash sale on Y to clear slow inventory").
-- Use **bold** for key numbers and platform names.
+- Use **bold** for key numbers and platform names. Always use ₹ for currency (INR), never $.
 - Tone: confident, concise, like a smart co-founder texting you over morning coffee.
 - Never use bullet points, headers, or lists. Just 3 flowing sentences.
 - If there were zero sales, acknowledge it matter-of-factly and suggest an action to change that.`,

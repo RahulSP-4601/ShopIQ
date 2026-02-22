@@ -50,13 +50,13 @@ export function escapeHtml(text: string): string {
 
 /**
  * Format currency with defensive handling for NaN/Infinity and proper negative formatting.
- * Returns "$0.00" for non-finite numbers, "-$X.XX" for negatives.
+ * Returns "₹0.00" for non-finite numbers, "-₹X.XX" for negatives.
  */
 export function formatCurrency(value: number): string {
-  if (!Number.isFinite(value)) return "$0.00";
+  if (!Number.isFinite(value)) return "₹0.00";
   const sign = value < 0 ? "-" : "";
   const abs = Math.abs(value);
-  return `${sign}$${abs.toFixed(2)}`;
+  return `${sign}₹${abs.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 /**

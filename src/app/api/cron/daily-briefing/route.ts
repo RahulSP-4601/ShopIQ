@@ -170,7 +170,7 @@ export async function GET(request: NextRequest) {
                     winnerPlatform: metrics.winnerPlatform,
                     topProducts: metrics.topProducts,
                     lowStockProducts: metrics.lowStockProducts,
-                    dashboardUrl: `${appUrl}/dashboard`,
+                    dashboardUrl: `${appUrl}/chat`,
                     dateLabel,
                   });
                 } catch (sendError) {

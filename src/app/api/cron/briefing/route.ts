@@ -201,7 +201,7 @@ export async function GET(request: NextRequest) {
                     topProducts: metrics.topProducts,
                     lowStockProducts: metrics.lowStockProducts,
                     maturity: validatedMaturity,
-                    dashboardUrl: `${appUrl}/dashboard`,
+                    dashboardUrl: `${appUrl}/chat`,
                     weekLabel,
                   });
                 } catch (sendError) {
