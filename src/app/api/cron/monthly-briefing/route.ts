@@ -144,7 +144,13 @@ export async function GET(request: NextRequest) {
           typeof metrics.revenueChangePercent !== "number" ||
           !Array.isArray(metrics.marketplaceBreakdown) ||
           !Array.isArray(metrics.topProducts) ||
-          !Array.isArray(metrics.lowStockProducts)
+          !Array.isArray(metrics.lowStockProducts) ||
+          !Array.isArray(metrics.weeklyRevenue) ||
+          typeof metrics.totalActiveDays !== "number" ||
+          (metrics.winnerPlatform !== null &&
+            (typeof metrics.winnerPlatform !== "object" ||
+              typeof metrics.winnerPlatform.marketplace !== "string" ||
+              typeof metrics.winnerPlatform.revenue !== "number"))
         ) {
           console.error(
             `Monthly briefing cron: metricsData has unexpected shape for user ${user.id}, ` +

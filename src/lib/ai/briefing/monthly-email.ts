@@ -62,9 +62,8 @@ export async function sendMonthlyBriefingEmail(
   const resend = getResend();
   const safeName = escapeHtml(input.name);
 
-  const safeMonthLabel = input.monthLabel.replace(
-    /[\r\n\t\x00-\x1f\x7f]/g,
-    ""
+  const safeMonthLabel = escapeHtml(
+    input.monthLabel.replace(/[\r\n\t\x00-\x1f\x7f]/g, "")
   );
 
   // Convert markdown bold → HTML strong, then split into paragraphs
@@ -222,7 +221,7 @@ export async function sendMonthlyBriefingEmail(
     <!-- Header -->
     <div style="text-align: center; margin-bottom: 24px;">
       <p style="margin: 0; font-size: 13px; color: #6b7280; text-transform: uppercase; letter-spacing: 1.5px;">Monthly Briefing</p>
-      <h1 style="color: #111827; font-size: 22px; margin: 6px 0 0; font-weight: 700;">${escapeHtml(safeMonthLabel)}</h1>
+      <h1 style="color: #111827; font-size: 22px; margin: 6px 0 0; font-weight: 700;">${safeMonthLabel}</h1>
     </div>
 
     <!-- Revenue Card -->

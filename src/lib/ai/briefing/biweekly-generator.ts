@@ -243,7 +243,7 @@ export async function aggregateBiWeeklyMetrics(
 
   return {
     periodStart: startInclusive.toISOString().split("T")[0],
-    periodEnd: periodEnd.toISOString().split("T")[0],
+    periodEnd: endInclusive.toISOString().split("T")[0],
     revenue: {
       total: currentMetrics.totalRevenue,
       orders: currentMetrics.totalOrders,
@@ -422,26 +422,25 @@ async function acquireBiWeeklyGenerationLock(
       "code" in error &&
       (error as { code: string }).code === "P2002"
     ) {
-      const existing = await prisma.biWeeklyBriefing.findFirst({
-        where: { userId, periodStart },
+      // Atomic lock reclaim: single UPDATE with all conditions (no TOCTOU)
+      const reclaimed = await prisma.biWeeklyBriefing.updateMany({
+        where: {
+          userId,
+          periodStart,
+          narrative: LOCK_PLACEHOLDER_NARRATIVE,
+          createdAt: { lt: new Date(Date.now() - LOCK_TTL_MS) },
+        },
+        data: { createdAt: new Date() },
       });
-      if (
-        existing &&
-        existing.narrative === LOCK_PLACEHOLDER_NARRATIVE &&
-        Date.now() - existing.createdAt.getTime() > LOCK_TTL_MS
-      ) {
-        const reclaimed = await prisma.biWeeklyBriefing.updateMany({
-          where: {
-            id: existing.id,
-            narrative: LOCK_PLACEHOLDER_NARRATIVE,
-            createdAt: existing.createdAt,
-          },
-          data: { createdAt: new Date() },
-        });
-        if (reclaimed.count === 0) return { acquired: false };
-        return { acquired: true, briefingId: existing.id };
-      }
-      return { acquired: false };
+      if (reclaimed.count === 0) return { acquired: false };
+
+      // We won the reclaim — fetch the ID
+      const reclaimedRecord = await prisma.biWeeklyBriefing.findFirst({
+        where: { userId, periodStart },
+        select: { id: true },
+      });
+      if (!reclaimedRecord) return { acquired: false };
+      return { acquired: true, briefingId: reclaimedRecord.id };
     }
     throw error;
   }

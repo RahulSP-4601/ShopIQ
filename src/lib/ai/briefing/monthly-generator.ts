@@ -483,26 +483,25 @@ async function acquireMonthlyGenerationLock(
       "code" in error &&
       (error as { code: string }).code === "P2002"
     ) {
-      const existing = await prisma.monthlyBriefing.findFirst({
-        where: { userId, reportMonth },
+      // Atomic lock reclaim: single UPDATE with all conditions (no TOCTOU)
+      const reclaimed = await prisma.monthlyBriefing.updateMany({
+        where: {
+          userId,
+          reportMonth,
+          narrative: LOCK_PLACEHOLDER_NARRATIVE,
+          createdAt: { lt: new Date(Date.now() - LOCK_TTL_MS) },
+        },
+        data: { createdAt: new Date() },
       });
-      if (
-        existing &&
-        existing.narrative === LOCK_PLACEHOLDER_NARRATIVE &&
-        Date.now() - existing.createdAt.getTime() > LOCK_TTL_MS
-      ) {
-        const reclaimed = await prisma.monthlyBriefing.updateMany({
-          where: {
-            id: existing.id,
-            narrative: LOCK_PLACEHOLDER_NARRATIVE,
-            createdAt: existing.createdAt,
-          },
-          data: { createdAt: new Date() },
-        });
-        if (reclaimed.count === 0) return { acquired: false };
-        return { acquired: true, briefingId: existing.id };
-      }
-      return { acquired: false };
+      if (reclaimed.count === 0) return { acquired: false };
+
+      // We won the reclaim — fetch the ID
+      const reclaimedRecord = await prisma.monthlyBriefing.findFirst({
+        where: { userId, reportMonth },
+        select: { id: true },
+      });
+      if (!reclaimedRecord) return { acquired: false };
+      return { acquired: true, briefingId: reclaimedRecord.id };
     }
     throw error;
   }
