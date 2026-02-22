@@ -743,6 +743,183 @@ ALWAYS use market demand framing:
 
 ---
 
+## Cold-Start Phase — How Recommendations Work Before 100 Clients
+
+### Two Phases
+
+The channel-product fit engine operates in **two distinct phases** based on total platform user count:
+
+| Phase | Condition | Active Recommendations | EXPAND + Benchmarks |
+|---|---|---|---|
+| **Phase 1: Early** | **< 100 total clients** on ShopIQ | **RESTOCK + REPRICE only** (user's own data) | Disabled entirely |
+| **Phase 2: Full** | **100+ total clients** on ShopIQ | All 4 types: EXPAND, RESTOCK, REPRICE, DEPRIORITIZE | Enabled (per-cluster, when 5+ sellers in a product cluster) |
+
+**Why 100?** With fewer than 100 clients, there's not enough cross-tenant data for meaningful benchmarks, and priors-only EXPAND recommendations are just generic advice the seller already knows. Rather than showing low-confidence guesses, we wait until the platform has enough sellers for real data to emerge.
+
+### Phase 1: < 100 Clients — RESTOCK + REPRICE Only
+
+During Phase 1, the `get_channel_product_fit` tool only generates two recommendation types, both powered entirely by the **user's own sales data**:
+
+#### RESTOCK — "Your stock is running low"
+
+Fully powered by user's own data — no benchmarks needed. If their stock is low and velocity is high, we recommend restocking.
+
+- `daysRemaining = currentStock / unitVelocity`
+- Triggers when < 14 days of stock remaining
+- Urgency: critical < 7 days, warning < 14 days
+
+#### REPRICE — "Your pricing is misaligned across your own channels"
+
+Cross-channel price comparison using the user's own channels only. If the same product is priced differently across their connected marketplaces, we flag it.
+
+- Market price comparison (vs other sellers) — **not available**, skipped entirely
+- Only compares the user's own prices across their connected marketplaces
+
+#### What's Disabled in Phase 1
+
+- **EXPAND** — No "where else to sell" recommendations. Without benchmarks, this would just be generic category advice ("eBay is good for electronics") which adds no value.
+- **DEPRIORITIZE** — Requires enough data context to confidently tell a seller to reduce focus on a channel. Too risky with limited data.
+- **Cross-tenant benchmarks** — Not queried at all. No benchmark DB queries, no clustering, no k-anonymity checks.
+- **Fit scores / channel scoring** — Not computed. No 0-100 scores shown.
+
+#### Example Frax Response — Phase 1 (< 100 clients)
+
+User asks "Where else can I sell my JBL speaker?"
+
+```
+I can help you optimize your current channels based on your sales data!
+
+Your JBL Bluetooth Speaker on Shopify
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Selling ~2 units/day at ₹2,500 with a steady upward trend over the last 6 weeks.
+
+⚠️ Restock alert
+Only 45 units in stock (~6 days remaining at current velocity).
+Suggested restock: 240 units (30-day supply).
+
+💰 Pricing note
+Your JBL Speaker is priced at ₹2,500 on Shopify but ₹2,200 on eBay —
+a ₹300 gap. Consider aligning pricing or keeping the difference intentional
+based on each channel's fee structure.
+
+Channel expansion recommendations will become available as our platform
+grows and we can provide data-backed marketplace suggestions.
+```
+
+**What the user gets:** Actionable, data-backed alerts about their own inventory and pricing. No guesswork, no generic advice.
+
+**What the user doesn't get:** Any EXPAND suggestions. No "try Flipkart" — because without real demand data, that's just a guess.
+
+### Phase 2: 100+ Clients — Full Engine Activates
+
+Once ShopIQ reaches 100 total clients, the full engine turns on:
+
+- **EXPAND** recommendations activate — backed by cross-tenant benchmarks where 5+ sellers exist in a product cluster, falls back to marketplace priors where they don't
+- **DEPRIORITIZE** recommendations activate — enough data context to confidently suggest reducing focus
+- **REPRICE** gains market pricing — "similar products on Flipkart average ₹2,299" (when benchmarks available)
+- **Cross-tenant benchmark queries** start running (cached 24h)
+- **Fit scores** (0-100) computed per product per marketplace
+
+The transition from Phase 1 → Phase 2 is a **single check**: total user count >= 100. Within Phase 2, individual product clusters still need 5+ sellers to generate benchmark data — clusters without enough sellers fall back to marketplace priors for EXPAND reasoning.
+
+#### Example Frax Response — Phase 2 (100+ clients, benchmarks active)
+
+Same user, same question: "Where else can I sell my JBL speaker?"
+
+```
+Your JBL Bluetooth Speaker on Shopify
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Fit score: 72/100 (good) | Confidence: 82%
+Selling ~2 units/day at ₹2,500 with a steady upward trend.
+
+Where else to sell — backed by market demand data
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+| Marketplace | Fit Score | Market Demand     | Avg Price | Status        |
+|------------|-----------|-------------------|-----------|---------------|
+| Flipkart   | 85/100    | ~210 sold/week    | ₹2,299    | Not connected |
+| eBay       | 71/100    | ~95 sold/week     | ₹2,150    | Not connected |
+| Square     | 48/100    | ~12 sold/week     | ₹2,800    | Connected     |
+
+🔥 Top recommendation: List on Flipkart
+~210 similar Bluetooth speakers sold on Flipkart last week with ₹4,800/day
+market demand. Average price ₹2,299 — your ₹2,500 pricing is competitive.
+Connect Flipkart from Settings → Marketplaces.
+Estimated uplift: +₹45,000/month (~30% increase).
+```
+
+### Implementation Notes
+
+- **Phase check**: `analyzeChannelProductFit()` first queries total user count (`prisma.user.count()`). If < 100, skip EXPAND/DEPRIORITIZE/benchmarks entirely — only run RESTOCK + REPRICE logic on user's own data.
+- No feature flags — the threshold (100) is a constant in `index.ts`
+- As the platform grows past 100 clients, EXPAND/benchmarks silently activate for all users on their next query
+- Within Phase 2, individual clusters still need 5+ sellers for benchmark data — the 100-client gate just controls whether the engine attempts benchmarks at all
+
+---
+
+## Dominant Seller Edge Case — Top Seller Gets Diluted EXPAND
+
+### The Problem
+
+The spec requires **excluding the requesting user's own data** from cross-tenant benchmarks (so they compare against the market, not themselves). This creates a problem for dominant sellers.
+
+**Example**: 8 sellers sell JBL speakers on Flipkart. The top seller accounts for 168 of 210 weekly units (80%).
+
+| Who asks | Benchmark they see | What Frax says |
+|---|---|---|
+| Normal seller (2 units/week) | ~208 sold/week (all others including top seller) | "~208 similar speakers sold on Flipkart last week" — impressive |
+| **Top seller (168 units/week)** | **~42 sold/week** (only the other 7 sellers) | "~42 similar speakers sold on Flipkart last week" — underwhelming |
+
+The top seller — who contributes the most to the platform's data — gets the **least impressive EXPAND recommendations**. A marketplace that looks hot for everyone else looks lukewarm for them.
+
+### How Each Recommendation Type Affects the Top Seller
+
+| Recommendation | Impact | Why |
+|---|---|---|
+| **EXPAND** | **Diluted** — demand numbers shrink after excluding their data | They ARE the market on that cluster. Removing them deflates the numbers. |
+| **RESTOCK** | **Strong** — high velocity = frequent stock alerts | Purely own data. Top seller sells fast, stock burns fast. Works perfectly. |
+| **REPRICE** | **Strong** — spots underpricing vs market average | If they sell high volume at lower price than market avg, system flags margin opportunity: "You're at ₹2,500 — market avg ₹2,800. Room to increase." |
+| **DEPRIORITIZE** | **Strong** — multi-channel comparison reveals weak spots | Even top sellers have channels where they underperform relative to their own average. |
+
+### Example Frax Response — Top Seller Asks "Where else to sell my JBL speaker?"
+
+```
+Your JBL Bluetooth Speaker on Shopify
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Fit score: 91/100 (strong) | Confidence: 88%
+Selling ~24 units/day at ₹2,500 — you're a top performer on this channel.
+
+Where else to sell
+━━━━━━━━━━━━━━━━━━
+| Marketplace | Fit Score | Market Demand    | Avg Price | Status        |
+|------------|-----------|------------------|-----------|---------------|
+| Flipkart   | 62/100    | ~42 sold/week    | ₹2,450    | Not connected |
+| eBay       | 55/100    | ~18 sold/week    | ₹2,150    | Not connected |
+
+Flipkart shows ~42 similar speakers sold last week with market demand of
+₹1,470/day. Average price ₹2,450. Connect Flipkart from Settings →
+Marketplaces to start listing.
+Estimated uplift: +₹12,000/month (~8% increase).
+
+💰 Pricing opportunity
+Your JBL Speaker is priced at ₹2,500 — similar products on Shopify
+average ₹2,800. At your volume (~24 units/day), even a ₹100 increase
+could add ~₹72,000/month.
+```
+
+**Key differences from a normal seller's response:**
+- Market demand numbers are much smaller (~42 vs ~210) because their own 168 units are excluded
+- Estimated uplift is modest (~8% vs ~30%) because the benchmark is deflated
+- But REPRICE becomes very valuable — at high volume, small price changes = big revenue impact
+- The system naturally pivots to recommending pricing optimization over channel expansion
+
+### Why This Is Correct Behavior
+
+- **Mathematically honest**: The top seller shouldn't be told "the market is hot" when they ARE the market
+- **Still useful**: RESTOCK and REPRICE are highly valuable at their volume — a ₹100 price increase at 24 units/day = ₹72,000/month
+- **No fix needed**: This is the correct outcome. The system naturally gives the top seller different but equally actionable advice — optimize what you have (pricing, stock) rather than chase smaller markets
+
+---
+
 ## Verification
 
 1. **Type check**: `npx tsc --noEmit`
