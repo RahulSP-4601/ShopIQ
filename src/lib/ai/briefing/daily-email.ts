@@ -2,7 +2,6 @@ import {
   escapeHtml,
   formatCurrency,
   formatNumber,
-  sanitizeDashboardUrl,
   getResend,
   getFromEmail,
   EMAIL_REGEX,
@@ -220,13 +219,6 @@ export async function sendDailyBriefingEmail(
     </div>
 
     ${stockAlertHtml}
-
-    <!-- CTA -->
-    <div style="text-align: center; margin: 28px 0;">
-      <a href="${sanitizeDashboardUrl(input.dashboardUrl)}" rel="noreferrer noopener" style="display: inline-block; background: linear-gradient(135deg, #111827, #1f2937); color: #fff; text-decoration: none; padding: 14px 40px; border-radius: 10px; font-weight: 600; font-size: 14px; letter-spacing: 0.3px;">
-        Open Dashboard &rarr;
-      </a>
-    </div>
 
     <!-- Footer -->
     <p style="text-align: center; color: #9ca3af; font-size: 11px; margin-top: 32px; line-height: 1.5;">
