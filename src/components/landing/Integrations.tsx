@@ -84,13 +84,12 @@ const marketplaces = [
     ),
   },
   {
-    name: "PrestaShop",
-    color: "#DF0067",
+    name: "Wix",
+    color: "#0C6EFC",
     logo: (
       <svg className="w-10 h-10" viewBox="0 0 48 48" fill="none">
-        <path d="M24 48c13.255 0 24-10.745 24-24S37.255 0 24 0 0 10.745 0 24s10.745 24 24 24z" fill="#DF0067"/>
-        <path d="M33.6 16.8c0-3.84-3.12-6.96-6.96-6.96h-7.68v6.96h7.68c0 3.84-3.12 6.96-6.96 6.96h-.72v6.96h.72c7.68 0 13.92-6.24 13.92-13.92z" fill="#fff"/>
-        <path d="M18.96 23.76h-4.8v14.4h4.8v-14.4z" fill="#fff"/>
+        <rect width="48" height="48" rx="8" fill="#0C6EFC"/>
+        <path d="M12 14l4.8 20h1.2l4.8-14.4L27.6 34h1.2L33.6 14h-3.6l-2.4 12-4.2-12h-1.2l-4.2 12-2.4-12H12z" fill="#fff"/>
       </svg>
     ),
   },
@@ -106,12 +105,15 @@ const marketplaces = [
     ),
   },
   {
-    name: "SnapDeal",
-    color: "#E40046",
+    name: "WooCommerce",
+    color: "#96588A",
     logo: (
       <svg className="w-10 h-10" viewBox="0 0 48 48" fill="none">
-        <rect width="48" height="48" rx="8" fill="#E40046"/>
-        <path d="M24 10c-7.732 0-14 6.268-14 14s6.268 14 14 14 14-6.268 14-14-6.268-14-14-14zm5.6 20.3c-1.4 1.4-3.3 2.1-5.6 2.1-2.3 0-4.2-.7-5.6-2.1-1.4-1.4-2.1-3.3-2.1-5.6h3.5c0 1.3.4 2.4 1.2 3.2.8.8 1.8 1.2 3 1.2s2.2-.4 3-1.2c.8-.8 1.2-1.9 1.2-3.2s-.4-2.4-1.2-3.2c-.8-.8-1.8-1.2-3-1.2v-3.5c2.3 0 4.2.7 5.6 2.1 1.4 1.4 2.1 3.3 2.1 5.6 0 2.6-.7 4.5-2.1 5.8z" fill="#fff"/>
+        <rect width="48" height="48" rx="8" fill="#96588A"/>
+        <path d="M8 14c0-1.1.9-2 2-2h28c1.1 0 2 .9 2 2v16c0 1.1-.9 2-2 2H26l-4 4-4-4H10c-1.1 0-2-.9-2-2V14z" fill="#fff"/>
+        <circle cx="17" cy="22" r="2.5" fill="#96588A"/>
+        <circle cx="24" cy="22" r="2.5" fill="#96588A"/>
+        <circle cx="31" cy="22" r="2.5" fill="#96588A"/>
       </svg>
     ),
   },
@@ -174,12 +176,13 @@ export function Integrations() {
             Powered by Real-Time Sync
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-            <span className="text-slate-900">Your </span>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-600">Command Center</span>
+            <span className="text-slate-900">One Dashboard. </span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-600">Every Marketplace.</span>
           </h2>
           <p className="mt-6 text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
-            Connect once, analyze everywhere. Frame syncs with every major marketplace
-            to give you unified insights across all your sales channels.
+            Connect once with secure OAuth. Frame syncs your orders, products, and inventory
+            in real-time — normalizing data from every channel into one unified view.
+            No API keys. No CSV exports. No manual work.
           </p>
         </div>
 
@@ -381,6 +384,42 @@ export function Integrations() {
           </div>
         </div>
 
+        {/* Key point cards */}
+        <div className="fade-up grid gap-4 md:grid-cols-3 mt-8 lg:mt-16 max-w-4xl mx-auto">
+          <div className="flex items-start gap-4 p-5 rounded-xl border border-slate-100 bg-white hover:shadow-lg transition-all duration-300">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-teal-600">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+              </svg>
+            </div>
+            <div>
+              <h4 className="font-semibold text-slate-900 text-sm">One-Click Secure Connect</h4>
+              <p className="text-xs text-slate-500 mt-1">OAuth 2.0 — no API keys to copy-paste. Read-only access means Frame never modifies your store.</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-4 p-5 rounded-xl border border-slate-100 bg-white hover:shadow-lg transition-all duration-300">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+              </svg>
+            </div>
+            <div>
+              <h4 className="font-semibold text-slate-900 text-sm">Real-Time Sync</h4>
+              <p className="text-xs text-slate-500 mt-1">Webhooks push updates instantly (Shopify, BigCommerce, Square). All others sync every 15 minutes.</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-4 p-5 rounded-xl border border-slate-100 bg-white hover:shadow-lg transition-all duration-300">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-violet-50 text-violet-600">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L12 12.75 6.429 9.75m11.142 0l4.179 2.25-9.75 5.25-9.75-5.25 4.179-2.25" />
+              </svg>
+            </div>
+            <div>
+              <h4 className="font-semibold text-slate-900 text-sm">Unified Data Model</h4>
+              <p className="text-xs text-slate-500 mt-1">Orders, products, customers from every marketplace normalized into one consistent schema.</p>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

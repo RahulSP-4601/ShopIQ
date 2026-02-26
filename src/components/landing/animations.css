@@ -516,6 +516,21 @@
   animation: menuSlideDown 0.2s ease-out forwards;
 }
 
+/* ==================== Logo Bar Marquee Animation ==================== */
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 25s linear infinite;
+}
+
 /* ==================== Reduced Motion Accessibility ==================== */
 
 /* Respect users who prefer reduced motion */
@@ -544,6 +559,7 @@
   .animate-slide-down,
   .animate-modal-in,
   .animate-menu-slide-down,
+  .animate-marquee,
   .pricing-card-shine::after {
     animation: none !important;
     transition: none !important;
