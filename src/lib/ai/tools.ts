@@ -7,6 +7,7 @@ import {
 } from "@/lib/metrics/calculator";
 import prisma from "@/lib/prisma";
 import { UnifiedOrderStatus, MarketplaceType, Prisma } from "@prisma/client";
+import { analyzeChannelProductFit } from "@/lib/ai/channel-fit";
 
 // -------------------------------------------------------
 // Tool Definitions (sent to OpenAI)
@@ -65,6 +66,7 @@ export const FRAME_TOOLS: ChatCompletionTool[] = [
             description: "The time period (default last_30_days)",
           },
         },
+
       },
     },
   },
@@ -82,6 +84,7 @@ export const FRAME_TOOLS: ChatCompletionTool[] = [
             description: "Number of customers to return (default 5, max 20)",
           },
         },
+
       },
     },
   },
@@ -100,6 +103,7 @@ export const FRAME_TOOLS: ChatCompletionTool[] = [
             description: "The time period (default last_14_days)",
           },
         },
+
       },
     },
   },
@@ -112,6 +116,7 @@ export const FRAME_TOOLS: ChatCompletionTool[] = [
       parameters: {
         type: "object",
         properties: {},
+
       },
     },
   },
@@ -134,6 +139,7 @@ export const FRAME_TOOLS: ChatCompletionTool[] = [
             description: "Number of products to return (default 10, max 20)",
           },
         },
+
       },
     },
   },
@@ -158,6 +164,7 @@ export const FRAME_TOOLS: ChatCompletionTool[] = [
             description: "The time period (default last_30_days)",
           },
         },
+
       },
     },
   },
@@ -226,6 +233,7 @@ export const FRAME_TOOLS: ChatCompletionTool[] = [
               "Sort products by total revenue, units sold, or revenue per unit (default revenue)",
           },
         },
+
       },
     },
   },
@@ -244,6 +252,7 @@ export const FRAME_TOOLS: ChatCompletionTool[] = [
               "Number of weeks of history to analyze (default 8, max 12)",
           },
         },
+
       },
     },
   },
@@ -268,6 +277,7 @@ export const FRAME_TOOLS: ChatCompletionTool[] = [
             description: "The time period (default last_30_days)",
           },
         },
+
       },
     },
   },
@@ -303,6 +313,40 @@ export const FRAME_TOOLS: ChatCompletionTool[] = [
               "Number of top regions to return (default 10, max 20)",
           },
         },
+
+      },
+    },
+  },
+  // -------------------------------------------------------
+  // Channel-Product Fit Analysis
+  // -------------------------------------------------------
+  {
+    type: "function",
+    function: {
+      name: "get_channel_product_fit",
+      description:
+        "Analyze how well products perform across different marketplaces using the seller's own data and market demand signals. Returns fit scores (0-100), confidence levels, and actionable recommendations: expand to new channels, restock, reprice, or deprioritize. Use when users ask about which marketplace to sell on, platform recommendations, channel fit, product-marketplace strategy, or cross-channel optimization.",
+      parameters: {
+        type: "object",
+        properties: {
+          product_name: {
+            type: "string",
+            description:
+              "Optional: specific product name or SKU to analyze. If omitted, analyzes top products by revenue.",
+          },
+          period: {
+            type: "string",
+            enum: ["last_30_days", "last_60_days", "last_90_days"],
+            description:
+              "Lookback period for analysis (default last_90_days)",
+          },
+          limit: {
+            type: "number",
+            description:
+              "Number of products to analyze when no specific product given (default 10, max 20)",
+          },
+        },
+
       },
     },
   },
@@ -347,6 +391,7 @@ export const FRAME_TOOLS: ChatCompletionTool[] = [
       parameters: {
         type: "object",
         properties: {},
+
       },
     },
   },
@@ -408,6 +453,14 @@ function resolvePeriod(period?: string): { start: Date; end: Date } {
     case "last_30_days":
       start = new Date(now);
       start.setDate(start.getDate() - 30);
+      start.setHours(0, 0, 0, 0);
+      break;
+    // "last_60_days" is in the get_channel_product_fit enum but that tool
+    // calls analyzeChannelProductFit directly (not via resolvePeriod); kept
+    // for consistency with resolveChannelFitPeriod and potential future callers.
+    case "last_60_days":
+      start = new Date(now);
+      start.setDate(start.getDate() - 60);
       start.setHours(0, 0, 0, 0);
       break;
     case "last_90_days":
@@ -1306,10 +1359,22 @@ export async function executeTool(
       // -------------------------------------------------------
 
       case "create_note": {
-        const content = String(args.content || "");
-        if (!content) {
+        const MAX_NOTE_LEN = 1000;
+        // Strip ASCII + Unicode control/format characters (C0, C1, zero-width, directional overrides, BOM)
+        const rawContent = String(args.content || "")
+          .replace(/[\p{Cf}]/gu, "")
+          .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f\x80-\x9f]/g, "")
+          .trim();
+        if (!rawContent) {
           return JSON.stringify({ error: "Content is required" });
         }
+        // Truncate to safe length; avoid splitting UTF-16 surrogate pairs
+        let noteEnd = Math.min(rawContent.length, MAX_NOTE_LEN);
+        if (noteEnd < rawContent.length) {
+          const lastChar = rawContent.charCodeAt(noteEnd - 1);
+          if (lastChar >= 0xd800 && lastChar <= 0xdbff) noteEnd--;
+        }
+        const content = rawContent.slice(0, noteEnd);
         const ttlHours = Math.min(
           Math.max(Number(args.ttl_hours) || 24, 1),
           168
@@ -1385,6 +1450,27 @@ export async function executeTool(
               ? "Note dismissed"
               : "Note not found or already dismissed",
         });
+      }
+
+      case "get_channel_product_fit": {
+        // Sanitize product filter: strip control chars, bound length
+        const rawFilter = args.product_name ? String(args.product_name) : undefined;
+        const productFilter = rawFilter
+          ? rawFilter.replace(/[\x00-\x1f\x7f\x80-\x9f\p{Cf}]/gu, "").slice(0, 200).trim() || undefined
+          : undefined;
+        // Validate period against allowed values
+        const ALLOWED_PERIODS = ["last_30_days", "last_60_days", "last_90_days"] as const;
+        type AllowedPeriod = typeof ALLOWED_PERIODS[number];
+        const isAllowedPeriod = (v: string): v is AllowedPeriod =>
+          (ALLOWED_PERIODS as readonly string[]).includes(v);
+        const rawPeriod = String(args.period || "last_90_days");
+        const period = isAllowedPeriod(rawPeriod) ? rawPeriod : "last_90_days";
+        const result = await analyzeChannelProductFit(userId, {
+          productFilter,
+          period,
+          limit: Math.max(1, Math.min(Number(args.limit) || 10, 20)),
+        });
+        return JSON.stringify(result);
       }
 
       default:
