@@ -26,7 +26,11 @@ import { MIN_SELLERS_FOR_BENCHMARK, BENCHMARK_TTL_MS } from "./types";
  * Used so the in-process cache (see @/lib/metrics/cache — Map-backed,
  * NOT an external store like Redis) never holds real user IDs.
  */
-const PSEUDONYM_KEY = (() => {
+let _pseudonymKey: string | null = null;
+
+function getPseudonymKey(): string {
+  if (_pseudonymKey) return _pseudonymKey;
+
   const key = process.env.PSEUDONYM_KEY;
   if (key) {
     if (key.length < 32) {
@@ -36,6 +40,7 @@ const PSEUDONYM_KEY = (() => {
       console.error(msg);
       throw new Error(msg);
     }
+    _pseudonymKey = key;
     return key;
   }
 
@@ -44,7 +49,8 @@ const PSEUDONYM_KEY = (() => {
   const NON_PRODUCTION_ENVS = new Set(["development", "test", "preview"]);
   const env = process.env.NODE_ENV;
   if (NON_PRODUCTION_ENVS.has(env || "")) {
-    return "shopiq-dev-pseudonym-key-not-for-production";
+    _pseudonymKey = "shopiq-dev-pseudonym-key-not-for-production";
+    return _pseudonymKey;
   }
 
   // Fail fast in production — do not run with an insecure default key
@@ -53,7 +59,7 @@ const PSEUDONYM_KEY = (() => {
     "Set it to a random 32+ character secret.";
   console.error(msg);
   throw new Error(msg);
-})();
+}
 
 /** Per-query timeout for cross-tenant benchmark queries to prevent pool-wait hangs (milliseconds). */
 const BENCHMARK_QUERY_TIMEOUT_MS = 30_000;
@@ -61,7 +67,7 @@ const BENCHMARK_QUERY_TIMEOUT_MS = 30_000;
 const BENCHMARK_TXN_TIMEOUT_MS = BENCHMARK_QUERY_TIMEOUT_MS + 5_000;
 
 function pseudonymiseUserId(userId: string): string {
-  return createHmac("sha256", PSEUDONYM_KEY)
+  return createHmac("sha256", getPseudonymKey())
     .update(userId)
     .digest("hex")
     .slice(0, 16);
