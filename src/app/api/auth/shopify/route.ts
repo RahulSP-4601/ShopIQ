@@ -5,6 +5,7 @@ import {
   buildAuthUrl,
   validateShopDomain,
 } from "@/lib/shopify/oauth";
+import { getUserSession } from "@/lib/auth/session";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -21,6 +22,17 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       { error: "Invalid shop domain" },
       { status: 400 }
+    );
+  }
+
+  // Check if user is logged in
+  const session = await getUserSession();
+  if (!session) {
+    // Redirect to signin with the shop parameter
+    // Encode the entire redirect path to prevent query param confusion
+    const redirectPath = `/api/auth/shopify?shop=${encodeURIComponent(shop)}`;
+    return NextResponse.redirect(
+      new URL(`/signin?redirect=${encodeURIComponent(redirectPath)}`, request.url)
     );
   }
 

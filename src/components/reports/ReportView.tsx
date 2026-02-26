@@ -1,5 +1,8 @@
 "use client";
 
+import { memo } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { Report } from "@prisma/client";
 
 interface ReportViewProps {
@@ -18,22 +21,127 @@ interface ReportContent {
   metrics: Record<string, unknown>;
 }
 
+const ReportMarkdown = memo(function ReportMarkdown({
+  content,
+}: {
+  content: string;
+}) {
+  return (
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      components={{
+        h1: ({ children }) => (
+          <h3 className="text-lg font-bold text-slate-900 mt-5 mb-2.5 first:mt-0 pb-1.5 border-b border-slate-200">
+            {children}
+          </h3>
+        ),
+        h2: ({ children }) => (
+          <h4 className="text-base font-bold text-slate-900 mt-4 mb-2 first:mt-0">
+            {children}
+          </h4>
+        ),
+        h3: ({ children }) => (
+          <h5 className="text-[0.9rem] font-semibold text-slate-800 mt-3.5 mb-1.5 first:mt-0">
+            {children}
+          </h5>
+        ),
+        p: ({ children }) => (
+          <p className="text-sm leading-relaxed text-slate-600 mb-2.5 last:mb-0">{children}</p>
+        ),
+        strong: ({ children }) => (
+          <strong className="font-semibold text-slate-900">{children}</strong>
+        ),
+        ul: ({ children }) => (
+          <ul className="text-sm space-y-1.5 mb-3 last:mb-0 ml-5 list-disc marker:text-emerald-500">
+            {children}
+          </ul>
+        ),
+        ol: ({ children }) => (
+          <ol className="text-sm space-y-1.5 mb-3 last:mb-0 ml-5 list-decimal marker:text-emerald-500">
+            {children}
+          </ol>
+        ),
+        li: ({ children }) => (
+          <li className="leading-relaxed text-sm text-slate-600 pl-1">{children}</li>
+        ),
+        code: ({ className, children }) => {
+          const hasLanguage = className?.includes("language-");
+          const text = String(children).replace(/\n$/, "");
+          const isBlock = hasLanguage || text.includes("\n");
+          if (isBlock) {
+            return (
+              <pre className="bg-slate-800 text-slate-100 rounded-lg px-4 py-3 text-xs overflow-x-auto my-2.5">
+                <code>{children}</code>
+              </pre>
+            );
+          }
+          return (
+            <code className="bg-slate-100 text-emerald-700 px-1.5 py-0.5 rounded text-xs font-mono">
+              {children}
+            </code>
+          );
+        },
+        pre: ({ children }) => <>{children}</>,
+        blockquote: ({ children }) => (
+          <blockquote className="border-l-4 border-emerald-400 pl-3 my-2.5 text-sm text-slate-600 italic">
+            {children}
+          </blockquote>
+        ),
+        hr: () => <hr className="my-4 border-slate-200" />,
+        table: ({ children }) => (
+          <div className="overflow-x-auto my-3 rounded-lg border border-slate-200">
+            <table className="min-w-full text-sm">{children}</table>
+          </div>
+        ),
+        thead: ({ children }) => (
+          <thead className="bg-slate-50 border-b border-slate-200">
+            {children}
+          </thead>
+        ),
+        th: ({ children }) => (
+          <th className="px-4 py-2.5 text-left font-semibold text-slate-700 text-xs uppercase tracking-wide">
+            {children}
+          </th>
+        ),
+        td: ({ children }) => (
+          <td className="px-4 py-2 text-slate-600 border-t border-slate-100">
+            {children}
+          </td>
+        ),
+        a: ({ href, children }) => (
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-emerald-600 hover:text-emerald-700 underline underline-offset-2"
+          >
+            {children}
+          </a>
+        ),
+      }}
+    >
+      {content}
+    </ReactMarkdown>
+  );
+});
+
 export function ReportView({ report }: ReportViewProps) {
-  const content = report.content as ReportContent;
+  const content = report.content as unknown as ReportContent;
   const metrics = content?.metrics || {};
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+    return new Date(dateString).toLocaleDateString("en-IN", {
       month: "long",
       day: "numeric",
       year: "numeric",
     });
   };
 
+  const reportCurrency = content?.currency || "INR";
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat(reportCurrency === "INR" ? "en-IN" : "en-US", {
       style: "currency",
-      currency: content?.currency || "USD",
+      currency: reportCurrency,
     }).format(amount);
   };
 
@@ -69,29 +177,17 @@ export function ReportView({ report }: ReportViewProps) {
         </div>
       </div>
 
-      {/* AI Summary */}
+      {/* Frax Analysis */}
       {report.summary && (
         <div className="rounded-xl border border-slate-200 bg-white p-6">
           <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-slate-900">
-            <svg
-              className="h-5 w-5 text-emerald-600"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-              />
-            </svg>
-            AI Analysis
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 text-sm">
+              ⚡
+            </span>
+            Frax Analysis
           </h2>
           <div className="prose prose-slate max-w-none">
-            <div className="whitespace-pre-wrap text-slate-600">
-              {report.summary}
-            </div>
+            <ReportMarkdown content={report.summary} />
           </div>
         </div>
       )}
@@ -139,7 +235,7 @@ function RevenueMetrics({
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-6">
       <h2 className="mb-4 text-lg font-semibold text-slate-900">Revenue Overview</h2>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <MetricCard
           label="Total Revenue"
           value={formatCurrency(Number(metrics.totalRevenue) || 0)}
@@ -181,7 +277,7 @@ function ProductMetrics({
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-6">
       <h2 className="mb-4 text-lg font-semibold text-slate-900">Product Performance</h2>
-      <div className="grid gap-4 sm:grid-cols-3 mb-6">
+      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 mb-6">
         <MetricCard
           label="Total Products"
           value={String(metrics.totalProducts || 0)}
@@ -255,7 +351,7 @@ function CustomerMetrics({
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-6">
       <h2 className="mb-4 text-lg font-semibold text-slate-900">Customer Insights</h2>
-      <div className="grid gap-4 sm:grid-cols-4 mb-6">
+      <div className="grid gap-4 grid-cols-2 sm:grid-cols-4 mb-6">
         <MetricCard
           label="Total Customers"
           value={String(metrics.totalCustomers || 0)}

@@ -1,5 +1,5 @@
-// ShopIQ Database Schema
-// Prisma ORM for Shopify Analytics App
+// Frame Database Schema
+// Prisma ORM for Multi-Marketplace Analytics Platform
 
 generator client {
   provider = "prisma-client-js"
@@ -7,260 +7,213 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 // ============================================
-// STORE & AUTH
+// USER (CLIENT only)
 // ============================================
 
-model Store {
+model User {
   id String @id @default(cuid())
 
-  // Shopify identifiers
-  shopifyId String  @unique
-  domain    String  @unique // my-store.myshopify.com
-  name      String
-  email     String?
-  currency  String  @default("USD")
-  timezone  String  @default("UTC")
-
-  // Auth
-  accessToken String
-  scope       String
-
-  // Sync status
-  syncStatus     SyncStatus @default(PENDING)
-  lastSyncedAt   DateTime?
-  ordersCount    Int        @default(0)
-  productsCount  Int        @default(0)
-  customersCount Int        @default(0)
-
-  // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  orders        Order[]
-  products      Product[]
-  customers     Customer[]
-  conversations Conversation[]
-  reports       Report[]
-  syncLogs      SyncLog[]
-}
-
-enum SyncStatus {
-  PENDING
-  SYNCING
-  COMPLETED
-  FAILED
-}
-
-model SyncLog {
-  id      String @id @default(cuid())
-  storeId String
-  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
-
-  entity       String // "orders" | "products" | "customers"
-  status       String // "started" | "in_progress" | "completed" | "failed"
-  totalCount   Int?
-  syncedCount  Int     @default(0)
-  errorMessage String?
-
-  startedAt   DateTime  @default(now())
-  completedAt DateTime?
-
-  @@index([storeId])
-}
-
-// ============================================
-// PRODUCTS
-// ============================================
-
-model Product {
-  id      String @id @default(cuid())
-  storeId String
-  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
-
-  // Shopify data
-  shopifyId   String
-  title       String
-  handle      String?
-  productType String?
-  vendor      String?
-  status      String  @default("active")
-
-  // Pricing
-  price          Decimal? @db.Decimal(10, 2)
-  compareAtPrice Decimal? @db.Decimal(10, 2)
-  costPerItem    Decimal? @db.Decimal(10, 2)
-
-  // Inventory
-  totalInventory Int @default(0)
-
-  // Images
-  imageUrl String?
-
-  // Timestamps
-  shopifyCreatedAt DateTime?
-  shopifyUpdatedAt DateTime?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-
-  // Relations
-  variants  ProductVariant[]
-  lineItems LineItem[]
-
-  @@unique([storeId, shopifyId])
-  @@index([storeId])
-}
-
-model ProductVariant {
-  id        String  @id @default(cuid())
-  productId String
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-
-  shopifyId         String
-  title             String
-  sku               String?
-  price             Decimal  @db.Decimal(10, 2)
-  compareAtPrice    Decimal? @db.Decimal(10, 2)
-  costPerItem       Decimal? @db.Decimal(10, 2)
-  inventoryQuantity Int      @default(0)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  lineItems LineItem[]
-
-  @@unique([productId, shopifyId])
-}
-
-// ============================================
-// CUSTOMERS
-// ============================================
-
-model Customer {
-  id      String @id @default(cuid())
-  storeId String
-  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
-
-  // Shopify data
-  shopifyId String
-  email     String?
-  firstName String?
-  lastName  String?
-  phone     String?
-
-  // Location
+  // Profile information
+  name     String
+  email    String  @unique
+  phone    String?
   city     String?
-  province String?
+  state    String?
+  zipCode  String?
   country  String?
 
-  // Stats
-  ordersCount Int     @default(0)
-  totalSpent  Decimal @default(0) @db.Decimal(10, 2)
+  // Authentication
+  passwordHash String
 
-  // Marketing
-  acceptsMarketing Boolean @default(false)
+  // Password reset (stores hashed token for security)
+  resetTokenHash   String?   @unique
+  resetTokenExpiry DateTime?
 
-  // Tags
-  tags String?
+  // AI bootstrap tracking
+  bootstrappedAt DateTime?
 
   // Timestamps
-  shopifyCreatedAt DateTime?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relations
-  orders Order[]
+  subscription     Subscription?
+  marketplaceConns MarketplaceConnection[]
+  trialClient      SalesClient? @relation("trialClient")
+  unifiedOrders    UnifiedOrder[]
+  unifiedProducts  UnifiedProduct[]
+  conversations    Conversation[]
+  reports          Report[]
+  businessProfile  BusinessProfile?
+  beliefs              Belief[]
+  notes                Note[]
+  alerts               Alert[]
+  messageFeedbacks     MessageFeedback[]
+  weeklyBriefings      WeeklyBriefing[]
+  dailyBriefings       DailyBriefing[]
+  biWeeklyBriefings    BiWeeklyBriefing[]
+  monthlyBriefings     MonthlyBriefing[]
+  aiMaturitySnapshots  AiMaturitySnapshot[]
 
-  @@unique([storeId, shopifyId])
-  @@index([storeId])
   @@index([email])
 }
 
 // ============================================
-// ORDERS
+// EMPLOYEE (FOUNDER & SALES_MEMBER)
 // ============================================
 
-model Order {
-  id      String @id @default(cuid())
-  storeId String
-  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
-
-  // Shopify data
-  shopifyId   String
-  orderNumber Int
-  name        String // e.g., "#1001"
-
-  // Financials
-  totalPrice     Decimal @db.Decimal(10, 2)
-  subtotalPrice  Decimal @db.Decimal(10, 2)
-  totalTax       Decimal @default(0) @db.Decimal(10, 2)
-  totalDiscounts Decimal @default(0) @db.Decimal(10, 2)
-  totalShipping  Decimal @default(0) @db.Decimal(10, 2)
-  currency       String  @default("USD")
-
-  // Status
-  financialStatus   String?
-  fulfillmentStatus String?
-
-  // Customer
-  customerId    String?
-  customer      Customer? @relation(fields: [customerId], references: [id])
-  customerEmail String?
-
-  // Source
-  sourceName String?
-
-  // Location
-  shippingCity     String?
-  shippingProvince String?
-  shippingCountry  String?
-
-  // Timestamps
-  shopifyCreatedAt DateTime
-  shopifyUpdatedAt DateTime?
-  cancelledAt      DateTime?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-
-  // Relations
-  lineItems LineItem[]
-
-  @@unique([storeId, shopifyId])
-  @@index([storeId])
-  @@index([shopifyCreatedAt])
-  @@index([customerId])
+enum EmployeeRole {
+  FOUNDER
+  SALES_MEMBER
 }
 
-model LineItem {
-  id      String @id @default(cuid())
-  orderId String
-  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+model Employee {
+  id String @id @default(cuid())
 
-  // Product reference
-  productId String?
-  product   Product?        @relation(fields: [productId], references: [id])
-  variantId String?
-  variant   ProductVariant? @relation(fields: [variantId], references: [id])
+  // Profile
+  name  String
+  email String @unique
+  phone String?
 
-  // Shopify IDs
-  shopifyProductId String?
-  shopifyVariantId String?
+  // Authentication
+  passwordHash String
 
-  // Item details
-  title         String
-  variantTitle  String?
-  sku           String?
-  quantity      Int
-  price         Decimal @db.Decimal(10, 2)
-  totalDiscount Decimal @default(0) @db.Decimal(10, 2)
+  // Role & access control
+  role       EmployeeRole
+  isApproved Boolean      @default(false)
+  refCode        String?  @unique
+  commissionRate Decimal? @db.Decimal(5, 2)
 
+  // Password reset
+  resetTokenHash    String?   @unique
+  resetTokenExpiry  DateTime?
+  mustChangePassword Boolean  @default(false)
+
+  // Timestamps
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  @@index([orderId])
-  @@index([productId])
+  // Relations
+  salesClients SalesClient[]
+  commissions  Commission[]
+
+  @@index([email])
+}
+
+// ============================================
+// MARKETPLACE CONNECTIONS
+// ============================================
+
+model MarketplaceConnection {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  marketplace MarketplaceType
+  status      ConnectionStatus @default(PENDING)
+
+  // OAuth tokens - SECURITY: These fields MUST be encrypted at rest using application-layer encryption.
+  // Use @/lib/auth/encryption helpers (encryptToken/decryptToken) for all reads/writes.
+  // Never store plaintext tokens. Consider migrating to a secrets manager for production.
+  accessToken  String? // Encrypted OAuth access token - use encryptToken() before write, decryptToken() after read
+  refreshToken String? // Encrypted OAuth refresh token - use encryptToken() before write, decryptToken() after read
+  tokenExpiry  DateTime? // Token expiration timestamp (not encrypted, used for refresh scheduling)
+
+  // Marketplace-specific data
+  externalId    String?
+  externalName  String?
+  webhookSecret String? // Encrypted webhook signature key (Square, etc.) - use encryptToken() before write, decryptToken() after read
+
+  // Sync control — uses CAS via updateMany with optimistic locking (syncLockVersion).
+  // Stale locks older than 30 min (or with null syncStartedAt) are auto-reclaimed.
+  syncInProgress  Boolean   @default(false) // Distributed sync lock — use atomic updateMany for CAS
+  syncStartedAt   DateTime? // When current sync started — used to detect and release stale locks
+  syncLockVersion Int       @default(0) // Monotonic version counter — prevents releasing another process's lock
+
+  // Timestamps
+  connectedAt       DateTime?
+  lastSyncAt        DateTime? // Last successful sync completion
+  lastSyncAttemptAt DateTime? // Last sync attempt (success or failure) — used for backoff
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Unified data relations
+  unifiedOrders   UnifiedOrder[]
+  unifiedProducts UnifiedProduct[]
+  unifiedSyncLogs UnifiedSyncLog[]
+
+  @@unique([userId, marketplace])
+  @@index([userId])
+}
+
+enum MarketplaceType {
+  SHOPIFY
+  AMAZON
+  EBAY
+  ETSY
+  WOOCOMMERCE
+  BIGCOMMERCE
+  WIX
+  SQUARE
+  MAGENTO
+  PRESTASHOP
+  FLIPKART
+  SNAPDEAL
+}
+
+enum ConnectionStatus {
+  PENDING
+  CONNECTED
+  DISCONNECTED
+  ERROR
+}
+
+// ============================================
+// SUBSCRIPTION
+// ============================================
+
+model Subscription {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  status SubscriptionStatus @default(ACTIVE)
+
+  // Pricing
+  basePrice       Decimal @default(999) @db.Decimal(10, 2)
+  additionalPrice Decimal @default(449) @db.Decimal(10, 2)
+  totalPrice      Decimal @default(999) @db.Decimal(10, 2)
+
+  // Connected marketplaces count for billing
+  marketplaceCount Int @default(2)
+
+  // Billing cycle
+  currentPeriodStart DateTime @default(now())
+  currentPeriodEnd   DateTime @default(dbgenerated("(NOW() + '30 days'::interval)")) // Default to 30 days from creation
+
+  // Payment info (Razorpay)
+  razorpayCustomerId     String?
+  razorpaySubscriptionId String?
+  razorpayPlanId         String?
+  razorpaySyncPending    Boolean  @default(false) // True when DB pricing diverges from Razorpay plan
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  PENDING_CANCELLATION
+  CANCELED
+  UNPAID
+  PAUSED
 }
 
 // ============================================
@@ -268,9 +221,9 @@ model LineItem {
 // ============================================
 
 model Conversation {
-  id      String @id @default(cuid())
-  storeId String
-  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   title String?
 
@@ -279,7 +232,7 @@ model Conversation {
 
   messages Message[]
 
-  @@index([storeId])
+  @@index([userId])
 }
 
 model Message {
@@ -293,9 +246,30 @@ model Message {
   // For assistant messages
   queryData Json?
 
+  // Attachments (files, audio recordings)
+  attachments Attachment[]
+  feedback    MessageFeedback?
+
   createdAt DateTime @default(now())
 
   @@index([conversationId])
+}
+
+model Attachment {
+  id        String  @id @default(cuid())
+  messageId String
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  type     String // "file" | "audio"
+  name     String
+  size     Int
+  mimeType String
+  url      String // Supabase Storage public URL
+  path     String // Storage path for deletion
+
+  createdAt DateTime @default(now())
+
+  @@index([messageId])
 }
 
 enum MessageRole {
@@ -308,9 +282,9 @@ enum MessageRole {
 // ============================================
 
 model Report {
-  id      String @id @default(cuid())
-  storeId String
-  store   Store  @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   type  ReportType
   title String
@@ -328,7 +302,7 @@ model Report {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([storeId])
+  @@index([userId])
 }
 
 enum ReportType {
@@ -343,4 +317,523 @@ enum ReportStatus {
   GENERATING
   COMPLETED
   FAILED
+}
+
+// ============================================
+// TRIAL REQUESTS
+// ============================================
+
+model TrialRequest {
+  id    String  @id @default(cuid())
+  name  String
+  email String
+  phone String?
+
+  // Sales referral tracking
+  refCode String?
+
+  // Status tracking
+  status TrialRequestStatus @default(PENDING)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  salesClient SalesClient?
+
+  @@index([email])
+  @@index([createdAt])
+}
+
+enum TrialRequestStatus {
+  PENDING
+  CONTACTED
+  CONVERTED
+  DECLINED
+}
+
+// ============================================
+// SALES TEAM
+// ============================================
+
+model SalesClient {
+  id            String   @id @default(cuid())
+  salesMemberId String
+  salesMember   Employee @relation(fields: [salesMemberId], references: [id], onDelete: Cascade)
+
+  // Client info
+  name  String
+  email String
+  phone String?
+
+  status TrialRequestStatus @default(PENDING)
+
+  // Optional link to TrialRequest (if came via referral link)
+  trialRequestId String?       @unique
+  trialRequest   TrialRequest? @relation(fields: [trialRequestId], references: [id])
+
+  // Trial invitation
+  trialToken  String?   @unique
+  trialSentAt DateTime?
+
+  // Link to actual user account created during trial setup
+  clientUserId String? @unique
+  clientUser   User?   @relation("trialClient", fields: [clientUserId], references: [id])
+
+  commissions Commission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([salesMemberId])
+  @@index([email])
+}
+
+model Commission {
+  id            String   @id @default(cuid())
+  salesMemberId String
+  salesMember   Employee @relation(fields: [salesMemberId], references: [id], onDelete: Cascade)
+
+  salesClientId String?
+  salesClient   SalesClient? @relation(fields: [salesClientId], references: [id])
+
+  amount Decimal @db.Decimal(10, 2)
+  note   String?
+  period String @default("INITIAL") // "YYYY-MM" for monthly commissions, "INITIAL" for initial purchase
+
+  createdAt DateTime @default(now())
+
+  @@unique([salesMemberId, salesClientId, period])
+  @@index([salesMemberId])
+}
+
+// ============================================
+// UNIFIED MARKETPLACE DATA
+// ============================================
+
+enum UnifiedOrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
+}
+
+enum UnifiedProductStatus {
+  ACTIVE
+  INACTIVE
+  OUT_OF_STOCK
+}
+
+model UnifiedOrder {
+  id              String             @id @default(cuid())
+  userId          String
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  marketplace     MarketplaceType
+  connectionId    String
+  connection      MarketplaceConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  externalOrderId String
+  status          UnifiedOrderStatus @default(PENDING)
+  currency        String
+  totalAmount     Decimal            @db.Decimal(10, 2)
+  totalAmountUSD  Decimal?           @db.Decimal(10, 2)
+  itemCount       Int                @default(0)
+  customerName    String? // PII — MUST be encrypted at rest via encryptToken() before write, decryptToken() after read. NULLed by /api/cron/cleanup after 365 days. MUST NOT appear in logs.
+  customerEmail   String? // PII — MUST be encrypted at rest via encryptToken() before write, decryptToken() after read. NULLed by /api/cron/cleanup after 365 days. MUST NOT appear in logs.
+  orderedAt       DateTime
+  fulfilledAt     DateTime?
+  rawData         Json?
+  syncedAt        DateTime           @default(now())
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  items UnifiedOrderItem[]
+
+  @@unique([connectionId, externalOrderId])
+  @@index([userId, marketplace])
+  @@index([userId, orderedAt])
+  @@index([connectionId])
+}
+
+model UnifiedProduct {
+  id           String               @id @default(cuid())
+  userId       String
+  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  marketplace  MarketplaceType
+  connectionId String
+  connection   MarketplaceConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  externalId   String
+  title        String
+  sku          String?
+  category     String?
+  price        Decimal              @db.Decimal(10, 2)
+  currency     String
+  inventory    Int                  @default(0)
+  status       UnifiedProductStatus @default(ACTIVE)
+  imageUrl     String?
+  rawData      Json?
+  syncedAt     DateTime             @default(now())
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  orderItems UnifiedOrderItem[]
+
+  @@unique([connectionId, externalId])
+  @@index([userId, marketplace])
+  @@index([userId, sku])
+  @@index([connectionId])
+}
+
+model UnifiedOrderItem {
+  id             String          @id @default(cuid())
+  orderId        String
+  order          UnifiedOrder    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId      String?
+  product        UnifiedProduct? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  externalItemId String
+  title          String
+  sku            String?
+  quantity       Int
+  unitPrice      Decimal         @db.Decimal(10, 2)
+  totalPrice     Decimal         @db.Decimal(10, 2)
+  currency       String
+  createdAt      DateTime        @default(now())
+
+  @@unique([orderId, externalItemId])
+  @@index([orderId])
+  @@index([productId])
+}
+
+model UnifiedSyncLog {
+  id           String                @id @default(cuid())
+  connectionId String
+  connection   MarketplaceConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  marketplace  MarketplaceType
+  entity       String // "orders" | "products"
+  status       String // "started" | "completed" | "failed"
+  totalCount   Int?
+  syncedCount  Int                   @default(0)
+  errorMessage String?
+  trigger      String                @default("cron") // "cron" | "webhook" | "manual"
+  startedAt    DateTime              @default(now())
+  completedAt  DateTime?
+
+  @@index([connectionId])
+  @@index([marketplace, startedAt])
+}
+
+// ============================================
+// TOKEN REVOCATION (Session Blacklist)
+// ============================================
+
+model RevokedToken {
+  id        String   @id @default(cuid())
+  jti       String   @unique // JWT ID claim
+  userId    String
+  revokedAt DateTime @default(now())
+  expiresAt DateTime // When the original token expires (for cleanup)
+
+  @@index([userId])
+  @@index([expiresAt]) // For periodic cleanup of expired entries
+}
+
+// ============================================
+// AUDIT LOG (Auth Events)
+// ============================================
+
+enum AuditAction {
+  LOGIN
+  LOGOUT
+  LOGIN_FAILED
+  SESSION_CREATED
+  SESSION_REVOKED
+  PASSWORD_RESET_REQUESTED
+  PASSWORD_RESET_COMPLETED
+  MARKETPLACE_CONNECTED
+  MARKETPLACE_DISCONNECTED
+}
+
+model AuditLog {
+  id        String      @id @default(cuid())
+  userId    String?     // Null for failed login attempts by unknown users
+  action    AuditAction
+  ipAddress String?
+  userAgent String?
+  metadata  Json?       // Additional context (e.g., marketplace type, error details)
+  createdAt DateTime    @default(now())
+
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+  @@index([createdAt]) // For TTL/cleanup queries
+}
+
+// ============================================
+// WEBHOOK EVENT DEDUPLICATION
+// ============================================
+
+model WebhookEvent {
+  id          String          @id @default(cuid())
+  marketplace MarketplaceType
+  eventId     String          // Marketplace-provided event ID (from headers or payload)
+  eventType   String          // e.g., "orders/create", "store/order/created"
+  processedAt DateTime        @default(now())
+
+  @@unique([marketplace, eventId])
+  @@index([processedAt]) // For TTL/cleanup of old events
+}
+
+// ============================================
+// PAYMENT WEBHOOK DEDUPLICATION
+// ============================================
+
+model PaymentWebhookEvent {
+  id          String   @id @default(cuid())
+  provider    String   // "razorpay"
+  eventId     String   // Provider-specific event identifier
+  eventType   String   // e.g., "subscription.activated", "payment.failed"
+  processedAt DateTime @default(now())
+
+  @@unique([provider, eventId])
+  @@index([processedAt]) // For TTL/cleanup of old events
+}
+
+// ============================================
+// RAZORPAY PLAN CACHE (Cross-Instance Dedup)
+// ============================================
+
+model RazorpayPlan {
+  id             String   @id @default(cuid())
+  amountInPaise  Int      @unique // Monthly amount in paise — one plan per unique price point
+  razorpayPlanId String   // Razorpay plan ID (e.g., "plan_xxx")
+  createdAt      DateTime @default(now())
+}
+
+// ============================================
+// AI COGNITIVE ARCHITECTURE (Phase 2)
+// ============================================
+
+// Context-conditional belief graph — tracks Frax's confidence per task domain
+model Belief {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  statement  String // e.g., "analyze_revenue", "forecast_demand"
+  contextKey String @default("*") // Pipe-delimited context: "ethnic_wear|weekend" or "*" for global
+
+  strength       Float  @default(0.5) // 0.0 to 1.0
+  autonomyMode   String @default("PROPOSAL") // AUTONOMOUS | PROPOSAL | GUIDANCE_SEEKING
+  validatedCycles Int   @default(0) // For AI Years calculation
+
+  lastValidatedAt DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([userId, statement, contextKey])
+  @@index([userId])
+  @@index([userId, strength])
+  // CHECK constraint for strength (0.0-1.0) is enforced via raw SQL migration (see migrations folder)
+}
+
+// TTL-based notes — Frax's short-term memory (Column 2 of working memory)
+model Note {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  content      String @db.Text
+  basePriority Float  @default(0.5) // 0.0 to 1.0
+  status       String @default("ACTIVE") // ACTIVE | DISMISSED | EXPIRED | ACTED_ON
+  source       String @default("ai") // ai | system | alert
+
+  ttlHours  Int      @default(24)
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, status])
+  @@index([userId, expiresAt])
+  @@index([expiresAt])
+  // CHECK constraint for basePriority (0.0-1.0) is enforced via raw SQL migration (see migrations folder)
+}
+
+// Proactive alerts — detected by background cron, surfaced in chat
+model Alert {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type     String // stockout | demand_surge | revenue_anomaly | return_pattern
+  severity String @default("medium") // low | medium | high | critical
+  title    String
+  body     String @db.Text
+  metadata Json?
+  dedupKey String? // Deterministic key from metadata for atomic dedup via unique constraint; NULL allows multiple alerts
+
+  status     String    @default("pending") // pending | surfaced | dismissed | resolved
+  surfacedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, type, dedupKey]) // Atomic dedup: prevents duplicate alerts per user+type+metadata
+  @@index([userId, status])
+  @@index([userId, createdAt])
+  @@index([userId, type, createdAt])
+  @@index([createdAt])
+}
+
+enum FeedbackRating {
+  POSITIVE @map("positive")
+  NEGATIVE @map("negative")
+}
+
+// Thumbs up/down feedback on assistant messages — drives belief updates
+// INVARIANT: MessageFeedback.userId must match Message.conversation.userId.
+// Enforced in the service layer (src/lib/ai/feedback.ts) — verify ownership before insert/upsert.
+model MessageFeedback {
+  id        String  @id @default(cuid())
+  messageId String  @unique
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  rating FeedbackRating
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// Weekly AI-generated business briefing — emailed to sellers
+model WeeklyBriefing {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  weekStart   DateTime
+  metricsData Json
+  narrative   String   @db.Text
+  maturity    Json
+
+  emailSentAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@unique([userId, weekStart])
+  @@index([userId])
+}
+
+// Daily AI-generated "Morning Coffee" briefing — emailed to sellers
+model DailyBriefing {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  reportDate  DateTime  @db.Date // Calendar date (no time component) — enforces one briefing per user per day
+  metricsData Json      // DailyMetrics serialized as JSON
+  narrative   String    @db.Text // AI-generated 3-sentence summary + action
+
+  emailSentAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@unique([userId, reportDate])
+  @@index([userId])
+}
+
+// Bi-weekly AI briefing — trend analysis over 2 weeks
+model BiWeeklyBriefing {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  periodStart DateTime @db.Date // Monday of the first week
+  periodEnd   DateTime @db.Date // Sunday of the second week
+  metricsData Json
+  narrative   String   @db.Text
+
+  emailSentAt DateTime?
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, periodStart])
+  @@index([userId])
+}
+
+// Monthly AI briefing — strategic review of the full month
+model MonthlyBriefing {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  reportMonth DateTime @db.Date // 1st day of the reported month
+  metricsData Json
+  narrative   String   @db.Text
+
+  emailSentAt DateTime?
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, reportMonth])
+  @@index([userId])
+}
+
+// AI maturity progression snapshots — tracks Frax's growth over time
+model AiMaturitySnapshot {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  geometricMeanReliability Float
+  stage                    String // Infant | Apprentice | Professional | Expert
+  aiYears                  Float
+  totalBeliefs             Int
+  highConfidenceCount      Int
+  lowConfidenceCount       Int
+  totalValidatedCycles     Int
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+// ============================================
+// BUSINESS PROFILE (Birth System - Phase 3)
+// ============================================
+
+enum IndustryType {
+  FASHION
+  ELECTRONICS
+  HOME_GARDEN
+  FOOD_BEVERAGE
+  HEALTH_BEAUTY
+  SPORTS_OUTDOOR
+  TOYS_GAMES
+  BOOKS_MEDIA
+  AUTOMOTIVE
+  JEWELRY
+  HANDMADE_CRAFT
+  PET_SUPPLIES
+  OTHER
+}
+
+enum BusinessSize {
+  SOLO
+  SMALL
+  MEDIUM
+  LARGE
+}
+
+model BusinessProfile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  industry        IndustryType
+  businessSize    BusinessSize
+  primaryCategory String?
+  targetMarket    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

@@ -1,19 +1,45 @@
-import { Store } from "@prisma/client";
+import { decryptToken } from "./oauth";
+import { isValidShopifyDomain } from "./validation";
 
 // Use a supported Shopify API version - update this periodically
 // Supported versions as of 2026: 2026-01, 2025-10, 2025-07, 2025-04
 const API_VERSION = process.env.SHOPIFY_API_VERSION || "2025-10";
 const FETCH_TIMEOUT_MS = 30000; // 30 second timeout for API calls
 
-export class ShopifyClient {
-  private store: Store;
+/** Minimal interface for Shopify API access — replaces the legacy Store model */
+export interface ShopifyStoreConfig {
+  domain: string;
+  accessToken: string | null;
+}
 
-  constructor(store: Store) {
-    this.store = store;
+export class ShopifyClient {
+  private domain: string;
+  private accessToken: string;
+
+  /**
+   * Create a ShopifyClient
+   * @param config - Object with domain and accessToken
+   * @param isEncrypted - Whether the accessToken is encrypted (default: true for DB-stored tokens)
+   */
+  constructor(config: ShopifyStoreConfig, isEncrypted: boolean = true) {
+    if (!config.accessToken) {
+      throw new Error("Access token is required for Shopify API calls");
+    }
+
+    const domain = config.domain?.trim();
+    if (!domain) {
+      throw new Error("Shopify domain is required and cannot be empty");
+    }
+    if (!isValidShopifyDomain(domain)) {
+      throw new Error(`Invalid Shopify domain: "${domain}"`);
+    }
+
+    this.domain = domain;
+    this.accessToken = isEncrypted ? decryptToken(config.accessToken) : config.accessToken;
   }
 
   private async fetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
-    const url = `https://${this.store.domain}/admin/api/${API_VERSION}${endpoint}`;
+    const url = `https://${this.domain}/admin/api/${API_VERSION}${endpoint}`;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
@@ -22,7 +48,7 @@ export class ShopifyClient {
         ...options,
         signal: controller.signal,
         headers: {
-          "X-Shopify-Access-Token": this.store.accessToken,
+          "X-Shopify-Access-Token": this.accessToken,
           "Content-Type": "application/json",
           ...options?.headers,
         },
@@ -64,11 +90,11 @@ export class ShopifyClient {
 
     try {
       const response = await fetch(
-        `https://${this.store.domain}/admin/api/${API_VERSION}/products.json?${searchParams}`,
+        `https://${this.domain}/admin/api/${API_VERSION}/products.json?${searchParams}`,
         {
           signal: controller.signal,
           headers: {
-            "X-Shopify-Access-Token": this.store.accessToken,
+            "X-Shopify-Access-Token": this.accessToken,
             "Content-Type": "application/json",
           },
         }
@@ -111,11 +137,11 @@ export class ShopifyClient {
 
     try {
       const response = await fetch(
-        `https://${this.store.domain}/admin/api/${API_VERSION}/customers.json?${searchParams}`,
+        `https://${this.domain}/admin/api/${API_VERSION}/customers.json?${searchParams}`,
         {
           signal: controller.signal,
           headers: {
-            "X-Shopify-Access-Token": this.store.accessToken,
+            "X-Shopify-Access-Token": this.accessToken,
             "Content-Type": "application/json",
           },
         }
@@ -154,6 +180,7 @@ export class ShopifyClient {
     limit?: number;
     page_info?: string;
     created_at_min?: Date;
+    updated_at_min?: Date;
   }): Promise<{
     orders: ShopifyOrder[];
     nextPageInfo?: string;
@@ -163,7 +190,9 @@ export class ShopifyClient {
     if (params?.page_info) {
       searchParams.set("page_info", params.page_info);
     }
-    if (params?.created_at_min) {
+    if (params?.updated_at_min) {
+      searchParams.set("updated_at_min", params.updated_at_min.toISOString());
+    } else if (params?.created_at_min) {
       searchParams.set("created_at_min", params.created_at_min.toISOString());
     }
 
@@ -172,11 +201,11 @@ export class ShopifyClient {
 
     try {
       const response = await fetch(
-        `https://${this.store.domain}/admin/api/${API_VERSION}/orders.json?${searchParams}`,
+        `https://${this.domain}/admin/api/${API_VERSION}/orders.json?${searchParams}`,
         {
           signal: controller.signal,
           headers: {
-            "X-Shopify-Access-Token": this.store.accessToken,
+            "X-Shopify-Access-Token": this.accessToken,
             "Content-Type": "application/json",
           },
         }
@@ -281,12 +310,20 @@ export interface ShopifyOrder {
   customer?: {
     id: number;
     email: string;
+    first_name?: string;
+    last_name?: string;
   };
   shipping_address?: {
     city: string;
     province: string;
     country: string;
   };
+  fulfillments?: Array<{
+    id: number;
+    status: string;
+    created_at: string;
+    updated_at: string;
+  }>;
   line_items: ShopifyLineItem[];
 }
 
