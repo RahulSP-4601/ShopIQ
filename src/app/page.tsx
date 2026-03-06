@@ -4,10 +4,18 @@ import { useEffect } from "react";
 import {
   Navbar,
   Hero,
+  LogoBar,
+  Integrations,
+  AIShowcase,
+  ChannelProductFit,
+  ReportsAlerts,
   Features,
-  HowItWorks,
   ExampleQuestions,
+  HowItWorks,
+  Comparison,
+  Testimonials,
   CTA,
+  FAQ,
   Footer,
   BackgroundEffects,
 } from "@/components/landing";
@@ -36,10 +44,18 @@ export default function Home() {
       <BackgroundEffects />
       <Navbar />
       <Hero />
+      <LogoBar />
+      <Integrations />
+      <AIShowcase />
+      <ChannelProductFit />
+      <ReportsAlerts />
       <Features />
-      <HowItWorks />
       <ExampleQuestions />
+      <HowItWorks />
+      <Comparison />
+      <Testimonials />
       <CTA />
+      <FAQ />
       <Footer />
     </div>
   );

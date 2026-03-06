@@ -1,69 +1,589 @@
-@keyframes blob {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  25% { transform: translate(20px, -30px) scale(1.1); }
-  50% { transform: translate(-20px, 20px) scale(0.9); }
-  75% { transform: translate(30px, 10px) scale(1.05); }
+/* Premium subtle animations for Frame landing page */
+
+/* Smooth fade up animation for scroll reveal */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-@keyframes gradient {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+/* Subtle float animation for background elements */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-10px) scale(1.02);
+  }
 }
 
+/* Gentle pulse for glowing elements */
+@keyframes glow {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* Gradient shift animation */
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Subtle scale on hover */
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Shimmer effect for loading states */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Draw line animation */
 @keyframes draw {
-  from { stroke-dashoffset: 200; }
-  to { stroke-dashoffset: 0; }
+  from {
+    stroke-dashoffset: 200;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
-@keyframes slide-up {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+/* Typing cursor blink */
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
 }
 
-@keyframes pulse-slow {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 0.8; }
+/* Classes */
+
+/* Fade up on scroll - triggered by IntersectionObserver */
+.fade-up {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.animate-blob {
-  animation: blob 8s ease-in-out infinite;
+.fade-up.animate-in {
+  opacity: 1;
+  transform: translateY(0);
 }
 
-.animation-delay-2000 {
-  animation-delay: 2s;
+/* Floating background elements */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
 }
 
-.animation-delay-4000 {
-  animation-delay: 4s;
+/* Glow effect for orbs */
+.animate-glow {
+  animation: glow 4s ease-in-out infinite;
 }
 
+/* Animated gradient text */
 .animate-gradient {
   background-size: 200% auto;
-  animation: gradient 3s ease infinite;
+  animation: gradientShift 4s ease infinite;
 }
 
+/* Draw SVG path animation */
 .animate-draw {
   stroke-dasharray: 200;
   animation: draw 1.5s ease-out forwards;
   animation-delay: 0.5s;
 }
 
-.animate-slide-up {
-  animation: slide-up 0.6s ease-out forwards;
-  opacity: 0;
+/* Shimmer loading effect */
+.animate-shimmer {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
 }
 
+/* Cursor blink for typing effects */
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
+
+/* Subtle scale in animation */
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out forwards;
+}
+
+/* Stagger animation delays */
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
+.delay-500 { animation-delay: 0.5s; }
+
+/* Hover lift effect */
+.hover-lift {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+}
+
+/* Smooth transitions */
+.transition-smooth {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Focus ring for accessibility */
+.focus-ring:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* ==================== Premium Integration Hub Animations ==================== */
+
+/* Energy particle flowing along wire - premium version */
+@keyframes energyFlow {
+  0% {
+    offset-distance: 0%;
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  10% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  90% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+    transform: scale(0.5);
+  }
+}
+
+/* Pulsing glow for particles */
+@keyframes particleGlow {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.5);
+  }
+}
+
+/* Slow spin animation */
+@keyframes spinSlow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Reverse spin */
+@keyframes spinReverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+/* Slow ping animation */
+@keyframes pingSlow {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+}
+
+/* Pulse slow */
+@keyframes pulseSlow {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Pulse slower */
+@keyframes pulseSlower {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+/* Hub glow effect */
+@keyframes hubGlow {
+  0%, 100% {
+    box-shadow:
+      0 0 30px rgba(251, 191, 36, 0.4),
+      0 0 60px rgba(251, 191, 36, 0.2),
+      inset 0 0 30px rgba(251, 191, 36, 0.1);
+  }
+  50% {
+    box-shadow:
+      0 0 50px rgba(251, 191, 36, 0.6),
+      0 0 100px rgba(251, 191, 36, 0.3),
+      inset 0 0 50px rgba(251, 191, 36, 0.2);
+  }
+}
+
+/* Wire glow pulse */
+@keyframes wireGlowPulse {
+  0%, 100% {
+    opacity: 0.6;
+    filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.5));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.8));
+  }
+}
+
+/* Gradient animation for text */
+@keyframes gradientX {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Node entrance animation */
+@keyframes nodeEntrance {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* Orbital ring animation */
+@keyframes orbitalFloat {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 0.5;
+  }
+}
+
+/* Premium Integration Hub classes */
+.integration-hub-premium {
+  position: relative;
+}
+
+/* Energy particle animation */
+.energy-particle {
+  animation: energyFlow 3s linear infinite, particleGlow 1.5s ease-in-out infinite;
+  will-change: offset-distance, opacity, transform;
+}
+
+/* Wire glow path */
+.wire-glow-path {
+  animation: wireGlowPulse 2s ease-in-out infinite;
+}
+
+/* Slow spin */
+.animate-spin-slow {
+  animation: spinSlow 20s linear infinite;
+}
+
+/* Reverse spin */
+.animate-reverse-spin {
+  animation: spinReverse 15s linear infinite;
+}
+
+/* Slow ping */
+.animate-ping-slow {
+  animation: pingSlow 3s ease-in-out infinite;
+}
+
+/* Pulse slow */
 .animate-pulse-slow {
-  animation: pulse-slow 4s ease-in-out infinite;
+  animation: pulseSlow 4s ease-in-out infinite;
 }
 
-.fade-up {
+/* Pulse slower */
+.animate-pulse-slower {
+  animation: pulseSlower 6s ease-in-out infinite;
+}
+
+/* Hub glow */
+.hub-glow {
+  animation: hubGlow 3s ease-in-out infinite;
+}
+
+/* Gradient text animation */
+.animate-gradient-x {
+  background-size: 200% auto;
+  animation: gradientX 3s ease infinite;
+}
+
+/* Marketplace node premium */
+.marketplace-node-premium {
+  animation: nodeEntrance 0.6s ease-out forwards;
   opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
 }
 
-.fade-up.animate-in {
-  opacity: 1;
-  transform: translateY(0);
+/* Node ring glow on hover */
+.node-ring {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.marketplace-node-premium:hover .node-ring {
+  transform: scale(1.05);
+}
+
+/* Orbital rings */
+.orbital-ring {
+  animation: orbitalFloat 4s ease-in-out infinite;
+}
+
+.orbital-ring-1 {
+  animation-delay: 0s;
+}
+
+.orbital-ring-2 {
+  animation-delay: 0.5s;
+}
+
+.orbital-ring-3 {
+  animation-delay: 1s;
+}
+
+/* Radial gradient utility */
+.bg-gradient-radial {
+  background: radial-gradient(circle, var(--tw-gradient-stops));
+}
+
+/* ==================== Pricing Card Shine ==================== */
+
+/* Diagonal shine sweep across the pricing card */
+@keyframes cardShine {
+  0% {
+    transform: translateX(-100%) rotate(25deg);
+  }
+  100% {
+    transform: translateX(200%) rotate(25deg);
+  }
+}
+
+.pricing-card-shine {
+  pointer-events: none;
+  z-index: 1;
+}
+
+.pricing-card-shine::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 60%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.03) 40%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.03) 60%,
+    transparent 100%
+  );
+  transform: translateX(-100%) rotate(25deg);
+  animation: cardShine 6s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+/* ==================== Cookie Consent Animations ==================== */
+
+/* Slide up animation for cookie banner */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Slide down animation for cookie banner exit */
+@keyframes slideDown {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+
+/* Modal entrance animation */
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* Cookie consent classes */
+.animate-slide-up {
+  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-modal-in {
+  animation: modalIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* ==================== Mobile Navigation Menu Animations ==================== */
+
+/* Mobile menu slide down animation */
+@keyframes menuSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-menu-slide-down {
+  animation: menuSlideDown 0.2s ease-out forwards;
+}
+
+/* ==================== Logo Bar Marquee Animation ==================== */
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 25s linear infinite;
+}
+
+/* ==================== Reduced Motion Accessibility ==================== */
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  /* Disable all animations */
+  .fade-up,
+  .animate-float,
+  .animate-glow,
+  .animate-gradient,
+  .animate-draw,
+  .animate-shimmer,
+  .animate-blink,
+  .animate-scale-in,
+  .animate-spin-slow,
+  .animate-reverse-spin,
+  .animate-ping-slow,
+  .animate-pulse-slow,
+  .animate-pulse-slower,
+  .hub-glow,
+  .animate-gradient-x,
+  .marketplace-node-premium,
+  .orbital-ring,
+  .energy-particle,
+  .wire-glow-path,
+  .animate-slide-up,
+  .animate-slide-down,
+  .animate-modal-in,
+  .animate-menu-slide-down,
+  .animate-marquee,
+  .pricing-card-shine::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* Ensure fade-up elements are visible without animation */
+  .fade-up {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+  }
+
+  /* Marketplace nodes should be visible immediately */
+  .marketplace-node-premium {
+    opacity: 1 !important;
+  }
+
+  /* Disable spinning animations */
+  .animate-spin,
+  .animate-ping {
+    animation: none !important;
+  }
+
+  /* Reduce transition durations for essential interactions */
+  * {
+    transition-duration: 0.01ms !important;
+  }
 }
