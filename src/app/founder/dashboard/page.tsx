@@ -35,7 +35,18 @@ interface Commission {
   createdAt: string;
 }
 
-type Tab = "team" | "clients";
+interface WaitlistEntry {
+  id: string;
+  companyName: string;
+  email: string;
+  phone: string | null;
+  source: string | null;
+  status: "PENDING" | "TRIAL_SENT" | "CONVERTED" | "DECLINED";
+  trialSentAt: string | null;
+  createdAt: string;
+}
+
+type Tab = "team" | "clients" | "waitlist";
 
 export default function FounderDashboardPage() {
   const router = useRouter();
@@ -45,8 +56,8 @@ export default function FounderDashboardPage() {
     const handlePageShow = (e: PageTransitionEvent) => {
       if (e.persisted) {
         fetch("/api/auth/verify-employee", { cache: "no-store" }).then((res) => {
-          if (!res.ok) router.replace("/signin");
-        }).catch(() => router.replace("/signin"));
+          if (!res.ok) router.replace("/signin?internal=1");
+        }).catch(() => router.replace("/signin?internal=1"));
       }
     };
     window.addEventListener("pageshow", handlePageShow);
@@ -56,6 +67,7 @@ export default function FounderDashboardPage() {
   const [tab, setTab] = useState<Tab>("team");
   const [members, setMembers] = useState<Member[]>([]);
   const [allClients, setAllClients] = useState<SalesClient[]>([]);
+  const [waitlistEntries, setWaitlistEntries] = useState<WaitlistEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
@@ -77,7 +89,9 @@ export default function FounderDashboardPage() {
   const [inviteSuccess, setInviteSuccess] = useState<{ name: string; email: string; refCode: string } | null>(null);
   const [membersError, setMembersError] = useState("");
   const [clientsError, setClientsError] = useState("");
+  const [waitlistError, setWaitlistError] = useState("");
   const [commError, setCommError] = useState("");
+  const [sendingWaitlistTrialId, setSendingWaitlistTrialId] = useState<string | null>(null);
 
   // Refs for invite modal accessibility
   const inviteModalRef = useRef<HTMLDivElement>(null);
@@ -108,11 +122,23 @@ export default function FounderDashboardPage() {
     }
   }, []);
 
+  const fetchWaitlist = useCallback(async () => {
+    setWaitlistError("");
+    try {
+      const res = await fetch("/api/founder/waitlist");
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setWaitlistEntries(data.entries || []);
+    } catch {
+      setWaitlistError("Failed to load waitlist data. Please try again.");
+    }
+  }, []);
+
   useEffect(() => {
-    Promise.all([fetchMembers(), fetchAllClients()]).finally(() =>
+    Promise.all([fetchMembers(), fetchAllClients(), fetchWaitlist()]).finally(() =>
       setLoading(false)
     );
-  }, [fetchMembers, fetchAllClients]);
+  }, [fetchMembers, fetchAllClients, fetchWaitlist]);
 
   // Invite modal accessibility: focus trap, escape key, restore focus
   useEffect(() => {
@@ -161,7 +187,7 @@ export default function FounderDashboardPage() {
         setSignOutError("Failed to sign out.");
         return;
       }
-      router.replace("/signin");
+      router.replace("/signin?internal=1");
     } catch {
       setSignOutError("Failed to sign out.");
     }
@@ -286,6 +312,26 @@ export default function FounderDashboardPage() {
     }
   };
 
+  const handleSendWaitlistTrial = async (id: string) => {
+    setSendingWaitlistTrialId(id);
+    setActionError(null);
+    try {
+      const res = await fetch(`/api/founder/waitlist/${id}/send-trial`, {
+        method: "POST",
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setActionError(data.error || "Failed to send free trial");
+        return;
+      }
+      await Promise.all([fetchWaitlist(), fetchAllClients()]);
+    } catch {
+      setActionError("Failed to send free trial");
+    } finally {
+      setSendingWaitlistTrialId(null);
+    }
+  };
+
 
   if (loading) {
     return (
@@ -320,13 +366,14 @@ export default function FounderDashboardPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {(membersError || clientsError) && (
+        {(membersError || clientsError || waitlistError) && (
           <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center justify-between">
             <div className="text-sm text-red-600">
               {membersError && <p>{membersError}</p>}
               {clientsError && <p>{clientsError}</p>}
+              {waitlistError && <p>{waitlistError}</p>}
             </div>
-            <button onClick={() => { setMembersError(""); setClientsError(""); fetchMembers(); fetchAllClients(); }} className="text-sm text-red-600 underline hover:text-red-800 cursor-pointer">Retry</button>
+            <button onClick={() => { setMembersError(""); setClientsError(""); setWaitlistError(""); fetchMembers(); fetchAllClients(); fetchWaitlist(); }} className="text-sm text-red-600 underline hover:text-red-800 cursor-pointer">Retry</button>
           </div>
         )}
         {actionError && (
@@ -338,7 +385,7 @@ export default function FounderDashboardPage() {
         {/* Tabs + Add Member */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-8">
           <div className="flex gap-1 bg-gray-100 border border-gray-200 rounded-lg p-1 w-fit">
-            {(["team", "clients"] as const).map((t) => (
+            {(["team", "clients", "waitlist"] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => {
@@ -351,7 +398,7 @@ export default function FounderDashboardPage() {
                     : "text-gray-600 hover:text-gray-900"
                 }`}
               >
-                {t === "team" ? "Sales Team" : "All Clients"}
+                {t === "team" ? "Sales Team" : t === "clients" ? "All Clients" : "Waitlist"}
               </button>
             ))}
           </div>
@@ -767,6 +814,73 @@ export default function FounderDashboardPage() {
                           }`}>{c.status}</span>
                         </td>
                         <td className="px-2 py-2 sm:px-5 sm:py-3 text-gray-500">{formatDate(c.createdAt)}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* WAITLIST TAB */}
+        {tab === "waitlist" && (
+          <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
+            <div className="p-5 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">
+                Waitlist ({waitlistEntries.length})
+              </h2>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs sm:text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200 text-gray-500">
+                    <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Company</th>
+                    <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Email</th>
+                    <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Phone</th>
+                    <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Source</th>
+                    <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Status</th>
+                    <th className="text-left px-2 py-2 sm:px-5 sm:py-3 font-medium">Joined</th>
+                    <th className="text-right px-2 py-2 sm:px-5 sm:py-3 font-medium">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {waitlistEntries.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-5 py-12 text-center text-gray-400">
+                        No waitlist entries yet.
+                      </td>
+                    </tr>
+                  ) : (
+                    waitlistEntries.map((entry) => (
+                      <tr key={entry.id} className="border-b border-gray-100 hover:bg-gray-50">
+                        <td className="px-2 py-2 sm:px-5 sm:py-3 text-gray-900">{entry.companyName}</td>
+                        <td className="px-2 py-2 sm:px-5 sm:py-3 text-gray-600">{entry.email}</td>
+                        <td className="px-2 py-2 sm:px-5 sm:py-3 text-gray-600">{entry.phone || "—"}</td>
+                        <td className="px-2 py-2 sm:px-5 sm:py-3 text-gray-600 max-w-xs truncate">{entry.source || "—"}</td>
+                        <td className="px-2 py-2 sm:px-5 sm:py-3">
+                          <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            entry.status === "CONVERTED"
+                              ? "bg-green-100 text-green-700"
+                              : entry.status === "TRIAL_SENT"
+                                ? "bg-blue-100 text-blue-700"
+                                : entry.status === "DECLINED"
+                                  ? "bg-red-100 text-red-700"
+                                  : "bg-yellow-100 text-yellow-700"
+                          }`}>
+                            {entry.status}
+                          </span>
+                        </td>
+                        <td className="px-2 py-2 sm:px-5 sm:py-3 text-gray-500">{formatDate(entry.createdAt)}</td>
+                        <td className="px-2 py-2 sm:px-5 sm:py-3 text-right">
+                          <button
+                            onClick={() => handleSendWaitlistTrial(entry.id)}
+                            disabled={entry.status !== "PENDING" || sendingWaitlistTrialId === entry.id}
+                            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                          >
+                            {sendingWaitlistTrialId === entry.id ? "Sending..." : "Send Free Trial"}
+                          </button>
+                        </td>
                       </tr>
                     ))
                   )}

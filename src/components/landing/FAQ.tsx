@@ -4,8 +4,8 @@ import { useState } from "react";
 
 const faqs = [
   {
-    q: "How does the 30-day free trial work?",
-    a: "Sign up, connect your marketplaces, and get full access to every feature — unlimited AI queries, all reports, all analytics tools. No credit card required. At the end of 30 days, choose to continue with a paid plan or your account pauses (no data is deleted).",
+    q: "How does waitlist access work?",
+    a: "Join the waitlist with your company details. Our founder and sales team review requests and send 1-month trial access by invite email when approved.",
   },
   {
     q: "Does Frame modify or write to my marketplace stores?",

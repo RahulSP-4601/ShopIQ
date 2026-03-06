@@ -99,7 +99,7 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
   if (!token) {
-    return NextResponse.redirect(new URL("/signin", request.url));
+    return NextResponse.redirect(new URL("/signin?internal=1", request.url));
   }
 
   try {
@@ -107,7 +107,7 @@ export async function middleware(request: NextRequest) {
     const { payload } = await jwtVerify(token, getSecretKey());
 
     if (typeof payload.employeeId !== "string" || !payload.employeeId) {
-      return NextResponse.redirect(new URL("/signin", request.url));
+      return NextResponse.redirect(new URL("/signin?internal=1", request.url));
     }
 
     const employeeId = payload.employeeId;
@@ -128,18 +128,18 @@ export async function middleware(request: NextRequest) {
         // Internal API unreachable — deny access as a safe default.
         // Prevents stale JWT claims from granting founder access when
         // we can't confirm the employee's current status.
-        return NextResponse.redirect(new URL("/signin", request.url));
+        return NextResponse.redirect(new URL("/signin?internal=1", request.url));
       }
 
       if (role !== "FOUNDER") {
-        return NextResponse.redirect(new URL("/signin", request.url));
+        return NextResponse.redirect(new URL("/signin?internal=1", request.url));
       }
     }
 
     // Sales routes — JWT claims for fast routing; route handlers enforce fresh DB checks
     if (path.startsWith("/sales")) {
       if (role !== "SALES_MEMBER") {
-        return NextResponse.redirect(new URL("/signin", request.url));
+        return NextResponse.redirect(new URL("/signin?internal=1", request.url));
       }
 
       // Unapproved sales members can only see pending-approval page
@@ -152,7 +152,7 @@ export async function middleware(request: NextRequest) {
 
     return NextResponse.next();
   } catch {
-    return NextResponse.redirect(new URL("/signin", request.url));
+    return NextResponse.redirect(new URL("/signin?internal=1", request.url));
   }
 }
 

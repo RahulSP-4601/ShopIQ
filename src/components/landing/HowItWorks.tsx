@@ -129,7 +129,7 @@ export function HowItWorks() {
               onClick={() => setIsModalOpen(true)}
               className="px-6 py-2.5 rounded-xl text-sm font-medium text-white bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 transition-all shadow-lg shadow-teal-500/25"
             >
-              Start Free Trial
+              Join Waitlist
             </button>
           </div>
         </div>

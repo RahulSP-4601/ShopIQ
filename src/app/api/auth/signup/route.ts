@@ -24,6 +24,13 @@ const signupSchema = z
   });
 
 export async function POST(request: NextRequest) {
+  if (process.env.ENABLE_PUBLIC_SIGNUP === "false" || process.env.ENABLE_PUBLIC_SIGNUP === undefined) {
+    return NextResponse.json(
+      { error: "Signup is currently closed. Please join the waitlist." },
+      { status: 403 }
+    );
+  }
+
   try {
     const ip = getClientIP(request);
     if (!ip) {

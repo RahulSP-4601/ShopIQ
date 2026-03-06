@@ -51,7 +51,7 @@ export function Hero() {
                 onClick={() => setIsModalOpen(true)}
                 className="group flex h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 px-8 text-sm font-semibold text-white hover:from-teal-600 hover:to-emerald-600 transition-all duration-200 shadow-lg shadow-teal-500/25 hover:shadow-xl hover:shadow-teal-500/30 hover:scale-[1.02]"
               >
-                Start Free Trial
+                Join Waitlist
                 <svg
                   className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5"
                   fill="none"
@@ -74,7 +74,7 @@ export function Hero() {
 
             {/* Trust points */}
             <div className="fade-up mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-x-5 gap-y-2 text-sm text-slate-500">
-              {["No credit card required", "2-minute setup", "30-day free trial", "Cancel anytime"].map((item, i) => (
+              {["Founder-approved access", "2-minute setup", "waitlist access", "Cancel anytime"].map((item, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <div className="flex items-center justify-center w-4 h-4 rounded-full bg-emerald-50">
                     <svg className="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

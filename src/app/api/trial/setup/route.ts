@@ -124,6 +124,11 @@ export async function POST(request: NextRequest) {
           data: { clientUserId: newUser.id, status: "CONTACTED" },
         });
 
+        await tx.waitlistEntry.updateMany({
+          where: { trialToken: token },
+          data: { status: "CONVERTED" },
+        });
+
         return newUser;
       });
     } catch (txError) {
@@ -173,7 +178,7 @@ export async function POST(request: NextRequest) {
       // Return success but indicate manual sign-in is needed
       return NextResponse.json({
         success: true,
-        redirect: "/signin",
+        redirect: "/signin?internal=1",
         message: "Account created successfully. Please sign in to continue.",
       });
     }

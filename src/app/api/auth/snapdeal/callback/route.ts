@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     if (!session) {
       const response = NextResponse.redirect(
         new URL(
-          "/signin?redirect=/onboarding/connect&snapdeal_restart=true",
+          "/signin?internal=1&redirect=/onboarding/connect&snapdeal_restart=true",
           request.url
         )
       );

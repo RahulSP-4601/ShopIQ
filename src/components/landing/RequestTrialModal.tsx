@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 
 interface RequestTrialModalProps {
   isOpen: boolean;
@@ -8,27 +8,20 @@ interface RequestTrialModalProps {
 }
 
 export function RequestTrialModal({ isOpen, onClose }: RequestTrialModalProps) {
-  const refCode = useMemo(() => {
-    if (typeof window === "undefined") return null;
-    const params = new URLSearchParams(window.location.search);
-    return params.get("ref") || null;
-  }, []);
-
   const [formData, setFormData] = useState({
-    name: "",
+    companyName: "",
     email: "",
     phone: "",
+    source: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState("");
 
-  // Reset form when modal closes
   useEffect(() => {
     if (!isOpen) {
-      // Delay reset to allow for close animation
       const timer = setTimeout(() => {
-        setFormData({ name: "", email: "", phone: "" });
+        setFormData({ companyName: "", email: "", phone: "", source: "" });
         setIsSuccess(false);
         setError("");
       }, 300);
@@ -36,7 +29,6 @@ export function RequestTrialModal({ isOpen, onClose }: RequestTrialModalProps) {
     }
   }, [isOpen]);
 
-  // Handle escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -61,24 +53,16 @@ export function RequestTrialModal({ isOpen, onClose }: RequestTrialModalProps) {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("/api/trial-request", {
+      const response = await fetch("/api/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, refCode }),
+        body: JSON.stringify(formData),
       });
 
-      let data;
-      let text = "";
-      try {
-        data = await response.json();
-      } catch {
-        text = await response.text().catch(() => "");
-      }
+      const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        throw new Error(
-          data?.error || text || `Request failed: ${response.status} ${response.statusText}`
-        );
+        throw new Error(data?.error || `Request failed: ${response.status}`);
       }
 
       setIsSuccess(true);
@@ -89,7 +73,9 @@ export function RequestTrialModal({ isOpen, onClose }: RequestTrialModalProps) {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
@@ -103,21 +89,18 @@ export function RequestTrialModal({ isOpen, onClose }: RequestTrialModalProps) {
     <div
       className="fixed inset-0 z-50"
       style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1rem',
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "1rem",
       }}
     >
-      {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      {/* Modal */}
       <div className="relative z-10 w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl sm:p-8">
-        {/* Close button */}
         <button
           onClick={onClose}
           className="absolute right-4 top-4 p-2 text-slate-400 transition-colors hover:text-slate-600"
@@ -139,7 +122,6 @@ export function RequestTrialModal({ isOpen, onClose }: RequestTrialModalProps) {
         </button>
 
         {isSuccess ? (
-          // Success State
           <div className="py-8 text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
               <svg
@@ -157,11 +139,10 @@ export function RequestTrialModal({ isOpen, onClose }: RequestTrialModalProps) {
               </svg>
             </div>
             <h3 className="text-xl font-semibold text-slate-900">
-              Request Submitted!
+              You&apos;re On The Waitlist
             </h3>
             <p className="mt-2 text-slate-600">
-              Thank you for your interest in Frame. Our team will follow up
-              with you shortly.
+              Thanks for joining. We will contact you when your free trial access is ready.
             </p>
             <button
               onClick={onClose}
@@ -171,33 +152,30 @@ export function RequestTrialModal({ isOpen, onClose }: RequestTrialModalProps) {
             </button>
           </div>
         ) : (
-          // Form State
           <>
             <div className="mb-6 text-center">
-              <h2 className="text-2xl font-bold text-slate-900">
-                Request a Free Trial
-              </h2>
+              <h2 className="text-2xl font-bold text-slate-900">Join Waitlist</h2>
               <p className="mt-2 text-slate-600">
-                Fill out the form below and we will send you a 1 month free trial link within 24 hours.
+                Share your details and we will notify you when trial access is opened for your company.
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label
-                  htmlFor="name"
+                  htmlFor="companyName"
                   className="mb-1.5 block text-sm font-medium text-slate-700"
                 >
-                  Full Name
+                  Company Name
                 </label>
                 <input
                   type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
+                  id="companyName"
+                  name="companyName"
+                  value={formData.companyName}
                   onChange={handleChange}
                   required
-                  placeholder="John Doe"
+                  placeholder="Acme Inc"
                   className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 placeholder:text-slate-400 transition-colors focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
                 />
               </div>
@@ -216,7 +194,7 @@ export function RequestTrialModal({ isOpen, onClose }: RequestTrialModalProps) {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  placeholder="john@example.com"
+                  placeholder="you@company.com"
                   className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 placeholder:text-slate-400 transition-colors focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
                 />
               </div>
@@ -226,7 +204,7 @@ export function RequestTrialModal({ isOpen, onClose }: RequestTrialModalProps) {
                   htmlFor="phone"
                   className="mb-1.5 block text-sm font-medium text-slate-700"
                 >
-                  Contact Number
+                  Phone Number (Optional)
                 </label>
                 <input
                   type="tel"
@@ -234,7 +212,26 @@ export function RequestTrialModal({ isOpen, onClose }: RequestTrialModalProps) {
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  placeholder="+1 (555) 000-0000 (Optional)"
+                  placeholder="+1 (555) 000-0000"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 placeholder:text-slate-400 transition-colors focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="source"
+                  className="mb-1.5 block text-sm font-medium text-slate-700"
+                >
+                  How Did You Hear About Frax?
+                </label>
+                <textarea
+                  id="source"
+                  name="source"
+                  value={formData.source}
+                  onChange={handleChange}
+                  rows={2}
+                  maxLength={200}
+                  placeholder="Google, LinkedIn, referral, etc."
                   className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-base text-slate-900 placeholder:text-slate-400 transition-colors focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
                 />
               </div>
@@ -250,46 +247,9 @@ export function RequestTrialModal({ isOpen, onClose }: RequestTrialModalProps) {
                 disabled={isSubmitting}
                 className="w-full rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 px-6 py-3 font-semibold text-white transition-all hover:from-teal-600 hover:to-emerald-600 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {isSubmitting ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <svg
-                      className="h-5 w-5 animate-spin"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      />
-                    </svg>
-                    Submitting...
-                  </span>
-                ) : (
-                  "Submit Request"
-                )}
+                {isSubmitting ? "Submitting..." : "Join Waitlist"}
               </button>
             </form>
-
-            <p className="mt-4 text-center text-xs text-slate-500">
-              By submitting, you agree to our{" "}
-              <a href="/terms" className="text-teal-600 hover:underline">
-                Terms of Service
-              </a>{" "}
-              and{" "}
-              <a href="/privacy" className="text-teal-600 hover:underline">
-                Privacy Policy
-              </a>
-              .
-            </p>
           </>
         )}
       </div>

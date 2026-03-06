@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     const redirectPath = "/api/auth/ebay";
     return NextResponse.redirect(
       new URL(
-        `/signin?redirect=${encodeURIComponent(redirectPath)}`,
+        `/signin?internal=1&redirect=${encodeURIComponent(redirectPath)}`,
         request.url
       )
     );

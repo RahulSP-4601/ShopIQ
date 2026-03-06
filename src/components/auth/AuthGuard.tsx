@@ -30,11 +30,11 @@ export function AuthGuard({ children, fallback }: AuthGuardProps) {
         setIsAuthenticated(true);
       } else {
         setIsAuthenticated(false);
-        router.replace("/signin");
+        router.replace("/signin?internal=1");
       }
     } catch {
       setIsAuthenticated(false);
-      router.replace("/signin");
+      router.replace("/signin?internal=1");
     }
   }, [router]);
 

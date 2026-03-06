@@ -91,14 +91,14 @@ export function Navbar() {
           </div>
 
           <Link
-            href="/signin"
+            href="/signin?internal=1"
             className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
           >
             Sign in
           </Link>
 
           <Link
-            href="/signup"
+            href="/waitlist"
             className="hidden sm:inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-teal-500 to-emerald-500 rounded-lg hover:from-teal-600 hover:to-emerald-600 transition-all duration-200 shadow-lg shadow-teal-500/25"
           >
             Get Started
@@ -142,14 +142,14 @@ export function Navbar() {
             ))}
             <div className="pt-4 mt-4 border-t border-slate-200 space-y-2">
               <Link
-                href="/signin"
+                href="/signin?internal=1"
                 onClick={handleMobileLinkClick}
                 className="block px-4 py-3 text-base font-medium text-slate-600 hover:text-slate-900 transition-colors"
               >
                 Sign in
               </Link>
               <Link
-                href="/signup"
+                href="/waitlist"
                 onClick={handleMobileLinkClick}
                 className="block px-4 py-3 text-base font-semibold text-center text-white bg-gradient-to-r from-teal-500 to-emerald-500 rounded-lg hover:from-teal-600 hover:to-emerald-600 transition-all"
               >

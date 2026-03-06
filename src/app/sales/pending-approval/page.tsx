@@ -12,8 +12,8 @@ export default function PendingApprovalPage() {
     const handlePageShow = (e: PageTransitionEvent) => {
       if (e.persisted) {
         fetch("/api/auth/verify-employee", { cache: "no-store" }).then((res) => {
-          if (!res.ok) router.replace("/signin");
-        }).catch(() => router.replace("/signin"));
+          if (!res.ok) router.replace("/signin?internal=1");
+        }).catch(() => router.replace("/signin?internal=1"));
       }
     };
     window.addEventListener("pageshow", handlePageShow);
@@ -28,7 +28,7 @@ export default function PendingApprovalPage() {
         setSignOutError("Failed to sign out. Please try again.");
         return;
       }
-      router.replace("/signin");
+      router.replace("/signin?internal=1");
     } catch {
       setSignOutError("Failed to sign out. Please try again.");
     }

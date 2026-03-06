@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
+  if (process.env.ENABLE_PUBLIC_TRIAL_REQUESTS !== "true") {
+    return NextResponse.json(
+      { error: "Public trial requests are disabled. Please join the waitlist." },
+      { status: 403 }
+    );
+  }
+
   try {
     const body = await request.json();
     const { name, email, phone, refCode } = body;

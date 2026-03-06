@@ -207,7 +207,7 @@ export function CTA() {
                     className="group w-full py-3.5 rounded-xl text-sm font-bold tracking-wide transition-all duration-200 bg-gradient-to-r from-teal-500 to-emerald-500 text-white shadow-lg shadow-teal-500/25 hover:shadow-xl hover:shadow-teal-500/30 hover:-translate-y-0.5 cursor-pointer"
                   >
                     <span className="flex items-center justify-center gap-2">
-                      Start Your 30-Day Free Trial
+                      Join Waitlist
                       <svg className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                       </svg>
@@ -215,7 +215,7 @@ export function CTA() {
                   </button>
 
                   <p className="mt-4 text-center text-xs text-slate-400">
-                    No credit card required · Full access · Cancel anytime
+                    Founder-approved access · Full access · Cancel anytime
                   </p>
                 </div>
               </div>
@@ -242,7 +242,7 @@ export function CTA() {
                   onClick={() => setIsModalOpen(true)}
                   className="group flex h-12 items-center justify-center rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 px-8 text-sm font-semibold text-white transition-all duration-200 hover:shadow-lg hover:shadow-teal-500/25"
                 >
-                  Start Free Trial
+                  Join Waitlist
                   <svg className="w-4 h-4 ml-2 transition-transform duration-200 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                   </svg>
@@ -256,7 +256,7 @@ export function CTA() {
               </div>
 
               <div className="mt-10 flex flex-wrap items-center justify-center gap-4 text-sm text-slate-400">
-                {["30-day free trial", "No credit card", "Cancel anytime", "SOC 2 Certified"].map((item, i) => (
+                {["waitlist access", "No credit card", "Cancel anytime", "SOC 2 Certified"].map((item, i) => (
                   <div key={i} className="flex items-center gap-2">
                     <svg className="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />

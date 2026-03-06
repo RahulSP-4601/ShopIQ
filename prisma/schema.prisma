@@ -100,6 +100,7 @@ model Employee {
   // Relations
   salesClients SalesClient[]
   commissions  Commission[]
+  waitlistInvites WaitlistEntry[] @relation("WaitlistInvitedBy")
 
   @@index([email])
 }
@@ -353,6 +354,13 @@ enum TrialRequestStatus {
   DECLINED
 }
 
+enum WaitlistStatus {
+  PENDING
+  TRIAL_SENT
+  CONVERTED
+  DECLINED
+}
+
 // ============================================
 // SALES TEAM
 // ============================================
@@ -372,6 +380,7 @@ model SalesClient {
   // Optional link to TrialRequest (if came via referral link)
   trialRequestId String?       @unique
   trialRequest   TrialRequest? @relation(fields: [trialRequestId], references: [id])
+  waitlistEntry  WaitlistEntry?
 
   // Trial invitation
   trialToken  String?   @unique
@@ -388,6 +397,30 @@ model SalesClient {
 
   @@index([salesMemberId])
   @@index([email])
+}
+
+model WaitlistEntry {
+  id          String @id @default(cuid())
+  companyName String
+  email       String @unique
+  phone       String?
+  source      String?
+
+  status      WaitlistStatus @default(PENDING)
+  trialToken  String?        @unique
+  trialSentAt DateTime?
+
+  salesClientId String?     @unique
+  salesClient   SalesClient? @relation(fields: [salesClientId], references: [id], onDelete: SetNull)
+
+  invitedByEmployeeId String?
+  invitedByEmployee   Employee? @relation("WaitlistInvitedBy", fields: [invitedByEmployeeId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([status])
 }
 
 model Commission {

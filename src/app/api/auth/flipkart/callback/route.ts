@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       });
       return NextResponse.redirect(
         new URL(
-          "/signin?redirect=/onboarding/connect&flipkart_restart=true",
+          "/signin?internal=1&redirect=/onboarding/connect&flipkart_restart=true",
           request.url
         )
       );
