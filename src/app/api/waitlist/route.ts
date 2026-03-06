@@ -1,9 +1,54 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { checkRateLimit, getClientIP } from "@/lib/rate-limit";
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function isWaitlistSchemaError(error: unknown): boolean {
+  if (!(error instanceof Prisma.PrismaClientKnownRequestError)) {
+    return false;
+  }
+
+  if (error.code !== "P2021" && error.code !== "P2022") {
+    return false;
+  }
+
+  const cause = `${error.message} ${JSON.stringify(error.meta ?? {})}`.toLowerCase();
+  return cause.includes("waitlistentry") || cause.includes("waitliststatus");
+}
+
+async function upsertLegacyTrialRequest(companyName: string, email: string, phone: string) {
+  const existing = await prisma.trialRequest.findFirst({
+    where: { email },
+    orderBy: { createdAt: "desc" },
+    select: { id: true },
+  });
+
+  if (existing) {
+    const updated = await prisma.trialRequest.update({
+      where: { id: existing.id },
+      data: {
+        name: companyName,
+        phone: phone || null,
+      },
+      select: { id: true },
+    });
+    return { id: updated.id, alreadyJoined: true };
+  }
+
+  const created = await prisma.trialRequest.create({
+    data: {
+      name: companyName,
+      email,
+      phone: phone || null,
+    },
+    select: { id: true },
+  });
+
+  return { id: created.id, alreadyJoined: false };
 }
 
 export async function POST(request: NextRequest) {
@@ -75,33 +120,56 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const entry = await prisma.waitlistEntry.upsert({
-      where: { email: emailRaw },
-      update: {
-        companyName,
-        phone: phone || null,
-        source: source || null,
-      },
-      create: {
-        companyName,
-        email: emailRaw,
-        phone: phone || null,
-        source: source || null,
-      },
-      select: { id: true, status: true, createdAt: true, updatedAt: true },
-    });
+    try {
+      const entry = await prisma.waitlistEntry.upsert({
+        where: { email: emailRaw },
+        update: {
+          companyName,
+          phone: phone || null,
+          source: source || null,
+        },
+        create: {
+          companyName,
+          email: emailRaw,
+          phone: phone || null,
+          source: source || null,
+        },
+        select: { id: true, status: true, createdAt: true, updatedAt: true },
+      });
 
-    const alreadyJoined = entry.updatedAt > entry.createdAt;
+      const alreadyJoined = entry.updatedAt > entry.createdAt;
 
-    return NextResponse.json(
-      {
-        success: true,
-        alreadyJoined,
-        id: entry.id,
-        status: entry.status,
-      },
-      { status: alreadyJoined ? 200 : 201 }
-    );
+      return NextResponse.json(
+        {
+          success: true,
+          alreadyJoined,
+          id: entry.id,
+          status: entry.status,
+        },
+        { status: alreadyJoined ? 200 : 201 }
+      );
+    } catch (waitlistWriteError) {
+      if (!isWaitlistSchemaError(waitlistWriteError)) {
+        throw waitlistWriteError;
+      }
+
+      console.error(
+        "Waitlist schema missing in database, falling back to TrialRequest storage:",
+        waitlistWriteError instanceof Error ? waitlistWriteError.message : String(waitlistWriteError)
+      );
+
+      const fallback = await upsertLegacyTrialRequest(companyName, emailRaw, phone);
+      return NextResponse.json(
+        {
+          success: true,
+          alreadyJoined: fallback.alreadyJoined,
+          id: fallback.id,
+          status: "PENDING",
+          fallback: "trial_request",
+        },
+        { status: fallback.alreadyJoined ? 200 : 201 }
+      );
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     console.error("Failed to join waitlist:", message);
