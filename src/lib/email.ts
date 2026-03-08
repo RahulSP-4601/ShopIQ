@@ -128,7 +128,7 @@ export async function sendTrialInviteEmail({
             </tr>
             <tr>
               <td style="padding: 6px 12px 6px 0; vertical-align: top; color: #166534; font-weight: 700; font-size: 15px;">2.</td>
-              <td style="padding: 6px 0; color: #374151; font-size: 14px; line-height: 1.5;">Set your password and choose 2 marketplaces to connect</td>
+              <td style="padding: 6px 0; color: #374151; font-size: 14px; line-height: 1.5;">Set your password and choose marketplaces to connect</td>
             </tr>
             <tr>
               <td style="padding: 6px 12px 6px 0; vertical-align: top; color: #166534; font-weight: 700; font-size: 15px;">3.</td>

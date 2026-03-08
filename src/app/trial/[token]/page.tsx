@@ -101,7 +101,6 @@ export default function TrialSetupPage() {
   const toggleMarketplace = (id: string) => {
     setSelectedMarketplaces((prev) => {
       if (prev.includes(id)) return prev.filter((m) => m !== id);
-      if (prev.length >= 2) return prev;
       return [...prev, id];
     });
   };
@@ -121,8 +120,8 @@ export default function TrialSetupPage() {
       return;
     }
 
-    if (selectedMarketplaces.length !== 2) {
-      setError("Please select exactly 2 marketplaces");
+    if (selectedMarketplaces.length < 1) {
+      setError("Please select at least 1 marketplace");
       return;
     }
 
@@ -303,23 +302,19 @@ export default function TrialSetupPage() {
 
             {/* Marketplace Selection */}
             <div>
-              <h2 className="text-lg font-semibold text-gray-900 mb-1">Select 2 Marketplaces</h2>
-              <p className="text-sm text-gray-500 mb-4">Choose 2 marketplaces to connect during your free trial ({selectedMarketplaces.length}/2 selected)</p>
+              <h2 className="text-lg font-semibold text-gray-900 mb-1">Select Marketplaces</h2>
+              <p className="text-sm text-gray-500 mb-4">Choose marketplaces to connect during your free trial ({selectedMarketplaces.length} selected)</p>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                 {MARKETPLACES.map((mp) => {
                   const selected = selectedMarketplaces.includes(mp.id);
-                  const disabled = !selected && selectedMarketplaces.length >= 2;
                   return (
                     <button
                       key={mp.id}
                       type="button"
                       onClick={() => toggleMarketplace(mp.id)}
-                      disabled={disabled}
                       className={`flex flex-col items-center gap-2 p-2 sm:p-4 rounded-xl border-2 transition-all cursor-pointer ${
                         selected
                           ? "border-blue-500 bg-blue-50"
-                          : disabled
-                          ? "border-gray-100 bg-gray-50 opacity-40 cursor-not-allowed"
                           : "border-gray-200 bg-white hover:border-gray-300"
                       }`}
                     >
@@ -345,7 +340,7 @@ export default function TrialSetupPage() {
             <div className="flex flex-col gap-3">
               <button
                 type="submit"
-                disabled={submitting || selectedMarketplaces.length !== 2}
+                disabled={submitting || selectedMarketplaces.length < 1}
                 className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {submitting ? "Setting up your trial..." : "Start Free Trial"}

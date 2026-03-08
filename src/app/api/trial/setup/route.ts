@@ -27,13 +27,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: passwordValidation.error }, { status: 400 });
     }
 
-    if (!Array.isArray(marketplaces) || marketplaces.length !== 2) {
-      return NextResponse.json({ error: "Please select exactly 2 marketplaces" }, { status: 400 });
+    if (!Array.isArray(marketplaces) || marketplaces.length < 1) {
+      return NextResponse.json({ error: "Please select at least 1 marketplace" }, { status: 400 });
     }
 
     // Check for duplicate marketplaces
     if (new Set(marketplaces).size !== marketplaces.length) {
-      return NextResponse.json({ error: "Please select 2 distinct marketplaces" }, { status: 400 });
+      return NextResponse.json({ error: "Please select distinct marketplaces" }, { status: 400 });
     }
 
     if (!marketplaces.every((m: string) => VALID_MARKETPLACES.includes(m))) {
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
             basePrice: 0,
             additionalPrice: 0,
             totalPrice: 0,
-            marketplaceCount: 2,
+            marketplaceCount: marketplaces.length,
             currentPeriodStart: now,
             currentPeriodEnd: trialEnd,
           },

@@ -128,7 +128,7 @@ export default function TrialConnectPage() {
     fetchConnections();
   }, [fetchConnections]);
 
-  // Only show marketplaces that the user has a connection record for (the 2 they selected)
+  // Only show marketplaces that the user selected during trial setup.
   const trialMarketplaces = MARKETPLACES.filter((m) =>
     connections.some((c) => c.marketplace === m.id)
   );
@@ -141,7 +141,7 @@ export default function TrialConnectPage() {
   const connectedCount = connections.filter(
     (c) => c.status === "CONNECTED" && trialMarketplaceIds.has(c.marketplace)
   ).length;
-  const totalRequired = trialMarketplaces.length || 2;
+  const totalRequired = trialMarketplaces.length;
 
   // Auto-redirect to /chat when all marketplaces are connected
   useEffect(() => {
