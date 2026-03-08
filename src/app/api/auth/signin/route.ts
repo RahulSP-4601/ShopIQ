@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { email, password } = result.data;
-    const emailLower = email.toLowerCase();
+    const emailLower = email.trim().toLowerCase();
 
     // Fetch both tables concurrently to reduce timing differences
     const [user, employee] = await Promise.all([
