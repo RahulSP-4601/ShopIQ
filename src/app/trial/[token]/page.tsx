@@ -190,7 +190,7 @@ export default function TrialSetupPage() {
             <h1 className="text-2xl font-bold text-gray-900 mb-3">Trial Period Ended</h1>
             <p className="text-gray-500 mb-6">Your 30-day free trial has expired. Sign in to continue with a paid plan.</p>
             <a
-              href="/signin?internal=1"
+              href="/signin"
               className="inline-block w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors text-center"
             >
               Sign In
@@ -235,7 +235,7 @@ export default function TrialSetupPage() {
                     Retry Sign In
                   </button>
                   <a
-                    href="/signin?internal=1"
+                    href="/signin"
                     className="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors text-center"
                   >
                     Sign In Manually

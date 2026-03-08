@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     // Encode the entire redirect path to prevent query param confusion
     const redirectPath = `/api/auth/shopify?shop=${encodeURIComponent(shop)}`;
     return NextResponse.redirect(
-      new URL(`/signin?internal=1&redirect=${encodeURIComponent(redirectPath)}`, request.url)
+      new URL(`/signin?redirect=${encodeURIComponent(redirectPath)}`, request.url)
     );
   }
 

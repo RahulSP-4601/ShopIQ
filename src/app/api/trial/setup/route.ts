@@ -178,7 +178,7 @@ export async function POST(request: NextRequest) {
       // Return success but indicate manual sign-in is needed
       return NextResponse.json({
         success: true,
-        redirect: "/signin?internal=1",
+        redirect: "/signin",
         message: "Account created successfully. Please sign in to continue.",
       });
     }

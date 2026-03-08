@@ -11,7 +11,7 @@ export default async function OnboardingLayout({
   const session = await getUserSession();
 
   if (!session) {
-    redirect("/signin?internal=1");
+    redirect("/signin");
   }
 
   return (

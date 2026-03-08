@@ -11,7 +11,7 @@ export default async function ChatPage() {
 
   // If not logged in, redirect to signin
   if (!user) {
-    redirect("/signin?internal=1");
+    redirect("/signin");
   }
 
   // Check if user has connected marketplaces

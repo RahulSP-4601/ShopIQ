@@ -15,7 +15,6 @@ export default function SignInPage() {
 function SignInForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const internalAccess = searchParams.get("internal") === "1";
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -66,25 +65,6 @@ function SignInForm() {
       setIsLoading(false);
     }
   };
-
-  if (!internalAccess) {
-    return (
-      <div className="w-full max-w-md">
-        <div className="bg-white/80 backdrop-blur-sm rounded-3xl border border-slate-200/60 shadow-xl shadow-slate-200/50 p-8 md:p-10 text-center">
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Sign In Is Closed</h1>
-          <p className="mt-3 text-slate-600">
-            Public access is currently invite-only. Please join the waitlist.
-          </p>
-          <Link
-            href="/waitlist"
-            className="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 px-6 py-3.5 text-base font-semibold text-white hover:from-teal-600 hover:to-emerald-600 transition-all"
-          >
-            Join Waitlist
-          </Link>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="w-full max-w-md">

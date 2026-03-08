@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
       // Do NOT store the OAuth code - it's a one-time use token and storing it is insecure
       // User will need to restart the OAuth flow after signing in
       return NextResponse.redirect(
-        new URL("/signin?internal=1&redirect=/onboarding/connect&shopify_restart=true", request.url)
+        new URL("/signin?redirect=/onboarding/connect&shopify_restart=true", request.url)
       );
     }
 

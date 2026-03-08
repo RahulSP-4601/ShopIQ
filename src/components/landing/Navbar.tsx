@@ -91,7 +91,7 @@ export function Navbar() {
           </div>
 
           <Link
-            href="/signin?internal=1"
+            href="/signin"
             className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
           >
             Sign in
@@ -142,7 +142,7 @@ export function Navbar() {
             ))}
             <div className="pt-4 mt-4 border-t border-slate-200 space-y-2">
               <Link
-                href="/signin?internal=1"
+                href="/signin"
                 onClick={handleMobileLinkClick}
                 className="block px-4 py-3 text-base font-medium text-slate-600 hover:text-slate-900 transition-colors"
               >

@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     const redirectPath = "/api/auth/flipkart";
     return NextResponse.redirect(
       new URL(
-        `/signin?internal=1&redirect=${encodeURIComponent(redirectPath)}`,
+        `/signin?redirect=${encodeURIComponent(redirectPath)}`,
         request.url
       )
     );

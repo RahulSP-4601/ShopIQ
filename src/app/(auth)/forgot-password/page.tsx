@@ -67,7 +67,7 @@ export default function ForgotPasswordPage() {
           </p>
 
           <Link
-            href="/signin?internal=1"
+            href="/signin"
             className="inline-flex items-center gap-2 text-teal-600 font-medium hover:text-teal-700 transition-colors"
           >
             <svg
@@ -190,7 +190,7 @@ export default function ForgotPasswordPage() {
         {/* Back link */}
         <div className="mt-8 text-center">
           <Link
-            href="/signin?internal=1"
+            href="/signin"
             className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition-colors"
           >
             <svg

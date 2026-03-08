@@ -44,7 +44,7 @@ export function ChatHeader({
 
       // Only redirect on definitive auth failures (401/403)
       if (response.status === 401 || response.status === 403) {
-        router.replace("/signin?internal=1");
+        router.replace("/signin");
         return;
       }
 
@@ -55,7 +55,7 @@ export function ChatHeader({
       }
 
       // Exhausted retries, redirect
-      router.replace("/signin?internal=1");
+      router.replace("/signin");
     } catch {
       // Network error - retry for transient failures
       if (retryCount < MAX_RETRIES) {
@@ -64,7 +64,7 @@ export function ChatHeader({
       }
 
       // Exhausted retries on network errors, redirect
-      router.replace("/signin?internal=1");
+      router.replace("/signin");
     }
   }, [router]);
 
@@ -111,7 +111,7 @@ export function ChatHeader({
 
       if (response.ok) {
         // Use replace to prevent back button from returning to this page
-        router.replace("/signin?internal=1");
+        router.replace("/signin");
       } else {
         // Sign-out failed - show error to user
         setSignOutError("Failed to sign out. Please try again.");

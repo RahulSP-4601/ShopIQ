@@ -56,8 +56,8 @@ export default function FounderDashboardPage() {
     const handlePageShow = (e: PageTransitionEvent) => {
       if (e.persisted) {
         fetch("/api/auth/verify-employee", { cache: "no-store" }).then((res) => {
-          if (!res.ok) router.replace("/signin?internal=1");
-        }).catch(() => router.replace("/signin?internal=1"));
+          if (!res.ok) router.replace("/signin");
+        }).catch(() => router.replace("/signin"));
       }
     };
     window.addEventListener("pageshow", handlePageShow);
@@ -187,7 +187,7 @@ export default function FounderDashboardPage() {
         setSignOutError("Failed to sign out.");
         return;
       }
-      router.replace("/signin?internal=1");
+      router.replace("/signin");
     } catch {
       setSignOutError("Failed to sign out.");
     }

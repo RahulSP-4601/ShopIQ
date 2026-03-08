@@ -58,7 +58,7 @@ export default function AccountMarketplacesPage() {
 
       // Handle auth errors - redirect to signin
       if (connectionsRes.status === 401 || subscriptionRes.status === 401) {
-        router.push("/signin?internal=1");
+        router.push("/signin");
         return [];
       }
 

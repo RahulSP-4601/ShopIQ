@@ -57,7 +57,7 @@ function ResetPasswordForm() {
 
       // Clear loading before navigation in case navigation is slow
       setIsLoading(false);
-      router.push("/signin?internal=1&reset=success");
+      router.push("/signin?reset=success");
     } catch {
       setError("An error occurred. Please try again.");
     } finally {
@@ -264,7 +264,7 @@ function ResetPasswordForm() {
         {/* Back link */}
         <div className="mt-8 text-center">
           <Link
-            href="/signin?internal=1"
+            href="/signin"
             className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition-colors"
           >
             <svg

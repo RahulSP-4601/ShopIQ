@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
     if (!session) {
       let response = NextResponse.redirect(
         new URL(
-          "/signin?internal=1&redirect=/onboarding/connect&square_restart=true",
+          "/signin?redirect=/onboarding/connect&square_restart=true",
           request.url
         )
       );

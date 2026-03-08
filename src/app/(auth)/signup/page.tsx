@@ -18,8 +18,8 @@ export default function SignUpPage() {
 
         <p className="mt-4 text-sm text-slate-600">
           Already invited? Use{" "}
-          <Link href="/signin?internal=1" className="ml-1 font-semibold text-teal-600 hover:text-teal-700 transition-colors">
-            secure sign in
+          <Link href="/signin" className="ml-1 font-semibold text-teal-600 hover:text-teal-700 transition-colors">
+            sign in
           </Link>
           .
         </p>

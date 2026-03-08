@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         message: "Password has been reset successfully",
-        redirect: "/signin?internal=1",
+        redirect: "/signin",
       });
     }
 
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         message: "Password has been reset successfully",
-        redirect: "/signin?internal=1",
+        redirect: "/signin",
       });
     }
 
