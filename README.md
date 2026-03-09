@@ -224,7 +224,7 @@ SUPABASE_SERVICE_ROLE_KEY="your_service_role_key"
 
 # Email (Resend)
 RESEND_API_KEY="your_resend_key"
-RESEND_FROM_EMAIL="onboarding@yourdomain.com"
+RESEND_FROM_EMAIL="ReplyQuick <noreply@replyquick.ai>"
 ```
 
 ### Installation

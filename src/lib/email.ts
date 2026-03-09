@@ -8,7 +8,7 @@ function getResend() {
   return new Resend(key);
 }
 
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "ReplyQuick <noreply@replyquick.ai>";
 const CONTACT_TO_EMAIL = process.env.CONTACT_TO_EMAIL || FROM_EMAIL;
 
 function escapeHtml(text: string): string {
