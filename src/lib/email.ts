@@ -9,6 +9,7 @@ function getResend() {
 }
 
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
+const CONTACT_TO_EMAIL = process.env.CONTACT_TO_EMAIL || FROM_EMAIL;
 
 function escapeHtml(text: string): string {
   return text
@@ -248,6 +249,38 @@ export async function sendPasswordResetEmail({
         <p style="color: #9ca3af; font-size: 12px; margin-top: 32px;">
           This link expires in 1 hour. If you didn't request a password reset, you can safely ignore this email.
         </p>
+      </div>
+    `,
+  });
+}
+
+export async function sendContactFormEmail({
+  name,
+  email,
+  message,
+}: {
+  name: string;
+  email: string;
+  message: string;
+}) {
+  const resend = getResend();
+  const safeName = escapeHtml(name);
+  const safeEmail = escapeHtml(email);
+  const safeMessage = escapeHtml(message).replace(/\n/g, "<br />");
+
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to: CONTACT_TO_EMAIL,
+    replyTo: email,
+    subject: `New contact form message from ${name}`,
+    html: `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 640px; margin: 0 auto; padding: 24px 16px;">
+        <h2 style="color: #111827; margin: 0 0 12px;">New Contact Form Submission</h2>
+        <p style="color: #374151; margin: 0 0 6px;"><strong>Name:</strong> ${safeName}</p>
+        <p style="color: #374151; margin: 0 0 16px;"><strong>Email:</strong> ${safeEmail}</p>
+        <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px;">
+          <p style="margin: 0; color: #111827; line-height: 1.6;">${safeMessage}</p>
+        </div>
       </div>
     `,
   });

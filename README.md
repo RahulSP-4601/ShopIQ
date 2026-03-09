@@ -152,7 +152,7 @@ Frame operates on a **subscription-based SaaS model** with transparent, scalable
 - **Frontend**: Next.js 16, React 19, TypeScript, Tailwind CSS
 - **Backend**: Next.js API Routes, Prisma ORM
 - **Database**: PostgreSQL (Supabase)
-- **AI**: Google Gemini 1.5 Flash
+- **AI**: OpenAI GPT models (default: `gpt-4o-mini`)
 - **Marketplace APIs**: Shopify Admin API (2025-10), eBay REST API, Etsy Open API v3, Flipkart Seller API, BigCommerce API, Square API, Snapdeal Seller API
 - **Infrastructure**: Vercel (hosting + cron jobs)
 - **Email**: Resend
@@ -165,7 +165,7 @@ Frame operates on a **subscription-based SaaS model** with transparent, scalable
 - Node.js 18+
 - PostgreSQL database (Supabase recommended)
 - Marketplace developer accounts (Shopify, eBay, Etsy, Flipkart, BigCommerce, Square, Snapdeal)
-- Google Gemini API key
+- OpenAI API key
 
 ### Environment Variables
 
@@ -210,8 +210,9 @@ SQUARE_APPLICATION_SECRET="your_square_application_secret"
 SNAPDEAL_CLIENT_ID="your_snapdeal_client_id"
 SNAPDEAL_AUTH_TOKEN="your_snapdeal_auth_token"
 
-# Google Gemini AI
-GEMINI_API_KEY="your_gemini_api_key"
+# OpenAI
+OPENAI_API_KEY="sk-your-openai-api-key-here"
+OPENAI_MODEL="gpt-4o-mini"
 
 # Vercel Cron
 CRON_SECRET="your_cron_secret"

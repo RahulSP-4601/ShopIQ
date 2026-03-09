@@ -37,10 +37,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
     console.error("Cron sync error:", error);
-    // Return 200 to avoid Vercel retrying on transient failures
     return NextResponse.json(
       { success: false, error: "Sync encountered errors" },
-      { status: 200 }
+      { status: 500 }
     );
   }
 }

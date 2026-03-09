@@ -94,7 +94,7 @@ async function getLatestEmployeeStatus(
   }
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const token = request.cookies.get("frame_employee_session")?.value;
   const path = request.nextUrl.pathname;
 

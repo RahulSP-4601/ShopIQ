@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { sendContactFormEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,15 +12,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // TODO: Replace with actual email service (e.g. Resend, SendGrid)
-    const domain = email.split("@")[1] || "unknown";
-    console.log("[Contact Form]", { nameLength: name.length, emailDomain: domain, messageLength: message.length });
+    await sendContactFormEmail({
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      message: message.trim(),
+    });
 
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (error) {
+    console.error("Contact form delivery failed:", error);
     return NextResponse.json(
-      { error: "Failed to process request." },
-      { status: 500 }
+      { error: "Failed to deliver message. Please try again shortly." },
+      { status: 502 }
     );
   }
 }

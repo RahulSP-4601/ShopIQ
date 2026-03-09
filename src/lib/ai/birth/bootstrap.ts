@@ -48,13 +48,9 @@ const INDUSTRY_LABELS: Record<string, string> = {
 /**
  * Clean up partial bootstrap data to allow clean retry after failure.
  *
- * WARNING: This performs a FULL RESET of user's AI state:
- * - Deletes ALL beliefs (not just bootstrap ones) because beliefs don't have a source field
- * - Deletes all system notes (bootstrap creates a system welcome note)
- * - Deletes all maturity snapshots (bootstrap creates initial snapshot)
- *
- * TODO: Add source/origin field to Belief model to enable selective deletion of only
- * bootstrap beliefs, preventing loss of user-learned beliefs during retry.
+ * SAFETY: This intentionally avoids deleting beliefs to prevent data loss.
+ * Beliefs are upserted during bootstrap, so leaving them in place is safe.
+ * Cleanup only removes bootstrap-adjacent transient data.
  *
  * Idempotent - safe to call even if no data exists.
  */
@@ -62,8 +58,6 @@ export async function cleanupBootstrapForUser(userId: string): Promise<void> {
   try {
     // Use transaction to ensure atomic deletion (all or nothing)
     await prisma.$transaction([
-      // Delete all beliefs (FULL RESET - no source field to distinguish bootstrap beliefs)
-      prisma.belief.deleteMany({ where: { userId } }),
       // Delete all notes with source="system" (bootstrap creates a system welcome note)
       prisma.note.deleteMany({ where: { userId, source: "system" } }),
       // Delete maturity snapshots (bootstrap creates initial snapshot)
@@ -193,12 +187,8 @@ let lastStaleFxWarnTs = 0;
  * Get currency multipliers for AOV thresholds.
  * Returns conversion factors relative to USD baseline (high_aov > $5000, low_aov < $500).
  *
- * TODO: Replace hardcoded rates with live API or periodic background job.
- * Current rates are approximate and will become stale over time.
- * Consider fetching from:
- * - External API (e.g., exchangerate-api.com, openexchangerates.org)
- * - Cached DB table updated by cron (with last_updated timestamp)
- * - Environment variables for manual refresh
+ * Supports runtime override via FX_RATES_JSON to avoid code deploys for rate refresh.
+ * Expected shape: {"USD":1,"EUR":0.93,"INR":84.5}
  *
  * @returns Record of currency codes to USD conversion multipliers
  */
@@ -224,7 +214,7 @@ function getCurrencyMultipliers(): Record<string, number> {
     lastStaleFxWarnTs = Date.now();
   }
 
-  return {
+  const fallbackRates: Record<string, number> = {
     USD: 1.0,
     EUR: 0.93, // Updated from 0.92
     GBP: 0.80, // Updated from 0.79
@@ -234,6 +224,28 @@ function getCurrencyMultipliers(): Record<string, number> {
     CAD: 1.38, // Updated from 1.36
     // Add more as needed
   };
+
+  const rawEnvRates = process.env.FX_RATES_JSON;
+  if (!rawEnvRates) {
+    return fallbackRates;
+  }
+
+  try {
+    const parsed = JSON.parse(rawEnvRates) as Record<string, unknown>;
+    const merged = { ...fallbackRates };
+
+    for (const [code, value] of Object.entries(parsed)) {
+      const upperCode = code.toUpperCase();
+      if (typeof value === "number" && Number.isFinite(value) && value > 0) {
+        merged[upperCode] = value;
+      }
+    }
+
+    return merged;
+  } catch (error) {
+    console.error("Invalid FX_RATES_JSON; falling back to static rates:", error);
+    return fallbackRates;
+  }
 }
 
 // -------------------------------------------------------
