@@ -4,6 +4,42 @@ import prisma from "@/lib/prisma";
 import { requireFounder } from "@/lib/auth/session";
 import { sendTrialInviteEmail } from "@/lib/email";
 
+async function rollbackTrialInvite(
+  salesClientId: string,
+  waitlistEntryId: string
+): Promise<NextResponse | null> {
+  try {
+    await prisma.$transaction(async (tx) => {
+      await tx.waitlistEntry.update({
+        where: { id: waitlistEntryId },
+        data: {
+          status: "PENDING",
+          trialToken: null,
+          trialSentAt: null,
+          salesClientId: null,
+          invitedByEmployeeId: null,
+        },
+      });
+      await tx.salesClient.delete({
+        where: { id: salesClientId },
+      });
+    });
+    return null;
+  } catch (rollbackErr) {
+    console.error(
+      "Failed to rollback waitlist trial invite via prisma.$transaction (tx.salesClient.delete + tx.waitlistEntry.update):",
+      rollbackErr
+    );
+    return NextResponse.json(
+      {
+        error:
+          "Failed to send invitation email and rollback trial state. Partial failure occurred; manual intervention may be required.",
+      },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -43,16 +79,16 @@ export async function POST(
       process.env.NEXT_PUBLIC_APP_URL ||
       (process.env.NODE_ENV !== "production" ? request.nextUrl.origin : undefined);
 
-    if (process.env.NODE_ENV === "production" && !origin) {
-      return NextResponse.json(
-        { error: "Server configuration error: APP_URL is required in production" },
-        { status: 500 }
-      );
-    }
-
     const trialToken = crypto.randomUUID();
     const now = new Date();
     const trialLink = origin ? `${origin}/trial/${trialToken}` : undefined;
+
+    if (!trialLink) {
+      return NextResponse.json(
+        { error: "Server configuration error: APP_URL is required" },
+        { status: 500 }
+      );
+    }
 
     const result = await prisma.$transaction(async (tx) => {
       const salesClient = await tx.salesClient.create({
@@ -86,28 +122,36 @@ export async function POST(
       return salesClient;
     });
 
-    if (trialLink) {
-      try {
-        await sendTrialInviteEmail({
-          name: waitlistEntry.companyName,
-          email: waitlistEntry.email,
-          trialLink,
-        });
-      } catch (emailErr) {
-        const message = emailErr instanceof Error ? emailErr.message : String(emailErr);
-        console.error("Failed to send waitlist trial email:", message);
+    try {
+      await sendTrialInviteEmail({
+        name: waitlistEntry.companyName,
+        email: waitlistEntry.email,
+        trialLink,
+      });
+    } catch (emailErr) {
+      const message = emailErr instanceof Error ? emailErr.message : String(emailErr);
+      console.error("Failed to send waitlist trial email:", message);
+
+      const rollbackFailureResponse = await rollbackTrialInvite(
+        result.id,
+        waitlistEntry.id
+      );
+      if (rollbackFailureResponse) {
+        console.error("Original sendTrialInviteEmail error (emailErr):", emailErr);
+        return rollbackFailureResponse;
       }
-    } else {
-      console.error("APP_URL is not configured — skipping waitlist trial invite email");
+
+      return NextResponse.json(
+        { error: "Failed to send invitation email. Please try again." },
+        { status: 502 }
+      );
     }
 
     const responseBody: { success: true; salesClientId: string; trialLink?: string } = {
       success: true,
       salesClientId: result.id,
     };
-    if (trialLink) {
-      responseBody.trialLink = trialLink;
-    }
+    responseBody.trialLink = trialLink;
 
     return NextResponse.json(responseBody);
   } catch (error) {

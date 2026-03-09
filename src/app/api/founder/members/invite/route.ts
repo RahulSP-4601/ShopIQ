@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
       throw createError;
     }
 
-    // Send welcome email with reset link — must await so Vercel doesn't kill the request
+    // Send welcome email with reset link — if this fails, roll back employee creation
     const origin = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin;
     const resetUrl = `${origin}/reset-password?token=${resetToken}`;
     try {
@@ -117,8 +117,29 @@ export async function POST(request: NextRequest) {
         expiryHours: 24, // Matches INVITE_TOKEN_TTL (24 hours)
       });
     } catch (emailErr) {
-      console.error("Failed to send welcome email:", emailErr instanceof Error ? emailErr.message : emailErr);
-      // Employee was created successfully — don't fail the whole request over email
+      const msg = emailErr instanceof Error ? emailErr.message : String(emailErr);
+      console.error("Failed to send welcome email:", msg);
+
+      try {
+        await prisma.employee.delete({
+          where: { id: employee.id },
+        });
+      } catch (deleteErr) {
+        console.error("Failed to send welcome email (emailErr):", emailErr);
+        console.error("Failed to cleanup invited employee via prisma.employee.delete:", deleteErr);
+        return NextResponse.json(
+          {
+            error:
+              "Failed to send invitation email and cleanup failed. Please contact support.",
+          },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json(
+        { error: "Failed to send invitation email. Please try again." },
+        { status: 502 }
+      );
     }
 
     return NextResponse.json(

@@ -8,6 +8,7 @@ import { sendTrialAccountReadyEmail } from "@/lib/email";
 const VALID_MARKETPLACES: string[] = [
   "SHOPIFY", "AMAZON", "EBAY", "ETSY", "WOOCOMMERCE",
   "BIGCOMMERCE", "WIX", "SQUARE", "MAGENTO", "PRESTASHOP",
+  "FLIPKART", "SNAPDEAL",
 ];
 
 export async function POST(request: NextRequest) {
