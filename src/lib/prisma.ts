@@ -47,7 +47,34 @@ if (process.env.SESSION_SECRET) {
 // PRISMA CLIENT
 // ============================================
 
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined };
+interface GlobalPrismaState {
+  prisma: PrismaClient | undefined;
+  _noteTtlMiddlewareRegistered?: boolean;
+}
+
+type NoteMutationData = {
+  ttlHours?: unknown;
+  createdAt?: unknown;
+  expiresAt?: unknown;
+  content?: unknown;
+  [key: string]: unknown;
+};
+
+function getContentLength(value: unknown): number | undefined {
+  if (typeof value === "string") return value.length;
+  return undefined;
+}
+
+function normalizeTtlHours(value: unknown): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new Error(
+      `Note middleware: ttlHours must be a finite number, got ${String(value)} (${typeof value})`
+    );
+  }
+  return Math.max(1, Math.min(value, 168));
+}
+
+const globalForPrisma = globalThis as unknown as GlobalPrismaState;
 
 // TEMPORARY: Adapter disabled for Prisma Studio compatibility
 // Prisma Studio (as of v7.4.0) doesn't support custom adapters and throws ECONNRESET errors
@@ -77,8 +104,8 @@ export const prisma =
  * On Note.update: recalculates expiresAt if ttlHours is being updated
  */
 // Prevent re-registration on hot reload
-if (!(globalForPrisma as any)._noteTtlMiddlewareRegistered) {
-  (globalForPrisma as any)._noteTtlMiddlewareRegistered = true;
+if (!globalForPrisma._noteTtlMiddlewareRegistered) {
+  globalForPrisma._noteTtlMiddlewareRegistered = true;
 
   prisma.$use(async (params, next) => {
   if (params.model === "Note") {
@@ -86,13 +113,9 @@ if (!(globalForPrisma as any)._noteTtlMiddlewareRegistered) {
 
     if (params.action === "create") {
       // Derive expiresAt from ttlHours on creation
-      const data = params.args.data as any;
+      const data = params.args.data as NoteMutationData;
       if (data.ttlHours !== undefined) {
-        if (!Number.isFinite(data.ttlHours)) {
-          throw new Error(
-            `Note middleware: ttlHours must be a finite number, got ${data.ttlHours} (${typeof data.ttlHours})`
-          );
-        }
+        const originalTtlHours = data.ttlHours;
         let createdAt: Date;
         if (data.createdAt instanceof Date) {
           createdAt = data.createdAt;
@@ -101,7 +124,7 @@ if (!(globalForPrisma as any)._noteTtlMiddlewareRegistered) {
           if (isNaN(createdAt.getTime())) {
             console.warn(
               `Note middleware: Invalid createdAt ISO string "${data.createdAt}" - falling back to current time. ` +
-              `Record context: ${JSON.stringify({ ttlHours: data.ttlHours, contentLength: data.content?.length })}`
+              `Record context: ${JSON.stringify({ ttlHours: data.ttlHours, contentLength: getContentLength(data.content) })}`
             );
             createdAt = new Date(); // Invalid ISO string, fallback to now
           }
@@ -110,18 +133,18 @@ if (!(globalForPrisma as any)._noteTtlMiddlewareRegistered) {
           if (isNaN(createdAt.getTime())) {
             console.warn(
               `Note middleware: Invalid numeric createdAt ${data.createdAt} - falling back to current time. ` +
-              `Record context: ${JSON.stringify({ ttlHours: data.ttlHours, contentLength: data.content?.length })}`
+              `Record context: ${JSON.stringify({ ttlHours: data.ttlHours, contentLength: getContentLength(data.content) })}`
             );
             createdAt = new Date();
           }
         } else {
           createdAt = new Date();
         }
-        const ttlHours = Math.max(1, Math.min(data.ttlHours, 168)); // Clamp to 1h-7d
-        if (data.ttlHours !== ttlHours) {
+        const ttlHours = normalizeTtlHours(originalTtlHours);
+        if (originalTtlHours !== ttlHours) {
           console.warn(
-            `Note middleware (create): ttlHours clamped from ${data.ttlHours} to ${ttlHours} ` +
-            `(valid range: 1-168 hours). Context: ${JSON.stringify({ contentLength: data.content?.length })}`
+            `Note middleware (create): ttlHours clamped from ${String(originalTtlHours)} to ${ttlHours} ` +
+            `(valid range: 1-168 hours). Context: ${JSON.stringify({ contentLength: getContentLength(data.content) })}`
           );
         }
         data.expiresAt = new Date(createdAt.getTime() + ttlHours * MS_PER_HOUR);
@@ -130,7 +153,10 @@ if (!(globalForPrisma as any)._noteTtlMiddlewareRegistered) {
     } else if (params.action === "createMany") {
       // Block createMany with ttlHours to prevent bypassing TTL derivation
       const dataArray = params.args.data;
-      if (Array.isArray(dataArray) && dataArray.some((item: any) => item.ttlHours !== undefined)) {
+      if (
+        Array.isArray(dataArray) &&
+        dataArray.some((item: { ttlHours?: unknown }) => item.ttlHours !== undefined)
+      ) {
         throw new Error(
           `Note middleware: createMany with ttlHours is not supported. ` +
           `Bulk operations cannot properly derive per-record expiresAt timestamps. ` +
@@ -139,17 +165,13 @@ if (!(globalForPrisma as any)._noteTtlMiddlewareRegistered) {
       }
     } else if (params.action === "update") {
       // Recalculate expiresAt if ttlHours is being updated
-      const data = params.args.data as any;
+      const data = params.args.data as NoteMutationData;
       if (data.ttlHours !== undefined) {
-        if (!Number.isFinite(data.ttlHours)) {
-          throw new Error(
-            `Note middleware: ttlHours must be a finite number, got ${data.ttlHours} (${typeof data.ttlHours})`
-          );
-        }
-        const ttlHours = Math.max(1, Math.min(data.ttlHours, 168)); // Clamp to 1h-7d
-        if (data.ttlHours !== ttlHours) {
+        const originalTtlHours = data.ttlHours;
+        const ttlHours = normalizeTtlHours(originalTtlHours);
+        if (originalTtlHours !== ttlHours) {
           console.warn(
-            `Note middleware (update): ttlHours clamped from ${data.ttlHours} to ${ttlHours} ` +
+            `Note middleware (update): ttlHours clamped from ${String(originalTtlHours)} to ${ttlHours} ` +
             `(valid range: 1-168 hours)`
           );
         }
@@ -191,7 +213,7 @@ if (!(globalForPrisma as any)._noteTtlMiddlewareRegistered) {
       }
     } else if (params.action === "updateMany") {
       // Block updateMany with ttlHours to prevent data integrity issues
-      const data = params.args.data as any;
+      const data = params.args.data as NoteMutationData;
       if (data.ttlHours !== undefined) {
         throw new Error(
           `Note middleware: updateMany with ttlHours is not supported. ` +
@@ -201,15 +223,11 @@ if (!(globalForPrisma as any)._noteTtlMiddlewareRegistered) {
       }
     } else if (params.action === "upsert") {
       // Handle both create and update branches of upsert
-      const createData = params.args.create as any;
-      const updateData = params.args.update as any;
+      const createData = params.args.create as NoteMutationData;
+      const updateData = params.args.update as NoteMutationData;
 
       if (createData?.ttlHours !== undefined) {
-        if (!Number.isFinite(createData.ttlHours)) {
-          throw new Error(
-            `Note middleware: ttlHours must be a finite number, got ${createData.ttlHours} (${typeof createData.ttlHours})`
-          );
-        }
+        const originalCreateTtlHours = createData.ttlHours;
         let createdAt: Date;
         if (createData.createdAt instanceof Date) {
           createdAt = createData.createdAt;
@@ -218,7 +236,7 @@ if (!(globalForPrisma as any)._noteTtlMiddlewareRegistered) {
           if (isNaN(createdAt.getTime())) {
             console.warn(
               `Note middleware (upsert create): Invalid createdAt ISO string "${createData.createdAt}" - falling back to current time. ` +
-              `Record context: ${JSON.stringify({ ttlHours: createData.ttlHours, contentLength: createData.content?.length })}`
+              `Record context: ${JSON.stringify({ ttlHours: createData.ttlHours, contentLength: getContentLength(createData.content) })}`
             );
             createdAt = new Date(); // Invalid ISO string, fallback to now
           }
@@ -227,18 +245,18 @@ if (!(globalForPrisma as any)._noteTtlMiddlewareRegistered) {
           if (isNaN(createdAt.getTime())) {
             console.warn(
               `Note middleware (upsert create): Invalid numeric createdAt ${createData.createdAt} - falling back to current time. ` +
-              `Record context: ${JSON.stringify({ ttlHours: createData.ttlHours, contentLength: createData.content?.length })}`
+              `Record context: ${JSON.stringify({ ttlHours: createData.ttlHours, contentLength: getContentLength(createData.content) })}`
             );
             createdAt = new Date();
           }
         } else {
           createdAt = new Date();
         }
-        const ttlHours = Math.max(1, Math.min(createData.ttlHours, 168));
-        if (createData.ttlHours !== ttlHours) {
+        const ttlHours = normalizeTtlHours(originalCreateTtlHours);
+        if (originalCreateTtlHours !== ttlHours) {
           console.warn(
-            `Note middleware (upsert create): ttlHours clamped from ${createData.ttlHours} to ${ttlHours} ` +
-            `(valid range: 1-168 hours). Context: ${JSON.stringify({ contentLength: createData.content?.length })}`
+            `Note middleware (upsert create): ttlHours clamped from ${String(originalCreateTtlHours)} to ${ttlHours} ` +
+            `(valid range: 1-168 hours). Context: ${JSON.stringify({ contentLength: getContentLength(createData.content) })}`
           );
         }
         createData.expiresAt = new Date(createdAt.getTime() + ttlHours * MS_PER_HOUR);
@@ -246,15 +264,11 @@ if (!(globalForPrisma as any)._noteTtlMiddlewareRegistered) {
       }
 
       if (updateData?.ttlHours !== undefined) {
-        if (!Number.isFinite(updateData.ttlHours)) {
-          throw new Error(
-            `Note middleware: ttlHours must be a finite number, got ${updateData.ttlHours} (${typeof updateData.ttlHours})`
-          );
-        }
-        const ttlHours = Math.max(1, Math.min(updateData.ttlHours, 168));
-        if (updateData.ttlHours !== ttlHours) {
+        const originalUpdateTtlHours = updateData.ttlHours;
+        const ttlHours = normalizeTtlHours(originalUpdateTtlHours);
+        if (originalUpdateTtlHours !== ttlHours) {
           console.warn(
-            `Note middleware (upsert update): ttlHours clamped from ${updateData.ttlHours} to ${ttlHours} ` +
+            `Note middleware (upsert update): ttlHours clamped from ${String(originalUpdateTtlHours)} to ${ttlHours} ` +
             `(valid range: 1-168 hours)`
           );
         }

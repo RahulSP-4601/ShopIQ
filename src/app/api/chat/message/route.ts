@@ -18,6 +18,8 @@ interface AttachmentInput {
   path: string;
 }
 
+type ErrorWithStatus = Error & { status?: number };
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getUserSession();
@@ -204,8 +206,8 @@ export async function POST(request: NextRequest) {
         (error instanceof Error && error.name === "AbortError");
       if (isAbort) {
         // Create specific timeout error with status for proper HTTP response mapping
-        const timeoutError = new Error("AI response timed out");
-        (timeoutError as any).status = 504; // Gateway Timeout
+        const timeoutError: ErrorWithStatus = new Error("AI response timed out");
+        timeoutError.status = 504; // Gateway Timeout
         throw timeoutError;
       }
       throw error;
@@ -293,7 +295,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     // Map timeout errors to 504 Gateway Timeout
-    if (error instanceof Error && (error as any).status === 504) {
+    if (error instanceof Error && (error as ErrorWithStatus).status === 504) {
       console.error("Chat timeout:", error.message);
       return NextResponse.json(
         { error: "AI response timed out. Please try again." },

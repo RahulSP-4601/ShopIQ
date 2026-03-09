@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 
+const APP_BOOT_NOW_MS = Date.now();
+
 interface ChatHeaderProps {
   userName: string;
   userEmail: string;
@@ -28,43 +30,38 @@ export function ChatHeader({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Check if user is still authenticated with retry logic for transient network errors
-  const checkAuth = useCallback(async (retryCount = 0) => {
+  const checkAuth = useCallback(async () => {
     const MAX_RETRIES = 2;
     const RETRY_DELAY = 1000; // 1 second
 
-    try {
-      const response = await fetch("/api/auth/me", {
-        cache: "no-store",
-        headers: { "Cache-Control": "no-cache" },
-      });
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        const response = await fetch("/api/auth/me", {
+          cache: "no-store",
+          headers: { "Cache-Control": "no-cache" },
+        });
 
-      if (response.ok) {
-        return; // Authenticated
+        if (response.ok) {
+          return;
+        }
+
+        // Only redirect on definitive auth failures (401/403)
+        if (response.status === 401 || response.status === 403) {
+          router.replace("/signin");
+          return;
+        }
+      } catch {
+        // Network failures are retried below
       }
 
-      // Only redirect on definitive auth failures (401/403)
-      if (response.status === 401 || response.status === 403) {
-        router.replace("/signin");
-        return;
-      }
-
-      // For other HTTP errors, retry if attempts remain
-      if (retryCount < MAX_RETRIES) {
+      if (attempt < MAX_RETRIES) {
         await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
-        return checkAuth(retryCount + 1);
+        continue;
       }
 
-      // Exhausted retries, redirect
+      // Exhausted retries on HTTP/network errors, redirect
       router.replace("/signin");
-    } catch {
-      // Network error - retry for transient failures
-      if (retryCount < MAX_RETRIES) {
-        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
-        return checkAuth(retryCount + 1);
-      }
-
-      // Exhausted retries on network errors, redirect
-      router.replace("/signin");
+      return;
     }
   }, [router]);
 
@@ -72,13 +69,13 @@ export function ChatHeader({
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        checkAuth();
+        void checkAuth();
       }
     };
 
     // Check auth on popstate (browser back/forward)
     const handlePopState = () => {
-      checkAuth();
+      void checkAuth();
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -166,7 +163,7 @@ export function ChatHeader({
         {subscriptionStatus === "TRIAL" && trialEndsAt && (() => {
           const trialDate = new Date(trialEndsAt);
           if (isNaN(trialDate.getTime())) return null;
-          const daysLeft = Math.max(0, Math.ceil((trialDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+          const daysLeft = Math.max(0, Math.ceil((trialDate.getTime() - APP_BOOT_NOW_MS) / (1000 * 60 * 60 * 24)));
           return (
             <div className="hidden sm:flex items-center gap-2">
               <span className="text-sm text-slate-500">

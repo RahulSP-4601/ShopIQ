@@ -72,7 +72,7 @@ export default function OnboardingProfilePage() {
             console.debug("Profile save error - JSON parse failed:", parseErr instanceof Error ? parseErr.message : parseErr);
             // Not valid JSON, sanitize raw text before showing to user
             // Strip HTML tags, stack traces, and file paths
-            let sanitized = raw
+            const sanitized = raw
               .replace(/<[^>]*>/g, "") // Remove HTML tags
               .replace(/\s+at\s+.*?\(.*?\)/g, "") // Remove stack trace lines
               .replace(/\s+at\s+.*/g, "") // Remove other stack trace formats

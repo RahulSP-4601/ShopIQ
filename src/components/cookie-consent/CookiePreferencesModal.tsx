@@ -66,16 +66,29 @@ function CategoryCard({
 export function CookiePreferencesModal() {
   const context = useContext(CookieConsentContext);
 
-  const [analytics, setAnalytics] = useState(false);
-  const [marketing, setMarketing] = useState(false);
+  const [analytics, setAnalytics] = useState(() =>
+    context?.state.preferences.analytics ?? false
+  );
+  const [marketing, setMarketing] = useState(() =>
+    context?.state.preferences.marketing ?? false
+  );
 
-  // Sync local state with context state
   useEffect(() => {
-    if (context) {
-      setAnalytics(context.state.preferences.analytics);
-      setMarketing(context.state.preferences.marketing);
-    }
-  }, [context]);
+    if (!context) return;
+    const syncTimer = window.setTimeout(() => {
+      const nextAnalytics = context.state.preferences.analytics;
+      const nextMarketing = context.state.preferences.marketing;
+
+      setAnalytics((prev) => (prev === nextAnalytics ? prev : nextAnalytics));
+      setMarketing((prev) => (prev === nextMarketing ? prev : nextMarketing));
+    }, 0);
+
+    return () => window.clearTimeout(syncTimer);
+  }, [
+    context,
+    context?.state.preferences.analytics,
+    context?.state.preferences.marketing,
+  ]);
 
   // Handle ESC key
   useEffect(() => {

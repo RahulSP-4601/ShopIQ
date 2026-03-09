@@ -31,20 +31,19 @@ export function CookieConsentProvider({
   children: React.ReactNode;
 }) {
   const [state, setState] = useState<CookieConsentState>(defaultState);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading] = useState(false);
   const [showBanner, setShowBanner] = useState(false);
   const [showPreferences, setShowPreferences] = useState(false);
 
-  // Hydration-safe localStorage read
   useEffect(() => {
-    const stored = getStoredConsent();
-    if (stored) {
-      setState(stored);
-      setShowBanner(false);
-    } else {
-      setShowBanner(true);
-    }
-    setIsLoading(false);
+    const hydrateTimer = window.setTimeout(() => {
+      const stored = getStoredConsent();
+      if (stored) {
+        setState(stored);
+      }
+      setShowBanner(!stored);
+    }, 0);
+    return () => window.clearTimeout(hydrateTimer);
   }, []);
 
   const acceptAll = useCallback(() => {

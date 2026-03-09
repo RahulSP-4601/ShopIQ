@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import prisma from "@/lib/prisma";
 import { getUserSession } from "@/lib/auth/session";
 import { MarketplaceType } from "@prisma/client";
 
@@ -145,33 +144,20 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // For other marketplaces, create a stub connection (simulating OAuth success)
-    const marketplaceName = marketplace.replaceAll("_", " ");
-    const connection = await prisma.marketplaceConnection.upsert({
-      where: {
-        userId_marketplace: {
-          userId: session.userId,
-          marketplace,
-        },
-      },
-      create: {
-        userId: session.userId,
-        marketplace,
-        status: "CONNECTED",
-        connectedAt: new Date(),
-        externalId: `stub-${marketplace.toLowerCase()}-${Date.now()}`,
-        externalName: `My ${marketplaceName} Store`,
-      },
-      update: {
-        // Preserve externalId on reconnection to avoid breaking external references
-        status: "CONNECTED",
-        connectedAt: new Date(),
-      },
-    });
-
     return NextResponse.json({
-      success: true,
-      connection,
+      error: `${marketplace} integration is not yet supported`,
+      supportedMarketplaces: [
+        "SHOPIFY",
+        "EBAY",
+        "ETSY",
+        "FLIPKART",
+        "BIGCOMMERCE",
+        "SQUARE",
+        "SNAPDEAL",
+        "PRESTASHOP",
+      ],
+    }, {
+      status: 400,
     });
   } catch (error) {
     console.error("Connect marketplace error:", error);

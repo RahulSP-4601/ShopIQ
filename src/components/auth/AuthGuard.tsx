@@ -39,7 +39,9 @@ export function AuthGuard({ children, fallback }: AuthGuardProps) {
   }, [router]);
 
   useEffect(() => {
-    checkAuth();
+    const initialCheckTimer = window.setTimeout(() => {
+      void checkAuth();
+    }, 0);
 
     // Also check auth when the page becomes visible (e.g., user comes back via back button)
     const handleVisibilityChange = () => {
@@ -58,6 +60,7 @@ export function AuthGuard({ children, fallback }: AuthGuardProps) {
     window.addEventListener("popstate", handlePopState);
 
     return () => {
+      window.clearTimeout(initialCheckTimer);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("popstate", handlePopState);
     };

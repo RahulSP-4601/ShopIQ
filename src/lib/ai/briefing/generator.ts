@@ -10,6 +10,14 @@ import {
   snapshotMaturity,
 } from "@/lib/ai/memory/maturity";
 
+type OpenAIErrorShape = {
+  code?: string;
+  status?: number;
+  response?: {
+    status?: number;
+  };
+};
+
 // -------------------------------------------------------
 // Types
 // -------------------------------------------------------
@@ -196,8 +204,9 @@ ${metrics.dailyRevenue.map((d) => `${d.date}: $${safe(d.revenue).toFixed(2)} (${
     // Sanitize error before logging to avoid exposing sensitive data (API keys, tokens, etc.)
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     const errorName = error instanceof Error ? error.name : "Error";
-    const errorCode = (error as any)?.code;
-    const httpStatus = (error as any)?.response?.status;
+    const errorLike = (error as OpenAIErrorShape) || {};
+    const errorCode = errorLike.code;
+    const httpStatus = errorLike.status ?? errorLike.response?.status;
 
     const sanitizedError = {
       name: errorName,

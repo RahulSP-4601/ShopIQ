@@ -6,8 +6,8 @@ import { createUserSession } from "@/lib/auth/session";
 import { sendTrialAccountReadyEmail } from "@/lib/email";
 
 const VALID_MARKETPLACES: string[] = [
-  "SHOPIFY", "AMAZON", "EBAY", "ETSY", "WOOCOMMERCE",
-  "BIGCOMMERCE", "WIX", "SQUARE", "MAGENTO", "PRESTASHOP",
+  "SHOPIFY", "AMAZON", "EBAY", "ETSY",
+  "BIGCOMMERCE", "SQUARE", "PRESTASHOP",
   "FLIPKART", "SNAPDEAL",
 ];
 

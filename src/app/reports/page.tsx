@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getUserSession } from "@/lib/auth/session";
 import { ReportsList } from "@/components/reports/ReportsList";
 
@@ -18,16 +19,16 @@ export default async function ReportsPage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <a href="/chat" className="flex items-center gap-2">
+              <Link href="/chat" className="flex items-center gap-2">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white font-bold shadow-md shadow-emerald-500/25">
                   S
                 </div>
                 <span className="text-lg font-bold text-slate-900">Frame</span>
-              </a>
+              </Link>
               <span className="text-slate-300">|</span>
               <h1 className="text-lg font-semibold text-slate-700">Reports</h1>
             </div>
-            <a
+            <Link
               href="/chat"
               className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100"
             >
@@ -45,7 +46,7 @@ export default async function ReportsPage() {
                 />
               </svg>
               Back to Chat
-            </a>
+            </Link>
           </div>
         </div>
       </header>
