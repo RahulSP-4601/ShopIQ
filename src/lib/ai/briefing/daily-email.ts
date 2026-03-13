@@ -223,7 +223,7 @@ export async function sendDailyBriefingEmail(
     <!-- Footer -->
     <p style="text-align: center; color: #9ca3af; font-size: 11px; margin-top: 32px; line-height: 1.5;">
       Good morning ${safeName} &#9749;<br>
-      Your daily briefing from <strong>Frame</strong>, powered by <strong>Frax</strong>.
+      Your daily briefing from <strong>FRAX</strong>, powered by <strong>Frax</strong>.
     </p>
   </div>
 </body>

@@ -174,7 +174,7 @@ ${metrics.dailyRevenue.map((d) => `${d.date}: $${safe(d.revenue).toFixed(2)} (${
       messages: [
         {
           role: "system",
-          content: `You are Frax, the AI business analyst for Frame. Write a concise weekly briefing email narrative (200-300 words). Be direct, data-driven, and actionable. Use **bold** for key numbers. Include: executive summary, highlights, concerns, and 2-3 recommended actions.`,
+          content: `You are Frax, the AI business analyst for FRAX. Write a concise weekly briefing email narrative (200-300 words). Be direct, data-driven, and actionable. Use **bold** for key numbers. Include: executive summary, highlights, concerns, and 2-3 recommended actions.`,
         },
         {
           role: "user",

@@ -8,12 +8,12 @@ const faqs = [
     a: "Join the waitlist with your company details. Our founder and sales team review requests and send 1-month trial access by invite email when approved.",
   },
   {
-    q: "Does Frame modify or write to my marketplace stores?",
-    a: "No. Frame uses strictly read-only API access. We sync your orders, products, and inventory data for analytics purposes only. We never create, update, or delete anything on your marketplaces.",
+    q: "Does FRAX modify or write to my marketplace stores?",
+    a: "No. FRAX uses strictly read-only API access. We sync your orders, products, and inventory data for analytics purposes only. We never create, update, or delete anything on your marketplaces.",
   },
   {
     q: "How long does setup take?",
-    a: "Under 2 minutes. Click \"Connect\", authorize via OAuth on your marketplace, and Frame begins syncing immediately. No API keys to copy, no webhooks to configure manually, no technical setup required.",
+    a: "Under 2 minutes. Click \"Connect\", authorize via OAuth on your marketplace, and FRAX begins syncing immediately. No API keys to copy, no webhooks to configure manually, no technical setup required.",
   },
   {
     q: "How is my data kept secure?",
@@ -36,8 +36,8 @@ const faqs = [
     a: "It's a proprietary engine that scores every product's performance on each marketplace using 7 signals (revenue velocity, unit velocity, price position, sales trend, trend consistency, inventory turnover, return rate). It then generates specific recommendations: EXPAND to new channels, RESTOCK low inventory, REPRICE misaligned products, or DEPRIORITIZE underperformers. No other platform offers this.",
   },
   {
-    q: "Can I use Frame if I only sell on one marketplace?",
-    a: "Yes, but Frame's true power shines with 2+ marketplaces. With a single channel, you still get AI-powered analytics, automated reports, inventory alerts, and Frax as your analyst. Cross-channel comparison and channel-product fit become available as soon as you connect a second marketplace.",
+    q: "Can I use FRAX if I only sell on one marketplace?",
+    a: "Yes, but FRAX's true power shines with 2+ marketplaces. With a single channel, you still get AI-powered analytics, automated reports, inventory alerts, and Frax as your analyst. Cross-channel comparison and channel-product fit become available as soon as you connect a second marketplace.",
   },
   {
     q: "What happens to my data if I cancel?",
@@ -101,7 +101,7 @@ export function FAQ() {
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-emerald-500">Questions</span>
             </h2>
             <p className="fade-up mt-6 text-lg text-slate-600 max-w-md">
-              Everything you need to know about Frame. Can&apos;t find what you&apos;re looking for? Reach out to our team.
+              Everything you need to know about FRAX. Can&apos;t find what you&apos;re looking for? Reach out to our team.
             </p>
 
             {/* Contact card */}

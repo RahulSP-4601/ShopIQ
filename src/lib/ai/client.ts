@@ -374,7 +374,7 @@ export async function generateReport(
         {
           role: "system",
           content:
-            `You are Frax, the AI analyst for Frame. Generate a ${safeReportType} report for the store "${safeStoreName}".\n\n` +
+            `You are Frax, the AI analyst for FRAX. Generate a ${safeReportType} report for the store "${safeStoreName}".\n\n` +
             `Analyze the provided data and generate:\n` +
             `1. Key metrics and insights\n` +
             `2. Trends and patterns\n` +

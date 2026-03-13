@@ -327,7 +327,7 @@ Alerts (2 weeks): ${safe(metrics.alertsSummary.total)} total (${safe(metrics.ale
         messages: [
           {
             role: "system",
-            content: `You are Frax, the AI analyst for Frame. Write a punchy bi-weekly trend analysis for an e-commerce seller. Rules:
+            content: `You are Frax, the AI analyst for FRAX. Write a punchy bi-weekly trend analysis for an e-commerce seller. Rules:
 - EXACTLY 5-7 sentences. No more, no less.
 - Sentence 1: 2-week revenue headline and how it compares to the previous 2 weeks (up/down/flat).
 - Sentence 2: Which week was stronger (week 1 vs week 2) and what drove the difference.

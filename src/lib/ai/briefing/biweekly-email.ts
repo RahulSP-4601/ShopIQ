@@ -246,7 +246,7 @@ export async function sendBiWeeklyBriefingEmail(
     <!-- Footer -->
     <p style="text-align: center; color: #9ca3af; font-size: 11px; margin-top: 32px; line-height: 1.5;">
       Hello ${safeName} &#128202;<br>
-      Your bi-weekly briefing from <strong>Frame</strong>, powered by <strong>Frax</strong>.
+      Your bi-weekly briefing from <strong>FRAX</strong>, powered by <strong>Frax</strong>.
     </p>
   </div>
 </body>

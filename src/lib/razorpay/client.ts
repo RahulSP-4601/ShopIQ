@@ -139,10 +139,10 @@ async function getOrCreatePlanInternal(amountInRupees: number, amountInPaise: nu
     period: "monthly",
     interval: 1,
     item: {
-      name: `Frame Pro - ₹${amountInRupees}/mo`,
+      name: `FRAX Pro - ₹${amountInRupees}/mo`,
       amount: amountInPaise,
       currency: "INR",
-      description: `Frame multi-marketplace analytics - ₹${amountInRupees}/month`,
+      description: `FRAX multi-marketplace analytics - ₹${amountInRupees}/month`,
     },
   });
 
@@ -221,7 +221,7 @@ export async function getOrCreateCustomer(
   const customer = await (getRazorpay().customers as any).create({
     name: trimmedName,
     email: trimmedEmail,
-    notes: { source: "frame" },
+    notes: { source: "frax" },
   });
 
   return customer.id;

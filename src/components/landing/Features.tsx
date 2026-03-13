@@ -35,7 +35,7 @@ const features = [
     ),
     title: "Know Where to Sell What",
     description: "Proprietary 7-signal scoring engine rates every product's fit on every marketplace (0-100). Get EXPAND, RESTOCK, REPRICE, and DEPRIORITIZE recommendations backed by real data.",
-    microStat: "Only available on Frame",
+    microStat: "Only available on FRAX",
     badge: "Exclusive",
     color: "from-emerald-500 to-green-500",
     bgColor: "bg-emerald-50",
@@ -74,7 +74,7 @@ const features = [
       </svg>
     ),
     title: "Bank-Grade Security",
-    description: "AES-256-GCM token encryption, HMAC-SHA256 webhook verification, HTTP-only JWT sessions, automatic PII cleanup, and GDPR-compliant data handling. Read-only access — Frame never modifies your data.",
+    description: "AES-256-GCM token encryption, HMAC-SHA256 webhook verification, HTTP-only JWT sessions, automatic PII cleanup, and GDPR-compliant data handling. Read-only access — FRAX never modifies your data.",
     microStat: "SOC 2 Certified · GDPR Compliant",
     color: "from-emerald-500 to-green-500",
     bgColor: "bg-emerald-50",

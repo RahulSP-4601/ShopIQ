@@ -42,7 +42,7 @@ const values = [
   {
     title: "Built for Scale",
     description:
-      "Whether you sell on 2 platforms or 9, Frame grows with your business without missing a beat.",
+      "Whether you sell on 2 platforms or 9, FRAX grows with your business without missing a beat.",
     icon: (
       <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
@@ -60,9 +60,9 @@ export default function AboutPage() {
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2 sm:gap-3">
               <div className="relative w-9 h-9 sm:w-10 sm:h-10">
-                <Image src="/logo.png" alt="Frame" fill className="object-contain" />
+                <Image src="/logo.png" alt="FRAX" fill className="object-contain" />
               </div>
-              <span className="text-base sm:text-lg font-semibold text-slate-900">Frame</span>
+              <span className="text-base sm:text-lg font-semibold text-slate-900">FRAX</span>
             </Link>
             <Link
               href="/"
@@ -85,7 +85,7 @@ export default function AboutPage() {
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 py-16 sm:py-24 lg:py-32">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-teal-300 mb-6">
-              About Frame
+              About FRAX
             </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6" style={{ color: '#ffffff' }}>
               One dashboard for{" "}
@@ -94,7 +94,7 @@ export default function AboutPage() {
               </span>
             </h1>
             <p className="text-base sm:text-lg leading-relaxed max-w-2xl" style={{ color: '#cbd5e1' }}>
-              Frame is the AI-powered analytics platform that unifies your e-commerce data.
+              FRAX is the AI-powered analytics platform that unifies your e-commerce data.
               Connect Shopify, Amazon, eBay, Etsy, and more — then ask questions in plain English
               to get instant insights across all your sales channels.
             </p>
@@ -124,7 +124,7 @@ export default function AboutPage() {
           <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-4 sm:mb-6">Our Mission</h2>
           <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
             Multi-channel sellers spend hours switching between dashboards, exporting CSVs, and
-            manually reconciling data. We built Frame to end that. Our mission is to give every
+            manually reconciling data. We built FRAX to end that. Our mission is to give every
             e-commerce seller — from solo entrepreneurs to growing teams — a single source of
             truth for their entire business.
           </p>
@@ -184,7 +184,7 @@ export default function AboutPage() {
       {/* Footer */}
       <footer className="border-t border-slate-200">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-6 sm:py-8 text-center">
-          <p className="text-sm text-slate-500">&copy; {new Date().getFullYear()} Frame. All rights reserved.</p>
+          <p className="text-sm text-slate-500">&copy; {new Date().getFullYear()} FRAX. All rights reserved.</p>
         </div>
       </footer>
     </div>

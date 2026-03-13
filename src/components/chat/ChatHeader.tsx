@@ -147,13 +147,13 @@ export function ChatHeader({
         <Link href="/" className="flex items-center gap-2 sm:gap-3">
           <Image
             src="/logo.png"
-            alt="Frame"
+            alt="FRAX"
             width={62}
             height={62}
             className="object-contain h-10 w-10 sm:h-[62px] sm:w-[62px]"
             priority
           />
-          <span className="text-lg sm:text-xl font-bold text-slate-900 hidden xs:inline">Frame</span>
+          <span className="text-lg sm:text-xl font-bold text-slate-900 hidden xs:inline">FRAX</span>
         </Link>
       </div>
 

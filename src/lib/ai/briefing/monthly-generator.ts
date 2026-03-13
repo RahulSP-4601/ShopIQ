@@ -392,7 +392,7 @@ Alerts This Month: ${safe(metrics.alertsSummary.total)} total (${safe(metrics.al
         messages: [
           {
             role: "system",
-            content: `You are Frax, the AI analyst for Frame. Write a strategic monthly review for an e-commerce seller. Rules:
+            content: `You are Frax, the AI analyst for FRAX. Write a strategic monthly review for an e-commerce seller. Rules:
 - Write 200-300 words in flowing paragraphs. No bullet points, no headers, no lists.
 - Paragraph 1: Month headline — total revenue, comparison with previous month, whether business is growing/declining/flat.
 - Paragraph 2: Marketplace deep dive — which platform drove the most growth, which declined, and any market share shifts worth noting.

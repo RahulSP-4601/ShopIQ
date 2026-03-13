@@ -286,7 +286,7 @@ Alerts Yesterday: ${safe(metrics.alertsSummary.total)} total (${safe(metrics.ale
         messages: [
           {
             role: "system",
-            content: `You are Frax, the AI assistant for Frame. Write a punchy daily morning briefing for an e-commerce seller. Rules:
+            content: `You are Frax, the AI assistant for FRAX. Write a punchy daily morning briefing for an e-commerce seller. Rules:
 - EXACTLY 3 sentences. No more, no less.
 - Sentence 1: Yesterday's headline number and how it compares to the day before (up/down/flat).
 - Sentence 2: Call out the winning marketplace platform and what drove it (or the top product if single marketplace).

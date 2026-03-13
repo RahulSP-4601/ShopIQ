@@ -61,12 +61,12 @@ export async function sendSalesWelcomeEmail({
   await resend.emails.send({
     from: FROM_EMAIL,
     to: email,
-    subject: "Welcome to Frame Sales Team",
+    subject: "Welcome to FRAX Sales Team",
     html: `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 16px;">
         <h2 style="color: #111827; margin-bottom: 16px;">Hello ${safeName},</h2>
         <p style="color: #4b5563; line-height: 1.6;">
-          You've been added to the <strong>Frame</strong> sales team. Please set up your password to access your sales dashboard.
+          You've been added to the <strong>FRAX</strong> sales team. Please set up your password to access your sales dashboard.
         </p>
         <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin: 24px 0;">
           <p style="margin: 0 0 8px; color: #6b7280; font-size: 14px;">Email</p>
@@ -105,19 +105,19 @@ export async function sendTrialInviteEmail({
   await resend.emails.send({
     from: FROM_EMAIL,
     to: email,
-    subject: "Free 1 Month Access — Set Up Your Frame Account",
+    subject: "Free 1 Month Access — Set Up Your FRAX Account",
     html: `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 520px; margin: 0 auto; padding: 32px 16px;">
         <div style="text-align: center; margin-bottom: 24px;">
           <h1 style="color: #111827; font-size: 24px; margin: 0;">Free 1 Month Access</h1>
-          <p style="color: #6b7280; font-size: 15px; margin-top: 8px;">Your free trial of Frame is ready</p>
+          <p style="color: #6b7280; font-size: 15px; margin-top: 8px;">Your free trial of FRAX is ready</p>
         </div>
 
         <p style="color: #374151; line-height: 1.6; font-size: 15px;">
           Hi ${safeName},
         </p>
         <p style="color: #374151; line-height: 1.6; font-size: 15px;">
-          You've been invited to try <strong>Frame</strong> — an AI-powered platform that brings all your marketplace analytics into one place. Enjoy <strong>1 month of free access</strong> to explore everything Frame has to offer.
+          You've been invited to try <strong>FRAX</strong> — an AI-powered platform that brings all your marketplace analytics into one place. Enjoy <strong>1 month of free access</strong> to explore everything FRAX has to offer.
         </p>
 
         <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 20px; margin: 24px 0;">
@@ -173,11 +173,11 @@ export async function sendTrialAccountReadyEmail({
   await resend.emails.send({
     from: FROM_EMAIL,
     to: email,
-    subject: "Your Frame Account Is Ready",
+    subject: "Your FRAX Account Is Ready",
     html: `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 520px; margin: 0 auto; padding: 32px 16px;">
         <div style="text-align: center; margin-bottom: 24px;">
-          <h1 style="color: #111827; font-size: 24px; margin: 0;">Welcome to Frame!</h1>
+          <h1 style="color: #111827; font-size: 24px; margin: 0;">Welcome to FRAX!</h1>
           <p style="color: #6b7280; font-size: 15px; margin-top: 8px;">Your account has been set up successfully</p>
         </div>
 
@@ -185,7 +185,7 @@ export async function sendTrialAccountReadyEmail({
           Hi ${safeName},
         </p>
         <p style="color: #374151; line-height: 1.6; font-size: 15px;">
-          Your Frame account is ready. You now have <strong>30 days of free access</strong> to connect your marketplaces and get AI-powered insights for your business.
+          Your FRAX account is ready. You now have <strong>30 days of free access</strong> to connect your marketplaces and get AI-powered insights for your business.
         </p>
 
         <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 20px; margin: 24px 0;">
@@ -236,12 +236,12 @@ export async function sendPasswordResetEmail({
   await resend.emails.send({
     from: FROM_EMAIL,
     to: email,
-    subject: "Reset Your Frame Password",
+    subject: "Reset Your FRAX Password",
     html: `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 16px;">
         <h2 style="color: #111827; margin-bottom: 16px;">Hello ${safeName},</h2>
         <p style="color: #4b5563; line-height: 1.6;">
-          We received a request to reset your password for your <strong>Frame</strong> account.
+          We received a request to reset your password for your <strong>FRAX</strong> account.
         </p>
         <a href="${safeResetUrl}" style="display: inline-block; background: #2563eb; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: 500; font-size: 14px; margin: 24px 0;">
           Reset Password

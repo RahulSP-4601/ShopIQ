@@ -42,7 +42,7 @@ export function ReportsAlerts() {
               {/* Email header */}
               <div className="px-5 py-3 border-b border-slate-100 bg-slate-50">
                 <div className="flex items-center gap-2 text-xs text-slate-500">
-                  <span className="font-medium text-slate-700">From:</span> Frax &lt;frax@frame.com&gt;
+                  <span className="font-medium text-slate-700">From:</span> Frax &lt;frax@frax.com&gt;
                 </div>
                 <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
                   <span className="font-medium text-slate-700">Subject:</span> Your Morning Briefing — Feb 25

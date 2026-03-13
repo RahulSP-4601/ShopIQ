@@ -184,8 +184,8 @@ export default function OnboardingPaymentPage() {
       const options = {
         key: checkoutData.razorpayKeyId,
         subscription_id: checkoutData.subscriptionId,
-        name: "Frame",
-        description: `Frame Pro - ${connectedCount} marketplace${connectedCount > 1 ? "s" : ""}`,
+        name: "FRAX",
+        description: `FRAX Pro - ${connectedCount} marketplace${connectedCount > 1 ? "s" : ""}`,
         image: "/logo.png",
         handler: async (response: {
           razorpay_payment_id: string;
@@ -234,7 +234,7 @@ export default function OnboardingPaymentPage() {
           email: checkoutData.email,
         },
         theme: {
-          color: "#14B8A6", // teal-500 — matches Frame branding
+          color: "#14B8A6", // teal-500 — matches FRAX branding
         },
         modal: {
           ondismiss: () => {

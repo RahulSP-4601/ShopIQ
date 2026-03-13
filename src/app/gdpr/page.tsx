@@ -16,8 +16,8 @@ export default function GDPRPage() {
   return (
     <LegalLayout
       title="GDPR Compliance"
-      subtitle="Frame is committed to protecting your privacy and ensuring compliance with the General Data Protection Regulation (GDPR)."
-      lastUpdated="January 26, 2026"
+      subtitle="FRAX is committed to protecting your privacy and ensuring compliance with the General Data Protection Regulation (GDPR)."
+      lastUpdated="March 13, 2026"
       sections={sections}
     >
       <LegalSection id="commitment" title="Our GDPR Commitment">
@@ -29,7 +29,7 @@ export default function GDPRPage() {
 
         <InfoCard title="Our Commitment" variant="highlight">
           <p>
-            At Frame, we are fully committed to GDPR compliance. We have implemented comprehensive measures to
+            At FRAX, we are fully committed to GDPR compliance. We have implemented comprehensive measures to
             ensure that we process personal data lawfully, fairly, and transparently. This includes:
           </p>
           <LegalList
@@ -272,11 +272,11 @@ export default function GDPRPage() {
           <div className="space-y-2">
             <p>
               <span className="font-medium text-slate-700">Email: </span>
-              <a href="mailto:dpo@frame.com" className="text-teal-600 hover:underline">dpo@frame.com</a>
+              <a href="mailto:dpo@frax.com" className="text-teal-600 hover:underline">dpo@frax.com</a>
             </p>
             <p>
               <span className="font-medium text-slate-700">Address: </span>
-              <span className="text-slate-600">Frame Inc., Attn: Data Protection Officer, 123 Commerce Street, Suite 500, San Francisco, CA 94105</span>
+              <span className="text-slate-600">FRAX Inc., Attn: Data Protection Officer, 123 Commerce Street, Suite 500, San Francisco, CA 94105</span>
             </p>
           </div>
         </div>
@@ -341,7 +341,7 @@ export default function GDPRPage() {
 
         <p className="mt-6">
           Enterprise customers can request a copy of our standard DPA by contacting{" "}
-          <a href="mailto:legal@frame.com" className="text-teal-600 hover:underline">legal@frame.com</a>.
+          <a href="mailto:legal@frax.com" className="text-teal-600 hover:underline">legal@frax.com</a>.
         </p>
       </LegalSection>
 
@@ -400,7 +400,7 @@ export default function GDPRPage() {
           <InfoCard title="How to Submit a Request">
             <LegalList
               items={[
-                "Email our DPO at dpo@frame.com with your request",
+                "Email our DPO at dpo@frax.com with your request",
                 "Use the privacy settings in your account dashboard",
                 "Contact our support team for assistance",
                 "Submit a formal written request to our mailing address",
@@ -450,26 +450,26 @@ export default function GDPRPage() {
           <div className="grid sm:grid-cols-2 gap-6">
             <div>
               <h3 className="font-semibold text-slate-900 mb-2">Data Protection Officer</h3>
-              <a href="mailto:dpo@frame.com" className="text-teal-600 hover:underline">
-                dpo@frame.com
+              <a href="mailto:dpo@frax.com" className="text-teal-600 hover:underline">
+                dpo@frax.com
               </a>
               <p className="text-sm text-slate-500 mt-1">For GDPR and privacy inquiries</p>
             </div>
             <div>
               <h3 className="font-semibold text-slate-900 mb-2">Privacy Team</h3>
-              <a href="mailto:privacy@frame.com" className="text-teal-600 hover:underline">
-                privacy@frame.com
+              <a href="mailto:privacy@frax.com" className="text-teal-600 hover:underline">
+                privacy@frax.com
               </a>
               <p className="text-sm text-slate-500 mt-1">For general privacy questions</p>
             </div>
             <div className="sm:col-span-2">
               <h3 className="font-semibold text-slate-900 mb-2">EU Representative</h3>
               <p className="text-slate-600">
-                Frame EU Ltd.<br />
+                FRAX EU Ltd.<br />
                 123 Data Street<br />
                 Dublin, Ireland<br />
-                <a href="mailto:eu-representative@frame.com" className="text-teal-600 hover:underline">
-                  eu-representative@frame.com
+                <a href="mailto:eu-representative@frax.com" className="text-teal-600 hover:underline">
+                  eu-representative@frax.com
                 </a>
               </p>
             </div>

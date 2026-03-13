@@ -5,13 +5,13 @@ const posts = [
   {
     title: "How Multi-Channel Sellers Save 10+ Hours a Week with Unified Analytics",
     excerpt:
-      "Discover how Frame helps sellers stop switching between dashboards and start making faster, data-driven decisions across all their marketplaces.",
+      "Discover how FRAX helps sellers stop switching between dashboards and start making faster, data-driven decisions across all their marketplaces.",
     date: "Feb 5, 2026",
     category: "Product",
     readTime: "5 min read",
   },
   {
-    title: "Connecting Your Shopify Store to Frame: A Step-by-Step Guide",
+    title: "Connecting Your Shopify Store to FRAX: A Step-by-Step Guide",
     excerpt:
       "Learn how to connect your Shopify store in under 2 minutes and start syncing your orders, products, and customer data automatically.",
     date: "Jan 28, 2026",
@@ -21,15 +21,15 @@ const posts = [
   {
     title: "Understanding Your Sales Across Marketplaces: Key Metrics That Matter",
     excerpt:
-      "Not all metrics are created equal. Here are the KPIs that top multi-channel sellers track — and how Frame makes it effortless.",
+      "Not all metrics are created equal. Here are the KPIs that top multi-channel sellers track — and how FRAX makes it effortless.",
     date: "Jan 20, 2026",
     category: "Insights",
     readTime: "7 min read",
   },
   {
-    title: "Why We Built Frame: The Problem with Fragmented E-Commerce Data",
+    title: "Why We Built FRAX: The Problem with Fragmented E-Commerce Data",
     excerpt:
-      "Our founder shares the frustration that led to building Frame and the vision for a unified analytics platform for every seller.",
+      "Our founder shares the frustration that led to building FRAX and the vision for a unified analytics platform for every seller.",
     date: "Jan 12, 2026",
     category: "Company",
     readTime: "4 min read",
@@ -37,7 +37,7 @@ const posts = [
   {
     title: "New Integration: Flipkart Marketplace Now Supported",
     excerpt:
-      "Frame now supports Flipkart, India's largest e-commerce marketplace. Connect your seller account and get unified insights instantly.",
+      "FRAX now supports Flipkart, India's largest e-commerce marketplace. Connect your seller account and get unified insights instantly.",
     date: "Jan 5, 2026",
     category: "Product",
     readTime: "2 min read",
@@ -68,9 +68,9 @@ export default function BlogPage() {
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2 sm:gap-3">
               <div className="relative w-9 h-9 sm:w-10 sm:h-10">
-                <Image src="/logo.png" alt="Frame" fill className="object-contain" />
+                <Image src="/logo.png" alt="FRAX" fill className="object-contain" />
               </div>
-              <span className="text-base sm:text-lg font-semibold text-slate-900">Frame</span>
+              <span className="text-base sm:text-lg font-semibold text-slate-900">FRAX</span>
             </Link>
             <Link
               href="/"
@@ -141,7 +141,7 @@ export default function BlogPage() {
       {/* Footer */}
       <footer className="border-t border-slate-200">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-6 sm:py-8 text-center">
-          <p className="text-sm text-slate-500">&copy; {new Date().getFullYear()} Frame. All rights reserved.</p>
+          <p className="text-sm text-slate-500">&copy; {new Date().getFullYear()} FRAX. All rights reserved.</p>
         </div>
       </footer>
     </div>

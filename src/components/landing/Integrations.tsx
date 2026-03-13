@@ -180,7 +180,7 @@ export function Integrations() {
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-600">Every Marketplace.</span>
           </h2>
           <p className="mt-6 text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
-            Connect once with secure OAuth. Frame syncs your orders, products, and inventory
+            Connect once with secure OAuth. FRAX syncs your orders, products, and inventory
             in real-time — normalizing data from every channel into one unified view.
             No API keys. No CSV exports. No manual work.
           </p>
@@ -326,7 +326,7 @@ export function Integrations() {
                 <div className="absolute inset-0 bg-gradient-to-br from-teal-50 to-white" />
                 <Image
                   src="/logo.png"
-                  alt="Frame"
+                  alt="FRAX"
                   width={160}
                   height={160}
                   className="w-36 h-36 md:w-44 md:h-44 object-contain relative z-10"
@@ -394,7 +394,7 @@ export function Integrations() {
             </div>
             <div>
               <h4 className="font-semibold text-slate-900 text-sm">One-Click Secure Connect</h4>
-              <p className="text-xs text-slate-500 mt-1">OAuth 2.0 — no API keys to copy-paste. Read-only access means Frame never modifies your store.</p>
+              <p className="text-xs text-slate-500 mt-1">OAuth 2.0 — no API keys to copy-paste. Read-only access means FRAX never modifies your store.</p>
             </div>
           </div>
           <div className="flex items-start gap-4 p-5 rounded-xl border border-slate-100 bg-white hover:shadow-lg transition-all duration-300">

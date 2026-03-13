@@ -159,7 +159,7 @@ export function CTA() {
                     </div>
 
                     <h3 className="text-2xl font-extrabold text-white mb-6 tracking-wide">
-                      Frame Pro
+                      FRAX Pro
                     </h3>
 
                     <div className="flex items-baseline justify-center gap-0.5">

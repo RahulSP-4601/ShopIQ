@@ -10,8 +10,8 @@ const contactMethods = [
   {
     title: "Email",
     description: "For general inquiries and support.",
-    value: "support@frame.com",
-    href: "mailto:support@frame.com",
+    value: "support@frax.com",
+    href: "mailto:support@frax.com",
     icon: (
       <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
@@ -21,8 +21,8 @@ const contactMethods = [
   {
     title: "Sales",
     description: "Questions about plans and pricing.",
-    value: "sales@frame.com",
-    href: "mailto:sales@frame.com",
+    value: "sales@frax.com",
+    href: "mailto:sales@frax.com",
     icon: (
       <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
@@ -32,8 +32,8 @@ const contactMethods = [
   {
     title: "Privacy",
     description: "Data protection and GDPR requests.",
-    value: "privacy@frame.com",
-    href: "mailto:privacy@frame.com",
+    value: "privacy@frax.com",
+    href: "mailto:privacy@frax.com",
     icon: (
       <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
@@ -94,9 +94,9 @@ export default function ContactPage() {
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2 sm:gap-3">
               <div className="relative w-9 h-9 sm:w-10 sm:h-10">
-                <Image src="/logo.png" alt="Frame" fill className="object-contain" />
+                <Image src="/logo.png" alt="FRAX" fill className="object-contain" />
               </div>
-              <span className="text-base sm:text-lg font-semibold text-slate-900">Frame</span>
+              <span className="text-base sm:text-lg font-semibold text-slate-900">FRAX</span>
             </Link>
             <Link
               href="/"
@@ -262,7 +262,7 @@ export default function ContactPage() {
           <div className="max-w-2xl mx-auto text-center">
             <h3 className="font-semibold text-slate-900 mb-2">Mailing Address</h3>
             <p className="text-slate-600">
-              Frame Inc., 123 Commerce Street, Suite 500, San Francisco, CA 94105, United States
+              FRAX Inc., 123 Commerce Street, Suite 500, San Francisco, CA 94105, United States
             </p>
           </div>
         </div>
@@ -271,7 +271,7 @@ export default function ContactPage() {
       {/* Footer */}
       <footer className="border-t border-slate-200">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-6 sm:py-8 text-center">
-          <p className="text-sm text-slate-500">&copy; {new Date().getFullYear()} Frame. All rights reserved.</p>
+          <p className="text-sm text-slate-500">&copy; {new Date().getFullYear()} FRAX. All rights reserved.</p>
         </div>
       </footer>
     </div>

@@ -50,9 +50,9 @@ export default function CareersPage() {
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2 sm:gap-3">
               <div className="relative w-9 h-9 sm:w-10 sm:h-10">
-                <Image src="/logo.png" alt="Frame" fill className="object-contain" />
+                <Image src="/logo.png" alt="FRAX" fill className="object-contain" />
               </div>
-              <span className="text-base sm:text-lg font-semibold text-slate-900">Frame</span>
+              <span className="text-base sm:text-lg font-semibold text-slate-900">FRAX</span>
             </Link>
             <Link
               href="/"
@@ -92,7 +92,7 @@ export default function CareersPage() {
       {/* Perks */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 py-16 sm:py-24">
         <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 text-center mb-10 sm:mb-14">
-          Why Work at Frame
+          Why Work at FRAX
         </h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {perks.map((perk) => (
@@ -122,7 +122,7 @@ export default function CareersPage() {
             </p>
             <p className="text-slate-600">
               Send your resume to{" "}
-              <a href="mailto:careers@frame.com" className="text-teal-600 hover:underline font-medium">careers@frame.com</a>{" "}
+              <a href="mailto:careers@frax.com" className="text-teal-600 hover:underline font-medium">careers@frax.com</a>{" "}
               and we&apos;ll reach out when something opens up.
             </p>
           </div>
@@ -132,7 +132,7 @@ export default function CareersPage() {
       {/* Footer */}
       <footer className="border-t border-slate-200">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-6 sm:py-8 text-center">
-          <p className="text-sm text-slate-500">&copy; {new Date().getFullYear()} Frame. All rights reserved.</p>
+          <p className="text-sm text-slate-500">&copy; {new Date().getFullYear()} FRAX. All rights reserved.</p>
         </div>
       </footer>
     </div>

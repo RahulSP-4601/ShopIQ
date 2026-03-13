@@ -18,7 +18,7 @@ const testimonials = [
     color: "from-violet-500 to-purple-500",
   },
   {
-    quote: "Frame caught a stockout risk on my best-selling product 8 hours before it would have run out. That single alert saved me an estimated ₹2.4 lakh in lost sales. The proactive alerts are genuinely a game-changer.",
+    quote: "FRAX caught a stockout risk on my best-selling product 8 hours before it would have run out. That single alert saved me an estimated ₹2.4 lakh in lost sales. The proactive alerts are genuinely a game-changer.",
     author: "Rajesh Kumar",
     role: "Operations Head, StyleVault",
     marketplaces: ["Flipkart", "Amazon", "Shopify"],
@@ -53,7 +53,7 @@ export function Testimonials() {
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-emerald-500">Everywhere</span>
           </h2>
           <p className="mt-4 text-lg text-slate-600">
-            From solo founders to growing brands — here&apos;s what our sellers say about Frame.
+            From solo founders to growing brands — here&apos;s what our sellers say about FRAX.
           </p>
         </div>
 

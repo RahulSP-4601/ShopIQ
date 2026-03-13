@@ -44,7 +44,7 @@ export default function ConnectPage() {
               S
             </div>
             <span className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
-              Frame
+              FRAX
             </span>
           </Link>
         </div>
@@ -111,7 +111,7 @@ export default function ConnectPage() {
           </form>
 
           <p className="mt-6 text-center text-xs text-slate-400">
-            By connecting, you agree to let Frame access your store data for
+            By connecting, you agree to let FRAX access your store data for
             analytics purposes.
           </p>
         </div>

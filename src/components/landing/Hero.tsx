@@ -40,7 +40,7 @@ export function Hero() {
 
             {/* Subheadline */}
             <p className="fade-up mt-6 text-lg sm:text-xl text-slate-600 leading-relaxed max-w-xl">
-              Frame connects <span className="font-semibold text-slate-700">Shopify</span>, <span className="font-semibold text-slate-700">Amazon</span>, <span className="font-semibold text-slate-700">eBay</span>, <span className="font-semibold text-slate-700">Etsy</span>, <span className="font-semibold text-slate-700">Flipkart</span> and 4 more marketplaces
+              FRAX connects <span className="font-semibold text-slate-700">Shopify</span>, <span className="font-semibold text-slate-700">Amazon</span>, <span className="font-semibold text-slate-700">eBay</span>, <span className="font-semibold text-slate-700">Etsy</span>, <span className="font-semibold text-slate-700">Flipkart</span> and 4 more marketplaces
               into one AI-powered command center. Ask questions in plain English — get
               instant, data-backed answers across all your sales channels.
             </p>
@@ -289,7 +289,7 @@ function HeroDemo() {
                 <svg className="w-2.5 h-2.5 text-teal-500" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                 </svg>
-                <span className="text-[10px] text-slate-500">app.frame.com/chat</span>
+                <span className="text-[10px] text-slate-500">app.frax.com/chat</span>
               </div>
             </div>
           </div>

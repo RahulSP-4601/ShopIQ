@@ -444,7 +444,7 @@ export class SquareClient {
       body: JSON.stringify({
         idempotency_key: crypto.randomUUID(),
         subscription: {
-          name: "Frame Webhook",
+          name: "FRAX Webhook",
           enabled: params.enabled ?? true,
           event_types: params.event_types,
           notification_url: params.notification_url,

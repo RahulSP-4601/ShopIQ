@@ -7,7 +7,7 @@ const steps = [
   {
     number: "01",
     title: "Connect in One Click",
-    description: "Choose any of 9 supported marketplaces, click Connect, authorize via OAuth, and you're done. Frame securely stores your encrypted tokens and begins syncing immediately. Read-only access — we never modify your store.",
+    description: "Choose any of 9 supported marketplaces, click Connect, authorize via OAuth, and you're done. FRAX securely stores your encrypted tokens and begins syncing immediately. Read-only access — we never modify your store.",
     features: ["Secure OAuth 2.0", "Read-Only Access", "AES-256 Encryption", "Instant Sync"],
     time: "~30 seconds per marketplace",
     color: "from-teal-500 to-emerald-500",

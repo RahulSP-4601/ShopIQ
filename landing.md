@@ -1,6 +1,6 @@
-# Frame Analytics — Landing Page Specification
+# FRAX Analytics — Landing Page Specification
 
-> This document is a complete content and structure specification for Relume.io to generate a professional, conversion-optimized landing page for **Frame Analytics** — an AI-powered multi-marketplace e-commerce analytics platform.
+> This document is a complete content and structure specification for Relume.io to generate a professional, conversion-optimized landing page for **FRAX Analytics** — an AI-powered multi-marketplace e-commerce analytics platform.
 >
 > **Design Philosophy:** Every section should feel like it was built by a team that obsesses over craft. Clean whitespace, purposeful animation, typographic hierarchy, and data-rich visuals. The page should immediately communicate: *"This is a serious, premium product built by people who understand e-commerce."*
 
@@ -8,14 +8,14 @@
 
 ## Brand Identity
 
-- **Product Name:** Frame
+- **Product Name:** FRAX
 - **Tagline:** "Your AI-Powered Commerce Intelligence Platform"
 - **AI Assistant Name:** Frax
 - **Primary Colors:** Teal (#14b8a6) → Emerald (#10b981) gradient
 - **Secondary Colors:** Slate (#0f172a for text), Violet (#8b5cf6 for accents), Amber (#f59e0b for highlights/alerts)
-- **Logo:** Custom logo (logo.png), displayed alongside "Frame" text with "Analytics" subtitle
+- **Logo:** Custom logo (logo.png), displayed alongside "FRAX" text with "Analytics" subtitle
 - **Tone:** Professional, confident, data-driven. Not salesy or fluffy — speaks like a business analyst presenting to a founder. Use specific numbers wherever possible. Every claim should feel backed by data.
-- **Domain:** app.frame.com
+- **Domain:** app.frax.com
 - **Typography:**
   - Headlines: Inter (or equivalent sans-serif), bold (700), tight tracking (-0.02em)
   - Body: Inter, regular (400), relaxed line-height (1.6)
@@ -38,7 +38,7 @@
 
 **Layout:** Fixed top, transparent on load → frosted glass (white/80 + backdrop-blur-xl + subtle bottom border slate-200/50) on scroll. Height: 64px. z-index: 50.
 
-**Left:** Logo + "Frame" (font-bold text-xl) + "Analytics" (text-sm text-slate-500 font-medium) — logo and text vertically centered.
+**Left:** Logo + "FRAX" (font-bold text-xl) + "Analytics" (text-sm text-slate-500 font-medium) — logo and text vertically centered.
 
 **Center:** Navigation links — Features | Integrations | How it Works | Pricing
 - Links: text-sm font-medium text-slate-600, hover:text-teal-600 with underline slide-in animation from left
@@ -55,7 +55,7 @@
 
 ### 2. HERO SECTION
 
-**Goal:** In 3 seconds, the visitor should understand: (1) what Frame does, (2) who it's for, and (3) why it's different. This is the single most important section on the page.
+**Goal:** In 3 seconds, the visitor should understand: (1) what FRAX does, (2) who it's for, and (3) why it's different. This is the single most important section on the page.
 
 **Background:** Full-width section. Soft radial gradient from teal-50/30 center → white edges. Three decorative blur orbs:
 - Teal orb (400x400px, opacity 20%) — top-right, slightly off-screen
@@ -88,7 +88,7 @@ Total Clarity.
 
 **Subheadline:**
 ```
-Frame connects Shopify, Amazon, eBay, Etsy, Flipkart and 4 more marketplaces
+FRAX connects Shopify, Amazon, eBay, Etsy, Flipkart and 4 more marketplaces
 into one AI-powered command center. Ask questions in plain English — get
 instant, data-backed answers across all your sales channels.
 ```
@@ -106,7 +106,7 @@ Four items with muted green checkmark circles (bg-emerald-50 text-emerald-600):
 - Cancel anytime
 
 **Hero Visual (right column):**
-A 3D-perspective tilted screenshot of the Frame dashboard/chat interface, floating with a subtle shadow. The screenshot should show:
+A 3D-perspective tilted screenshot of the FRAX dashboard/chat interface, floating with a subtle shadow. The screenshot should show:
 - The Frax chat interface with a sample conversation
 - A mini revenue chart visible in the sidebar
 - Marketplace connection indicators (green dots) for Shopify, Amazon, Flipkart
@@ -122,7 +122,7 @@ The screenshot should have:
 
 ### 3. LOGO BAR — "Trusted by Sellers On"
 
-**Purpose:** Immediately establish credibility by showing the marketplace logos the user already knows and trusts. This is not about Frame's customers — it's about the marketplaces Frame integrates with. Subtle but effective trust transfer.
+**Purpose:** Immediately establish credibility by showing the marketplace logos the user already knows and trusts. This is not about FRAX's customers — it's about the marketplaces FRAX integrates with. Subtle but effective trust transfer.
 
 **Layout:** Full-width, bg-white, py-12. Subtle top/bottom border (slate-100).
 
@@ -149,7 +149,7 @@ On mobile: horizontal auto-scroll (marquee-style, CSS animation, no JS) with sea
 **Headline:** "See **Frax** in Action" — "Frax" in violet gradient text
 **Subheadline:** "Watch how sellers use conversational AI to get instant answers about their business. No dashboards to learn. Just ask."
 
-**Visual:** A centered, large browser-chrome mockup (macOS-style window with red/amber/green dots, address bar showing "app.frame.com/chat").
+**Visual:** A centered, large browser-chrome mockup (macOS-style window with red/amber/green dots, address bar showing "app.frax.com/chat").
 
 **Layout inside the mockup — two panels:**
 - **Left panel (30%):** A sidebar showing:
@@ -253,12 +253,12 @@ Your full briefing was also sent to your email at 7:00 AM."
 **Section Label:** INTEGRATIONS
 **Badge:** "Real-Time Sync" with animated green ping dot (CSS animation: scale pulse 0→1 with opacity fade)
 **Headline:** "One Dashboard. **Every Marketplace.**" — "Every Marketplace." in teal-to-emerald gradient text
-**Subheadline:** "Connect once with secure OAuth. Frame syncs your orders, products, and inventory in real-time — normalizing data from every channel into one unified view. No API keys. No CSV exports. No manual work."
+**Subheadline:** "Connect once with secure OAuth. FRAX syncs your orders, products, and inventory in real-time — normalizing data from every channel into one unified view. No API keys. No CSV exports. No manual work."
 
 **Visual — Orbital Hub Animation:**
 A large, centered orbital visualization (min 600px wide on desktop):
 
-- **Center:** Frame logo inside a glowing white circle (box-shadow: 0 0 60px rgba(20,184,166,0.3)) with two concentric animated rings (rotating slowly, opposite directions, dashed/dotted stroke, teal-200 opacity 30%)
+- **Center:** FRAX logo inside a glowing white circle (box-shadow: 0 0 60px rgba(20,184,166,0.3)) with two concentric animated rings (rotating slowly, opposite directions, dashed/dotted stroke, teal-200 opacity 30%)
 - **9 marketplace nodes** arranged in a circle around the center, each connected to the hub with animated particle lines (small dots traveling along the connection lines from node → center, representing data flow)
 - **Each node:** White circle (64px) with subtle shadow, colored border (2px) matching the marketplace brand color. Contains: marketplace logo (32px), name label below, and a small green "Live" badge (bg-emerald-500, text-white, text-[10px])
 - **Hover behavior:** Node scales to 1.15x, shadow deepens, a tooltip appears showing: marketplace name, integration type, and a one-line description
@@ -282,7 +282,7 @@ A large, centered orbital visualization (min 600px wide on desktop):
 
 | Icon | Title | Description |
 |------|-------|-------------|
-| Lock | **One-Click Secure Connect** | OAuth 2.0 authentication — no API keys to copy-paste. Read-only access means Frame never modifies your store. |
+| Lock | **One-Click Secure Connect** | OAuth 2.0 authentication — no API keys to copy-paste. Read-only access means FRAX never modifies your store. |
 | Zap | **Real-Time Sync** | Webhooks push updates instantly (Shopify, BigCommerce, Square). All others sync every 15 minutes automatically. |
 | Layers | **Unified Data Model** | Orders, products, customers, and inventory from every marketplace normalized into one consistent schema. |
 
@@ -349,12 +349,12 @@ Each card: hover → scale(1.03) + teal border glow. Clicking a card shows a sam
 
 ### 8. CHANNEL-PRODUCT FIT — "Know Where to Sell What"
 
-**Purpose:** This is Frame's most unique, proprietary feature. No competitor offers this. It deserves its own prominent section to drive differentiation and "I need this" reactions.
+**Purpose:** This is FRAX's most unique, proprietary feature. No competitor offers this. It deserves its own prominent section to drive differentiation and "I need this" reactions.
 
 **Section Label:** EXCLUSIVE FEATURE
-**Badge:** "Only on Frame" with a star icon — bg-violet-50, text-violet-700
+**Badge:** "Only on FRAX" with a star icon — bg-violet-50, text-violet-700
 **Headline:** "Know Exactly **Where to Sell What**" — "Where to Sell What" in emerald gradient
-**Subheadline:** "Frame's Channel-Product Fit Engine analyzes 7 performance signals to score how well each product fits each marketplace — then gives you specific, actionable recommendations."
+**Subheadline:** "FRAX's Channel-Product Fit Engine analyzes 7 performance signals to score how well each product fits each marketplace — then gives you specific, actionable recommendations."
 
 **Layout:** Full-width section with light teal-50/30 background and subtle dot pattern.
 
@@ -411,7 +411,7 @@ Style: Each signal is a compact card (icon + name + one-line description). Row s
 
 ### 9. REPORTS & ALERTS — "Insights That Come to You"
 
-**Purpose:** Showcase that Frame doesn't just answer questions — it proactively delivers intelligence to your inbox and alerts you to problems before they hurt your business.
+**Purpose:** Showcase that FRAX doesn't just answer questions — it proactively delivers intelligence to your inbox and alerts you to problems before they hurt your business.
 
 **Section Label:** AUTOMATION
 **Badge:** "Zero Effort" with a mail icon
@@ -425,7 +425,7 @@ A stylized email mockup (like a floating email card with subtle shadow and tilt)
 
 ```
 ┌─────────────────────────────────────────────────┐
-│  From: Frax <frax@frame.com>                    │
+│  From: Frax <frax@frax.com>                    │
 │  Subject: Your Morning Briefing — Feb 25        │
 │─────────────────────────────────────────────────│
 │                                                 │
@@ -511,7 +511,7 @@ Return rate: 4% → 12% this week
 - **Icon:** Target (emerald, inside emerald-50 icon box)
 - **Title:** "Know Where to Sell What"
 - **Description:** "Proprietary 7-signal scoring engine rates every product's fit on every marketplace (0-100). Get EXPAND, RESTOCK, REPRICE, and DEPRIORITIZE recommendations backed by real data."
-- **Micro-stat:** "Only available on Frame"
+- **Micro-stat:** "Only available on FRAX"
 - **Badge:** "Exclusive" pill (violet)
 
 #### Feature 4: Inventory Intelligence
@@ -529,7 +529,7 @@ Return rate: 4% → 12% this week
 #### Feature 6: Enterprise Security
 - **Icon:** Shield (emerald, inside emerald-50 icon box)
 - **Title:** "Bank-Grade Security"
-- **Description:** "AES-256-GCM token encryption, HMAC-SHA256 webhook verification, HTTP-only JWT sessions, automatic PII cleanup, and GDPR-compliant data handling. Read-only access to your stores — Frame never modifies your data."
+- **Description:** "AES-256-GCM token encryption, HMAC-SHA256 webhook verification, HTTP-only JWT sessions, automatic PII cleanup, and GDPR-compliant data handling. Read-only access to your stores — FRAX never modifies your data."
 - **Micro-stat:** "SOC 2 Certified · GDPR Compliant"
 
 ---
@@ -581,9 +581,9 @@ Each step has: a large step number (01, 02, 03) in the accent color, a title, de
 
 #### Step 01 — Connect Your Stores
 - **Accent Color:** Teal
-- **Icon/Visual:** A small animation of a marketplace logo connecting to the Frame hub with a "click" effect
+- **Icon/Visual:** A small animation of a marketplace logo connecting to the FRAX hub with a "click" effect
 - **Title:** "Connect in One Click"
-- **Description:** "Choose any of 9 supported marketplaces, click Connect, authorize via OAuth, and you're done. Frame securely stores your encrypted tokens and begins syncing your data immediately. Read-only access — we never modify your store."
+- **Description:** "Choose any of 9 supported marketplaces, click Connect, authorize via OAuth, and you're done. FRAX securely stores your encrypted tokens and begins syncing your data immediately. Read-only access — we never modify your store."
 - **Feature pills:** `Secure OAuth 2.0` · `Read-Only Access` · `AES-256 Encryption` · `Instant Sync`
 - **Time estimate:** "~30 seconds per marketplace"
 
@@ -608,17 +608,17 @@ Each step has: a large step number (01, 02, 03) in the accent color, a title, de
 
 ---
 
-### 13. COMPETITOR COMPARISON — "Why Sellers Switch to Frame"
+### 13. COMPETITOR COMPARISON — "Why Sellers Switch to FRAX"
 
-**Purpose:** Directly address the "how is this different?" question. Position Frame against the alternatives sellers already know (or their current manual workflow).
+**Purpose:** Directly address the "how is this different?" question. Position FRAX against the alternatives sellers already know (or their current manual workflow).
 
 **Section Label:** COMPARISON
-**Headline:** "Traditional Analytics **vs.** Frame" — "vs." in violet
+**Headline:** "Traditional Analytics **vs.** FRAX" — "vs." in violet
 **Subheadline:** "See why multi-channel sellers are replacing dashboards, spreadsheets, and expensive tools with one AI conversation."
 
-**Layout:** A clean comparison table with two columns. Left column (gray/muted) = "Traditional Tools / Manual Workflow". Right column (highlighted, subtle teal background) = "Frame". Checkmark/X icons for quick visual scanning.
+**Layout:** A clean comparison table with two columns. Left column (gray/muted) = "Traditional Tools / Manual Workflow". Right column (highlighted, subtle teal background) = "FRAX". Checkmark/X icons for quick visual scanning.
 
-| Capability | Traditional Tools | Frame |
+| Capability | Traditional Tools | FRAX |
 |-----------|------------------|-------|
 | **Multi-marketplace support** | Single platform focus (Shopify OR Amazon) | 9 marketplaces unified in one view |
 | **Data consolidation** | Manual CSV exports + spreadsheets | Automatic real-time sync + unified data model |
@@ -630,7 +630,7 @@ Each step has: a large step number (01, 02, 03) in the accent color, a title, de
 | **Setup time** | Days to weeks of configuration | 2 minutes — OAuth connect and go |
 | **Typical cost** | ₹8,000 – ₹80,000+/month | Starting at ₹999/month |
 
-**Style:** The "Frame" column should have a subtle teal-50 background, green checkmarks, and slightly bolder text. The "Traditional" column should have a white/gray background with red X marks or gray dashes. Add a subtle "Winner" crown/star icon on the Frame column header.
+**Style:** The "FRAX" column should have a subtle teal-50 background, green checkmarks, and slightly bolder text. The "Traditional" column should have a white/gray background with red X marks or gray dashes. Add a subtle "Winner" crown/star icon on the FRAX column header.
 
 ---
 
@@ -640,7 +640,7 @@ Each step has: a large step number (01, 02, 03) in the accent color, a title, de
 
 **Section Label:** TESTIMONIALS
 **Headline:** "Loved by Sellers **Everywhere**" — "Everywhere" in teal gradient
-**Subheadline:** "From solo founders to growing brands — here's what our sellers say about Frame."
+**Subheadline:** "From solo founders to growing brands — here's what our sellers say about FRAX."
 
 **Layout:** 3 testimonial cards in a horizontal row on desktop. On mobile, horizontal scroll (snap-to-card) with dot indicators.
 
@@ -661,7 +661,7 @@ Marketplaces: Amazon + Flipkart + eBay + Shopify
 Result: "+32% revenue from channel expansion"
 
 **Testimonial 3:**
-> "Frame caught a stockout risk on my best-selling product 8 hours before it would have run out. That single alert saved me an estimated ₹2.4 lakh in lost sales. The proactive alerts are genuinely a game-changer."
+> "FRAX caught a stockout risk on my best-selling product 8 hours before it would have run out. That single alert saved me an estimated ₹2.4 lakh in lost sales. The proactive alerts are genuinely a game-changer."
 
 — **Rajesh Kumar**, Operations Head, StyleVault
 Marketplaces: Flipkart + Amazon + Snapdeal
@@ -683,7 +683,7 @@ Result: "Prevented 3 stockouts in first month"
 
 **Card Header (teal-to-emerald gradient background, rounded-t-2xl, py-8):**
 - Badge: "Most Popular" with pulsing green dot — bg-white/20, text-white, rounded-full
-- Plan name: **Frame Pro** (text-white, text-2xl, font-bold)
+- Plan name: **FRAX Pro** (text-white, text-2xl, font-bold)
 - Price: **₹999** (text-white, text-5xl, font-bold, monospace) + "/month" (text-white/70, text-lg)
 - Subtext: "+ ₹449/mo per additional marketplace" (text-white/60, text-sm)
 - Equivalent: "~$12/month" (text-white/50, text-xs)
@@ -740,11 +740,11 @@ A subtle "Calculate your cost →" link that expands to show:
 **Q1: How does the 30-day free trial work?**
 A: Sign up, connect your marketplaces, and get full access to every feature — unlimited AI queries, all reports, all analytics tools. No credit card required. At the end of 30 days, choose to continue with a paid plan or your account pauses (no data is deleted).
 
-**Q2: Does Frame modify or write to my marketplace stores?**
-A: No. Frame uses strictly read-only API access. We sync your orders, products, and inventory data for analytics purposes only. We never create, update, or delete anything on your marketplaces.
+**Q2: Does FRAX modify or write to my marketplace stores?**
+A: No. FRAX uses strictly read-only API access. We sync your orders, products, and inventory data for analytics purposes only. We never create, update, or delete anything on your marketplaces.
 
 **Q3: How long does setup take?**
-A: Under 2 minutes. Click "Connect", authorize via OAuth on your marketplace, and Frame begins syncing immediately. No API keys to copy, no webhooks to configure manually, no technical setup required.
+A: Under 2 minutes. Click "Connect", authorize via OAuth on your marketplace, and FRAX begins syncing immediately. No API keys to copy, no webhooks to configure manually, no technical setup required.
 
 **Q4: How is my data kept secure?**
 A: All marketplace tokens are encrypted with AES-256-GCM before storage. Webhooks are verified with HMAC-SHA256 timing-safe comparison. Sessions use HTTP-only JWT cookies (no localStorage). Customer PII is encrypted and automatically cleaned after 365 days. We're SOC 2 certified and GDPR compliant.
@@ -761,8 +761,8 @@ A: Anything about your business data. Revenue breakdowns, top products, customer
 **Q8: What makes the Channel-Product Fit feature different?**
 A: It's a proprietary engine that scores every product's performance on each marketplace using 7 signals (revenue velocity, unit velocity, price position, sales trend, trend consistency, inventory turnover, return rate). It then generates specific recommendations: EXPAND to new channels, RESTOCK low inventory, REPRICE misaligned products, or DEPRIORITIZE underperformers. No other platform offers this cross-channel intelligence.
 
-**Q9: Can I use Frame if I only sell on one marketplace?**
-A: Yes, but Frame's true power shines with 2+ marketplaces. With a single channel, you still get AI-powered analytics, automated reports, inventory alerts, and Frax as your analyst. But cross-channel comparison, channel-product fit, and unified reporting become available as soon as you connect a second marketplace.
+**Q9: Can I use FRAX if I only sell on one marketplace?**
+A: Yes, but FRAX's true power shines with 2+ marketplaces. With a single channel, you still get AI-powered analytics, automated reports, inventory alerts, and Frax as your analyst. But cross-channel comparison, channel-product fit, and unified reporting become available as soon as you connect a second marketplace.
 
 **Q10: What happens to my data if I cancel?**
 A: Your data remains intact for 30 days after cancellation, in case you change your mind. After 30 days, marketplace tokens are revoked and your data is permanently deleted in accordance with our GDPR-compliant data handling policy.
@@ -805,7 +805,7 @@ with one AI-powered command center.
 **Layout:** 5-column grid on desktop (brand column spans 2, then Product, Company, Legal). On mobile: stack all columns.
 
 **Brand Column (col-span-2):**
-- Logo + "Frame" (text-white font-bold text-xl) + "Analytics" (text-slate-400 text-sm)
+- Logo + "FRAX" (text-white font-bold text-xl) + "Analytics" (text-slate-400 text-sm)
 - Description (text-slate-400, text-sm, max-w-sm): "The AI-powered analytics platform for multi-channel e-commerce sellers. Connect all your marketplaces. Ask questions in plain English. Grow with data."
 - Social links (icon-only, slate-400, hover:white, flex gap-3): Twitter (X), LinkedIn, GitHub
 - Trust badges (mt-4): "SOC 2" and "GDPR" small shield badges (bg-slate-800, text-slate-400 text-xs, rounded-md)
@@ -823,7 +823,7 @@ with one AI-powered command center.
 - Links: Privacy Policy, Terms of Service, Cookie Policy, Security, GDPR Compliance, Responsible Disclosure
 
 **Bottom Bar (border-t border-slate-800, mt-12 pt-8):**
-- Left: "© 2026 Frame Analytics. All rights reserved." (text-slate-500, text-sm)
+- Left: "© 2026 FRAX Analytics. All rights reserved." (text-slate-500, text-sm)
 - Right: "Cookie Settings" link (text-slate-500 hover:text-slate-300)
 
 ---
@@ -849,15 +849,15 @@ Triggered by all "Start Free Trial" / "Request a Free Trial" buttons throughout 
 
 **Close:** X button (top-right) + clicking backdrop closes modal. Esc key closes modal.
 
-**Backend flow:** Submission creates a `TrialRequest` record. Sales team reviews, sends trial invite with unique token. User clicks invite link → sets up password → connects marketplaces → starts using Frame.
+**Backend flow:** Submission creates a `TrialRequest` record. Sales team reviews, sends trial invite with unique token. User clicks invite link → sets up password → connects marketplaces → starts using FRAX.
 
 ---
 
-## The Product in Detail — What Frame Actually Is
+## The Product in Detail — What FRAX Actually Is
 
 *(This section is reference context for Relume/designers — not displayed on the landing page itself.)*
 
-### The Problem Frame Solves
+### The Problem FRAX Solves
 
 Multi-channel e-commerce sellers today manage their businesses across multiple marketplaces simultaneously — Shopify for their own website, Amazon for reach, Flipkart for the Indian market, eBay for global buyers, Etsy for handmade goods, and so on. Each marketplace has its own:
 
@@ -871,21 +871,21 @@ The result: sellers spend hours every day logging into 3-7 different dashboards,
 
 This is painful, slow, and error-prone. It leads to missed stockouts, pricing misalignment between channels, and blind spots where revenue is leaking.
 
-### What Frame Is
+### What FRAX Is
 
-Frame is an **AI-powered unified analytics platform** that connects to all your marketplaces via secure OAuth, syncs your orders/products/inventory in real-time, and lets you ask questions in plain English to an AI assistant named **Frax**.
+FRAX is an **AI-powered unified analytics platform** that connects to all your marketplaces via secure OAuth, syncs your orders/products/inventory in real-time, and lets you ask questions in plain English to an AI assistant named **Frax**.
 
 Instead of opening 7 dashboards, you open one chat. Instead of building pivot tables, you ask: *"Which products on Flipkart should I also list on Amazon?"* — and Frax gives you a specific, data-backed recommendation.
 
-### How Frame Works Under the Hood
+### How FRAX Works Under the Hood
 
-1. **Marketplace Connection:** User authenticates via OAuth 2.0 (or OAuth + PKCE for Etsy/Square). Frame receives read-only access tokens, encrypts them with AES-256-GCM, and stores them securely. Frame never writes to or modifies any marketplace data — it is strictly read-only.
+1. **Marketplace Connection:** User authenticates via OAuth 2.0 (or OAuth + PKCE for Etsy/Square). FRAX receives read-only access tokens, encrypts them with AES-256-GCM, and stores them securely. FRAX never writes to or modifies any marketplace data — it is strictly read-only.
 
 2. **Data Sync Pipeline:**
-   - **Real-time webhooks** from Shopify, BigCommerce, and Square push order/product updates to Frame the moment they happen.
+   - **Real-time webhooks** from Shopify, BigCommerce, and Square push order/product updates to FRAX the moment they happen.
    - **15-minute polling** syncs data from all other marketplaces (eBay, Etsy, Flipkart, etc.).
    - **Manual sync** can be triggered anytime from the app.
-   - All incoming data is normalized into a unified schema: `UnifiedOrder`, `UnifiedProduct`, `UnifiedOrderItem` — meaning a Shopify order and a Flipkart order look identical in Frame's database.
+   - All incoming data is normalized into a unified schema: `UnifiedOrder`, `UnifiedProduct`, `UnifiedOrderItem` — meaning a Shopify order and a Flipkart order look identical in FRAX's database.
    - Distributed locking (compare-and-swap on sync version) prevents duplicate syncs across multiple server instances.
    - Webhook deduplication via unique event IDs prevents reprocessing.
 
@@ -931,7 +931,7 @@ Frax is not a generic chatbot. It is a purpose-built e-commerce analyst with acc
 
 ### Channel-Product Fit Engine (Proprietary)
 
-This is Frame's most unique and powerful feature. No other platform offers this.
+This is FRAX's most unique and powerful feature. No other platform offers this.
 
 The engine analyzes how well each product performs across different marketplaces using **7 signals:**
 1. Revenue velocity (revenue per day)
@@ -965,13 +965,13 @@ Frax has a cognitive architecture that evolves over time:
 
 ---
 
-## Revenue Model — How Frame Earns Money
+## Revenue Model — How FRAX Earns Money
 
 *(Reference context — not displayed on landing page.)*
 
 ### Primary Revenue: SaaS Subscription
 
-Frame operates on a **usage-based SaaS subscription model** with a simple, transparent pricing structure:
+FRAX operates on a **usage-based SaaS subscription model** with a simple, transparent pricing structure:
 
 #### Pricing Structure
 
@@ -1005,7 +1005,7 @@ Frame operates on a **usage-based SaaS subscription model** with a simple, trans
 
 ### Acquisition Strategy: Trial-Based Funnel
 
-Frame uses a **sales-assisted trial funnel** with three acquisition paths:
+FRAX uses a **sales-assisted trial funnel** with three acquisition paths:
 
 1. **Self-Serve:** Visitor requests a free trial on the landing page → sales team reviews → sends trial invite → 30-day free trial → converts to paid.
 2. **Sales Referral:** Sales team member shares a referral link → prospect signs up → trial is auto-linked to sales member for commission tracking.
@@ -1021,14 +1021,14 @@ Frame uses a **sales-assisted trial funnel** with three acquisition paths:
 
 ### Secondary Revenue: Sales Team Commission System
 
-Frame has a built-in commission-based sales infrastructure:
+FRAX has a built-in commission-based sales infrastructure:
 
 - **Founder Dashboard:** The founder can invite, approve/reject, and manage sales team members.
 - **Sales Member Dashboard:** Each approved sales member gets a unique referral code, can view their clients, send trial invites, and track conversions.
 - **Commission Tracking:** Commissions are recorded per sales member per client per billing period. Commission rate is configurable per member.
 - **SalesClient Model:** Links the sales member → client → trial request → converted user, enabling end-to-end attribution.
 
-This system allows Frame to scale acquisition through a distributed salesforce without traditional enterprise sales overhead.
+This system allows FRAX to scale acquisition through a distributed salesforce without traditional enterprise sales overhead.
 
 ### Unit Economics Summary
 

@@ -1,4 +1,4 @@
-// Frame Database Schema
+// FRAX Database Schema
 // Prisma ORM for Multi-Marketplace Analytics Platform
 
 generator client {

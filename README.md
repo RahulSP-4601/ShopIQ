@@ -1,6 +1,6 @@
-# Frame - AI-Powered Multi-Channel E-Commerce Analytics
+# FRAX - AI-Powered Multi-Channel E-Commerce Analytics
 
-Frame is an intelligent analytics platform that transforms complex e-commerce data into actionable insights through conversational AI. Simply ask questions in plain English and get instant, data-driven answers about your store's performance across multiple marketplaces.
+FRAX is an intelligent analytics platform that transforms complex e-commerce data into actionable insights through conversational AI. Simply ask questions in plain English and get instant, data-driven answers about your store's performance across multiple marketplaces.
 
 ## The Problem We Solve
 
@@ -10,7 +10,7 @@ Multi-channel e-commerce sellers face a growing challenge: managing data across 
 
 ## Our Solution
 
-Frame acts as your AI-powered business analyst. Instead of navigating complex dashboards:
+FRAX acts as your AI-powered business analyst. Instead of navigating complex dashboards:
 
 - **Ask questions naturally** - "What was my revenue last week?" or "Which products are underperforming?"
 - **Get unified insights** - All your marketplace data in one place
@@ -109,7 +109,7 @@ Each report includes AI-generated summaries with actionable recommendations.
 
 ## How It Works
 
-1. **Sign Up** - Create an account on Frame
+1. **Sign Up** - Create an account on FRAX
 2. **Connect** - Link your marketplaces (Shopify, eBay, Etsy, Flipkart, BigCommerce, Square, Snapdeal) via OAuth or credentials
 3. **Sync** - Your data is automatically imported, normalized, and kept up to date
 4. **Ask** - Start asking questions and generating reports across all your stores
@@ -118,7 +118,7 @@ Each report includes AI-generated summaries with actionable recommendations.
 
 ### Pricing Structure
 
-Frame operates on a **subscription-based SaaS model** with transparent, scalable pricing:
+FRAX operates on a **subscription-based SaaS model** with transparent, scalable pricing:
 
 | Plan | Price | Includes |
 | ---- | ----- | -------- |
@@ -139,7 +139,7 @@ Frame operates on a **subscription-based SaaS model** with transparent, scalable
 
 ### Competitive Advantage
 
-| Traditional Analytics | Frame |
+| Traditional Analytics | FRAX |
 | --------------------- | ------ |
 | Complex dashboards | Conversational AI |
 | Single platform focus | Multi-marketplace unified |
