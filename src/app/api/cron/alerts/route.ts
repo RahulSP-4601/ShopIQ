@@ -42,13 +42,28 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Find all eligible users: active subscription + connected marketplace
-  // Use rotating shard selection based on current hour to ensure all users get processed over time
+  const searchParams = request.nextUrl.searchParams;
+  const shardParam = searchParams.get("shard");
+  const totalShardsParam = searchParams.get("totalShards");
+
+  const parsedShard = shardParam === null ? null : Number.parseInt(shardParam, 10);
+  const parsedTotalShards =
+    totalShardsParam === null ? null : Number.parseInt(totalShardsParam, 10);
+
+  const useExplicitSharding =
+    parsedShard !== null &&
+    parsedTotalShards !== null &&
+    Number.isInteger(parsedShard) &&
+    Number.isInteger(parsedTotalShards) &&
+    parsedTotalShards > 0 &&
+    parsedShard >= 0 &&
+    parsedShard < parsedTotalShards;
+
+  // Find all eligible users: active subscription + connected marketplace.
+  // Default behavior processes all users in one run so a daily Hobby-plan cron is sufficient.
+  // Optional `shard` + `totalShards` query params preserve finer-grained sharding for external schedulers.
   let eligibleUsers: { id: string }[];
   try {
-    const currentHour = new Date().getUTCHours(); // 0-23
-    const TOTAL_SHARDS = 24; // Process 1/24th of users each hour, full rotation every day
-
     eligibleUsers = await prisma.user.findMany({
       where: {
         subscription: {
@@ -62,17 +77,16 @@ export async function GET(request: NextRequest) {
       orderBy: { id: "asc" },
     });
 
-    // Filter to current shard (id hash % TOTAL_SHARDS == currentHour)
-    // Use simple string hash to evenly distribute users across shards
-    // Use unsigned conversion (>>> 0) to avoid Math.abs overflow when hash === -2147483648
-    eligibleUsers = eligibleUsers.filter((user) => {
-      let hash = 0;
-      for (let i = 0; i < user.id.length; i++) {
-        hash = (hash << 5) - hash + user.id.charCodeAt(i);
-        hash = hash & hash; // Convert to 32-bit integer
-      }
-      return ((hash >>> 0) % TOTAL_SHARDS) === currentHour;
-    });
+    if (useExplicitSharding) {
+      eligibleUsers = eligibleUsers.filter((user) => {
+        let hash = 0;
+        for (let i = 0; i < user.id.length; i++) {
+          hash = (hash << 5) - hash + user.id.charCodeAt(i);
+          hash = hash & hash; // Convert to 32-bit integer
+        }
+        return ((hash >>> 0) % parsedTotalShards) === parsedShard;
+      });
+    }
 
     // Shuffle to prevent user starvation (deterministic order always processes same MAX_USERS_PER_RUN users first)
     // Fisher-Yates shuffle for fair random selection
@@ -155,6 +169,9 @@ export async function GET(request: NextRequest) {
   return NextResponse.json(
     {
       success: errorCount === 0 && timeoutCount === 0,
+      sharded: useExplicitSharding,
+      shard: useExplicitSharding ? parsedShard : null,
+      totalShards: useExplicitSharding ? parsedTotalShards : null,
       usersProcessed: eligibleUsers.length,
       totalAlerts,
       errorCount,
