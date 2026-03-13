@@ -60,7 +60,7 @@ export default function SalesDashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [intakeCopied, setIntakeCopied] = useState(false);
   const [addForm, setAddForm] = useState({ name: "", email: "", phone: "" });
   const [addError, setAddError] = useState("");
   const [adding, setAdding] = useState(false);
@@ -189,11 +189,11 @@ export default function SalesDashboardPage() {
 
   const copyRefLink = async () => {
     if (!profile?.refCode) return;
-    const link = `${origin}?ref=${profile.refCode}`;
+    const link = `${origin}/trial-request/${profile.refCode}`;
     try {
       await navigator.clipboard.writeText(link);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setIntakeCopied(true);
+      setTimeout(() => setIntakeCopied(false), 2000);
     } catch {
       // Fallback: ignore if clipboard API unavailable
     }
@@ -293,18 +293,21 @@ export default function SalesDashboardPage() {
         )}
         {/* Referral Link */}
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
-          <h2 className="text-sm font-medium text-gray-500 mb-2">Your Referral Link</h2>
+          <h2 className="text-sm font-medium text-gray-500 mb-2">Private Client Intake Link</h2>
+          <p className="mb-3 text-sm text-gray-600">
+            Share this private form with prospects you want to move into the waitlist and trial pipeline.
+          </p>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <code className="flex-1 bg-gray-50 border border-gray-200 text-sm text-gray-700 px-4 py-2.5 rounded-lg truncate">
               {profile?.refCode
-                ? `${origin}?ref=${profile.refCode}`
+                ? `${origin}/trial-request/${profile.refCode}`
                 : "—"}
             </code>
             <button
               onClick={copyRefLink}
               className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors whitespace-nowrap cursor-pointer"
             >
-              {copied ? "Copied!" : "Copy"}
+              {intakeCopied ? "Copied!" : "Copy"}
             </button>
           </div>
         </div>

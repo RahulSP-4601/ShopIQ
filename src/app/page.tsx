@@ -22,6 +22,13 @@ import "@/components/landing/animations.css";
 
 export default function Home() {
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const refCode = params.get("ref");
+    if (refCode) {
+      window.location.replace(`/trial-request/${encodeURIComponent(refCode)}`);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {

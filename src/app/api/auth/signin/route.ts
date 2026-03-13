@@ -122,7 +122,10 @@ export async function POST(request: NextRequest) {
         // Trusted relative redirect — resume the interrupted flow
         redirect = redirectParam;
       } else if (user.marketplaceConns.length === 0) {
-        redirect = "/onboarding/connect";
+        redirect =
+          user.subscription?.status === "TRIAL"
+            ? "/trial/connect"
+            : "/onboarding/connect";
       } else if (
         !user.subscription ||
         !["ACTIVE", "TRIAL"].includes(user.subscription.status)
