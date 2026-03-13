@@ -11,6 +11,22 @@ function getResend() {
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "ReplyQuick <noreply@replyquick.ai>";
 const CONTACT_TO_EMAIL = process.env.CONTACT_TO_EMAIL || FROM_EMAIL;
 
+async function sendEmail(payload: Parameters<Resend["emails"]["send"]>[0]) {
+  const resend = getResend();
+  const response = await resend.emails.send(payload);
+
+  if (response.error) {
+    const statusPart = response.error.statusCode ? ` (${response.error.statusCode})` : "";
+    throw new Error(`Resend rejected email${statusPart}: ${response.error.message}`);
+  }
+
+  if (!response.data?.id) {
+    throw new Error("Resend did not return an email id");
+  }
+
+  return response.data.id;
+}
+
 function escapeHtml(text: string): string {
   return text
     .replace(/&/g, "&amp;")
@@ -51,14 +67,13 @@ export async function sendSalesWelcomeEmail({
   dashboardUrl: string;
   expiryHours?: number;
 }) {
-  const resend = getResend();
   const safeName = escapeHtml(name);
   const safeEmail = escapeHtml(email);
   const safeDashboardUrl = sanitizeUrl(dashboardUrl);
   const safeResetUrl = sanitizeUrl(resetUrl);
   const expiryLabel = expiryHours === 1 ? "1 hour" : `${expiryHours} hours`;
 
-  await resend.emails.send({
+  await sendEmail({
     from: FROM_EMAIL,
     to: email,
     subject: "Welcome to FRAX Sales Team",
@@ -98,11 +113,10 @@ export async function sendTrialInviteEmail({
   email: string;
   trialLink: string;
 }) {
-  const resend = getResend();
   const safeName = escapeHtml(name);
   const safeTrialLink = sanitizeUrl(trialLink);
 
-  await resend.emails.send({
+  await sendEmail({
     from: FROM_EMAIL,
     to: email,
     subject: "Free 1 Month Access — Set Up Your FRAX Account",
@@ -166,11 +180,10 @@ export async function sendTrialAccountReadyEmail({
   email: string;
   dashboardUrl: string;
 }) {
-  const resend = getResend();
   const safeName = escapeHtml(name);
   const safeDashboardUrl = sanitizeUrl(dashboardUrl);
 
-  await resend.emails.send({
+  await sendEmail({
     from: FROM_EMAIL,
     to: email,
     subject: "Your FRAX Account Is Ready",
@@ -229,11 +242,10 @@ export async function sendPasswordResetEmail({
   name: string;
   resetUrl: string;
 }) {
-  const resend = getResend();
   const safeName = escapeHtml(name);
   const safeResetUrl = sanitizeUrl(resetUrl);
 
-  await resend.emails.send({
+  await sendEmail({
     from: FROM_EMAIL,
     to: email,
     subject: "Reset Your FRAX Password",
@@ -263,12 +275,11 @@ export async function sendContactFormEmail({
   email: string;
   message: string;
 }) {
-  const resend = getResend();
   const safeName = escapeHtml(name);
   const safeEmail = escapeHtml(email);
   const safeMessage = escapeHtml(message).replace(/\n/g, "<br />");
 
-  await resend.emails.send({
+  await sendEmail({
     from: FROM_EMAIL,
     to: CONTACT_TO_EMAIL,
     replyTo: email,
