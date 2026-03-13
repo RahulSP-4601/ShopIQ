@@ -146,7 +146,7 @@ export function ChatHeader({
 
         <Link href="/" className="flex items-center gap-2 sm:gap-3">
           <Image
-            src="/logo.png"
+            src="/logo-frax.svg"
             alt="FRAX"
             width={62}
             height={62}

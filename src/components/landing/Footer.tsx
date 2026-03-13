@@ -76,20 +76,15 @@ export function Footer() {
           <div className="col-span-2">
             <Link href="/" className="flex items-center gap-2.5 group">
               <Image
-                src="/logo.png"
+                src="/logo-frax.svg"
                 alt="FRAX"
                 width={82}
                 height={82}
                 className="transition-transform duration-200 group-hover:scale-105"
               />
-              <div className="flex flex-col">
-                <span className="text-lg font-semibold text-slate-900 tracking-tight">
-                  FRAX
-                </span>
-                <span className="text-[10px] text-slate-500 font-medium tracking-wide uppercase -mt-0.5">
-                  Analytics
-                </span>
-              </div>
+              <span className="text-lg font-semibold text-slate-900 tracking-tight">
+                FRAX
+              </span>
             </Link>
             <p className="mt-4 text-sm text-slate-600 max-w-xs leading-relaxed">
               The AI-powered analytics platform for multi-channel e-commerce
@@ -139,7 +134,7 @@ export function Footer() {
         <div className="py-6 border-t border-slate-100 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-center sm:text-left">
             <p className="text-sm text-slate-400">
-              &copy; {new Date().getFullYear()} FRAX Analytics. All rights reserved.
+              &copy; {new Date().getFullYear()} FRAX. All rights reserved.
             </p>
             <button
               onClick={openPreferences}

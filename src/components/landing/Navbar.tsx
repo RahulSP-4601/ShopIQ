@@ -50,21 +50,16 @@ export function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 group">
           <Image
-            src="/logo.png"
+            src="/logo-frax.svg"
             alt="FRAX"
             width={82}
             height={82}
             className="transition-transform duration-200 group-hover:scale-105"
             priority
           />
-          <div className="flex flex-col">
-            <span className="text-xl font-bold text-slate-900 tracking-tight">
-              FRAX
-            </span>
-            <span className="text-[11px] text-teal-600 font-semibold tracking-wider uppercase -mt-0.5">
-              Analytics
-            </span>
-          </div>
+          <span className="text-xl font-bold text-slate-900 tracking-tight">
+            FRAX
+          </span>
         </Link>
 
         {/* Navigation Links - Desktop */}

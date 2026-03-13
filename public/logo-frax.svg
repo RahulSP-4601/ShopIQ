@@ -1,0 +1,38 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="fraxRibbon" x1="88" y1="80" x2="430" y2="432" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#66E6EF"/>
+      <stop offset="0.38" stop-color="#27CFC0"/>
+      <stop offset="0.68" stop-color="#127A8B"/>
+      <stop offset="1" stop-color="#0C4D63"/>
+    </linearGradient>
+    <linearGradient id="fraxHighlight" x1="126" y1="96" x2="392" y2="392" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#D7FFFC" stop-opacity="0.9"/>
+      <stop offset="0.35" stop-color="#9CF8EA" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#9CF8EA" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="fraxShadow" x="22" y="28" width="468" height="456" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#0E5364" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+
+  <rect width="512" height="512" rx="108" fill="white"/>
+
+  <g filter="url(#fraxShadow)">
+    <path
+      d="M148 92C224 62 320 64 390 100C454 133 478 202 466 272C454 343 419 409 357 437C289 468 195 463 138 415C83 369 62 289 73 215C82 155 96 113 148 92Z"
+      stroke="url(#fraxRibbon)"
+      stroke-width="82"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <path
+      d="M148 92C224 62 320 64 390 100C454 133 478 202 466 272C454 343 419 409 357 437C289 468 195 463 138 415C83 369 62 289 73 215C82 155 96 113 148 92Z"
+      stroke="url(#fraxHighlight)"
+      stroke-width="28"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      opacity="0.85"
+    />
+  </g>
+</svg>

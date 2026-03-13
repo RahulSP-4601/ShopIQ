@@ -13,7 +13,6 @@ import {
   ExampleQuestions,
   HowItWorks,
   Comparison,
-  Testimonials,
   CTA,
   FAQ,
   Footer,
@@ -53,7 +52,6 @@ export default function Home() {
       <ExampleQuestions />
       <HowItWorks />
       <Comparison />
-      <Testimonials />
       <CTA />
       <FAQ />
       <Footer />

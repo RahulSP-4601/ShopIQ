@@ -596,7 +596,7 @@ export default function AccountMarketplacesPage() {
               <div className="absolute -inset-1 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-xl blur opacity-25 group-hover:opacity-40 transition-opacity" />
               <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-emerald-600 shadow-lg">
                 <Image
-                  src="/logo.png"
+                  src="/logo-frax.svg"
                   alt="FRAX"
                   width={38}
                   height={38}

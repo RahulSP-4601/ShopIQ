@@ -186,7 +186,7 @@ export default function OnboardingPaymentPage() {
         subscription_id: checkoutData.subscriptionId,
         name: "FRAX",
         description: `FRAX Pro - ${connectedCount} marketplace${connectedCount > 1 ? "s" : ""}`,
-        image: "/logo.png",
+        image: "/logo-frax.svg",
         handler: async (response: {
           razorpay_payment_id: string;
           razorpay_subscription_id: string;

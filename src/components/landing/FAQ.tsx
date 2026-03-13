@@ -4,10 +4,6 @@ import { useState } from "react";
 
 const faqs = [
   {
-    q: "How does waitlist access work?",
-    a: "Join the waitlist with your company details. Our founder and sales team review requests and send 1-month trial access by invite email when approved.",
-  },
-  {
     q: "Does FRAX modify or write to my marketplace stores?",
     a: "No. FRAX uses strictly read-only API access. We sync your orders, products, and inventory data for analytics purposes only. We never create, update, or delete anything on your marketplaces.",
   },
@@ -22,10 +18,6 @@ const faqs = [
   {
     q: "What marketplaces do you support?",
     a: "We currently support 9 marketplaces: Shopify, Amazon, eBay, Etsy, Flipkart, BigCommerce, Square, Wix, and WooCommerce. We're actively adding more — PrestaShop and additional platforms are on our roadmap.",
-  },
-  {
-    q: "How often does data sync?",
-    a: "Shopify, BigCommerce, and Square push updates in real-time via webhooks. All other marketplaces sync every 15 minutes automatically. You can also trigger a manual sync anytime from the dashboard.",
   },
   {
     q: "What can I ask Frax?",

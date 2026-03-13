@@ -69,7 +69,7 @@ export function LegalLayout({
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2 sm:gap-3">
               <Image
-                src="/logo.png"
+                src="/logo-frax.svg"
                 alt="FRAX"
                 width={36}
                 height={36}
