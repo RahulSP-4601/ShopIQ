@@ -26,7 +26,7 @@ export default async function OnboardingLayout({
       <header className="relative z-10 p-6">
         <Link href="/" className="inline-flex items-center gap-3 group">
           <Image
-            src="/logo-frax.svg"
+            src="/logo-frax.png"
             alt="FRAX"
             width={66}
             height={66}

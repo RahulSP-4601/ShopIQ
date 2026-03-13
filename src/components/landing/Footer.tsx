@@ -76,7 +76,7 @@ export function Footer() {
           <div className="col-span-2">
             <Link href="/" className="flex items-center gap-2.5 group">
               <Image
-                src="/logo-frax.svg"
+                src="/logo-frax.png"
                 alt="FRAX"
                 width={82}
                 height={82}

@@ -68,7 +68,7 @@ export default function BlogPage() {
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2 sm:gap-3">
               <div className="relative w-9 h-9 sm:w-10 sm:h-10">
-                <Image src="/logo-frax.svg" alt="FRAX" fill className="object-contain" />
+                <Image src="/logo-frax.png" alt="FRAX" fill className="object-contain" />
               </div>
               <span className="text-base sm:text-lg font-semibold text-slate-900">FRAX</span>
             </Link>

@@ -325,7 +325,7 @@ export function Integrations() {
               <div className="relative w-36 h-36 md:w-44 md:h-44 rounded-full bg-white shadow-xl border-2 border-teal-200 flex items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-teal-50 to-white" />
                 <Image
-                  src="/logo-frax.svg"
+                  src="/logo-frax.png"
                   alt="FRAX"
                   width={160}
                   height={160}
