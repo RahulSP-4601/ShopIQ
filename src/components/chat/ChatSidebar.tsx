@@ -81,7 +81,7 @@ export function ChatSidebar({
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r border-slate-200 bg-slate-50 transform transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${
+      className={`fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r border-slate-200/80 bg-gradient-to-b from-slate-50 via-white to-white transform transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${
         isOpen ? "translate-x-0" : "-translate-x-full"
       }`}
     >
@@ -97,7 +97,7 @@ export function ChatSidebar({
       </button>
 
       {/* Header - User Info */}
-      <div className="border-b border-slate-200 p-4 pt-12 lg:pt-4">
+      <div className="border-b border-slate-200/80 p-4 pt-12 lg:pt-4">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-emerald-600 text-sm font-semibold text-white">
             {initials}
@@ -111,9 +111,9 @@ export function ChatSidebar({
         {/* Connected Marketplaces Accordion */}
         <button
           onClick={() => setShowMarketplaces(!showMarketplaces)}
-          className="mt-3 flex w-full items-center justify-between rounded-lg bg-white px-3 py-2 border border-slate-200 hover:border-slate-300 transition-colors"
+          className="mt-4 flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm transition-colors hover:border-slate-300"
         >
-          <span className="text-xs font-medium text-slate-600">
+          <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
             {connectedMarketplaces.length} Connected Marketplace
             {connectedMarketplaces.length !== 1 ? "s" : ""}
           </span>
@@ -133,11 +133,11 @@ export function ChatSidebar({
         </button>
 
         {showMarketplaces && (
-          <div className="mt-2 space-y-1">
+          <div className="mt-2 space-y-1.5">
             {connectedMarketplaces.map((mp, index) => (
               <div
                 key={`${mp.marketplace}-${index}`}
-                className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 border border-slate-100"
+                className="flex items-center gap-2 rounded-xl border border-slate-100 bg-white px-3 py-2 shadow-sm"
               >
                 <div
                   className="h-2 w-2 rounded-full"
@@ -162,7 +162,7 @@ export function ChatSidebar({
       <div className="p-3">
         <button
           onClick={startNewChat}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:from-teal-600 hover:to-emerald-700"
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-teal-500 to-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-[0_18px_35px_-20px_rgba(13,148,136,0.75)] transition-all hover:-translate-y-0.5 hover:from-teal-600 hover:to-emerald-700"
         >
           <svg
             className="h-4 w-4"
@@ -183,7 +183,7 @@ export function ChatSidebar({
 
       {/* Conversations List */}
       <div className="flex-1 overflow-y-auto px-3 pb-3">
-        <p className="mb-2 px-2 text-xs font-medium text-slate-400 uppercase tracking-wide">
+        <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
           Recent Chats
         </p>
         {isLoading ? (
@@ -195,14 +195,14 @@ export function ChatSidebar({
             No conversations yet
           </p>
         ) : (
-          <div className="space-y-1">
+          <div className="space-y-2">
             {conversations.map((conversation) => (
               <button
                 key={conversation.id}
                 onClick={() => navigateTo(`/chat/${conversation.id}`)}
-                className="w-full rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-slate-100"
+                className="w-full rounded-2xl border border-transparent bg-white px-3 py-3 text-left shadow-sm transition-all hover:border-slate-200 hover:bg-slate-50"
               >
-                <p className="text-sm text-slate-700 truncate">
+                <p className="text-sm font-medium text-slate-800 truncate">
                   {conversation.title || "Untitled"}
                 </p>
                 <p className="text-xs text-slate-400 mt-0.5">
@@ -215,10 +215,10 @@ export function ChatSidebar({
       </div>
 
       {/* Footer */}
-      <div className="border-t border-slate-200 p-3 space-y-1">
+      <div className="border-t border-slate-200/80 p-3 space-y-1.5">
         <button
           onClick={() => navigateTo("/account/marketplaces")}
-          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-teal-600 font-medium transition-colors hover:bg-teal-50"
+          className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-teal-700 transition-colors hover:bg-teal-50"
         >
           <svg
             className="h-4 w-4"
@@ -237,7 +237,7 @@ export function ChatSidebar({
         </button>
         <button
           onClick={() => navigateTo("/reports")}
-          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-600 transition-colors hover:bg-slate-100"
+          className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm text-slate-600 transition-colors hover:bg-slate-100"
         >
           <svg
             className="h-4 w-4"

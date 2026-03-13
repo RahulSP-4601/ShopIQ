@@ -1,6 +1,7 @@
 "use client";
 
 import { memo } from "react";
+import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
@@ -160,10 +161,21 @@ export function ChatMessage({
         )}
       >
         {isLoading ? (
-          <div className="flex items-center gap-1">
-            <div className="h-2 w-2 rounded-full bg-slate-400 animate-bounce [animation-delay:-0.3s]" />
-            <div className="h-2 w-2 rounded-full bg-slate-400 animate-bounce [animation-delay:-0.15s]" />
-            <div className="h-2 w-2 rounded-full bg-slate-400 animate-bounce" />
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-slate-200/80">
+              <Image
+                src="/logo-frax.png"
+                alt="FRAX"
+                width={28}
+                height={28}
+                className="h-7 w-7 animate-[spin_1.8s_linear_infinite]"
+                priority
+              />
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-semibold text-slate-800">Frax is analyzing</p>
+              <p className="text-xs text-slate-500">Pulling live signals from your connected marketplaces.</p>
+            </div>
           </div>
         ) : (
           <>
