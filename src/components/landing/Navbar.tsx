@@ -57,14 +57,9 @@ export function Navbar() {
             className="transition-transform duration-200 group-hover:scale-105"
             priority
           />
-          <div className="flex flex-col justify-center leading-none">
-            <span className="bg-gradient-to-r from-slate-950 via-slate-800 to-teal-700 bg-clip-text text-[1.45rem] font-black uppercase tracking-[0.22em] text-transparent sm:text-[1.6rem]">
-              FRAX
-            </span>
-            <span className="mt-1 text-[0.58rem] font-semibold uppercase tracking-[0.34em] text-slate-400 sm:text-[0.62rem]">
-              Commerce Intelligence
-            </span>
-          </div>
+          <span className="frax-wordmark text-[2.1rem] sm:text-[2.3rem]">
+            FRAX
+          </span>
         </Link>
 
         {/* Navigation Links - Desktop */}
