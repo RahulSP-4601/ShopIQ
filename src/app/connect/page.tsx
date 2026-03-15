@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function ConnectPage() {
   const [shopDomain, setShopDomain] = useState("");
@@ -38,14 +39,14 @@ export default function ConnectPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <a href="/" className="inline-flex items-center gap-2">
+          <Link href="/" className="inline-flex items-center gap-2">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white font-bold text-lg shadow-lg shadow-emerald-500/25">
               S
             </div>
             <span className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
-              ShopIQ
+              FRAX
             </span>
-          </a>
+          </Link>
         </div>
 
         {/* Connect Card */}
@@ -110,19 +111,19 @@ export default function ConnectPage() {
           </form>
 
           <p className="mt-6 text-center text-xs text-slate-400">
-            By connecting, you agree to let ShopIQ access your store data for
+            By connecting, you agree to let FRAX access your store data for
             analytics purposes.
           </p>
         </div>
 
         {/* Back link */}
         <p className="mt-6 text-center">
-          <a
+          <Link
             href="/chat"
             className="text-sm text-slate-500 hover:text-emerald-600 transition-colors"
           >
             ← Back to chat
-          </a>
+          </Link>
         </p>
       </div>
     </div>

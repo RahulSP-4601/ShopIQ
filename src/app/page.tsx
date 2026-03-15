@@ -4,10 +4,17 @@ import { useEffect } from "react";
 import {
   Navbar,
   Hero,
+  LogoBar,
+  Integrations,
+  AIShowcase,
+  ChannelProductFit,
+  ReportsAlerts,
   Features,
-  HowItWorks,
   ExampleQuestions,
+  HowItWorks,
+  Comparison,
   CTA,
+  FAQ,
   Footer,
   BackgroundEffects,
 } from "@/components/landing";
@@ -15,6 +22,13 @@ import "@/components/landing/animations.css";
 
 export default function Home() {
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const refCode = params.get("ref");
+    if (refCode) {
+      window.location.replace(`/trial-request/${encodeURIComponent(refCode)}`);
+      return;
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -36,10 +50,17 @@ export default function Home() {
       <BackgroundEffects />
       <Navbar />
       <Hero />
+      <LogoBar />
+      <Integrations />
+      <AIShowcase />
+      <ChannelProductFit />
+      <ReportsAlerts />
       <Features />
-      <HowItWorks />
       <ExampleQuestions />
+      <HowItWorks />
+      <Comparison />
       <CTA />
+      <FAQ />
       <Footer />
     </div>
   );

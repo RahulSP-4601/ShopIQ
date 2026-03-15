@@ -1,20 +1,17 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Eagle_Lake } from "next/font/google";
 import "./globals.css";
+import { CookieConsentProvider } from "@/components/cookie-consent";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const eagleLake = Eagle_Lake({
+  variable: "--font-eagle-lake",
+  weight: "400",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "ShopIQ — Your AI E-commerce Analyst",
-  description: "AI-powered analytics for Shopify store owners. Ask questions in plain English, get instant answers about revenue, products, and customers.",
+  title: "FRAX — Get all your marketplaces in 1 FRAX",
+  description: "AI-powered analytics for multi-channel e-commerce sellers. Connect Shopify, Amazon, Flipkart, and 50+ marketplaces. Get unified insights in one dashboard.",
 };
 
 export default function RootLayout({
@@ -23,11 +20,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+    <html lang="en" className="scroll-smooth">
+      <body className={`${eagleLake.variable} font-sans antialiased`}>
+        <CookieConsentProvider>{children}</CookieConsentProvider>
       </body>
     </html>
   );

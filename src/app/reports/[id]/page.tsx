@@ -1,5 +1,6 @@
 import { redirect, notFound } from "next/navigation";
-import { getStore } from "@/lib/auth/session";
+import Link from "next/link";
+import { getUserSession } from "@/lib/auth/session";
 import prisma from "@/lib/prisma";
 import { ReportView } from "@/components/reports/ReportView";
 
@@ -12,16 +13,16 @@ interface ReportDetailPageProps {
 export default async function ReportDetailPage({
   params,
 }: ReportDetailPageProps) {
-  const store = await getStore();
+  const session = await getUserSession();
 
-  if (!store) {
+  if (!session?.userId) {
     redirect("/");
   }
 
   const { id } = await params;
 
   const report = await prisma.report.findFirst({
-    where: { id, storeId: store.id },
+    where: { id, userId: session.userId },
   });
 
   if (!report) {
@@ -32,28 +33,28 @@ export default async function ReportDetailPage({
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto max-w-4xl px-6 py-4">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <a href="/chat" className="flex items-center gap-2">
+              <Link href="/chat" className="flex items-center gap-2">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white font-bold shadow-md shadow-emerald-500/25">
                   S
                 </div>
-                <span className="text-lg font-bold text-slate-900">ShopIQ</span>
-              </a>
+                <span className="text-lg font-bold text-slate-900">FRAX</span>
+              </Link>
               <span className="text-slate-300">|</span>
-              <a
+              <Link
                 href="/reports"
                 className="text-sm text-slate-500 hover:text-slate-700"
               >
                 Reports
-              </a>
+              </Link>
               <span className="text-slate-300">/</span>
               <span className="text-sm font-medium text-slate-700">
                 {report.title}
               </span>
             </div>
-            <a
+            <Link
               href="/reports"
               className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100"
             >
@@ -71,13 +72,13 @@ export default async function ReportDetailPage({
                 />
               </svg>
               Back to Reports
-            </a>
+            </Link>
           </div>
         </div>
       </header>
 
       {/* Content */}
-      <main className="mx-auto max-w-4xl px-6 py-8">
+      <main className="mx-auto max-w-4xl px-4 sm:px-6 py-8">
         <ReportView report={report} />
       </main>
     </div>

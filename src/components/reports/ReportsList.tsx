@@ -163,62 +163,104 @@ export function ReportsList({ storeName }: ReportsListProps) {
             </p>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-            <table className="w-full">
-              <thead className="border-b border-slate-200 bg-slate-50">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wide">
-                    Report
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wide">
-                    Status
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wide">
-                    Created
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wide">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200">
-                {reports.map((report) => (
-                  <tr key={report.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3">
-                      <p className="font-medium text-slate-900">{report.title}</p>
+          <>
+            {/* Mobile card layout */}
+            <div className="sm:hidden space-y-3">
+              {reports.map((report) => (
+                <div
+                  key={report.id}
+                  className="rounded-xl border border-slate-200 bg-white p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-slate-900 truncate">{report.title}</p>
                       <p className="text-sm text-slate-500">
                         {report.type.replace(/_/g, " ")}
                       </p>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          report.status === "COMPLETED"
-                            ? "bg-emerald-50 text-emerald-700"
-                            : report.status === "GENERATING"
-                            ? "bg-yellow-50 text-yellow-700"
-                            : "bg-red-50 text-red-700"
-                        }`}
-                      >
-                        {report.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-slate-500">
-                      {formatDate(report.createdAt)}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <button
-                        onClick={() => router.push(`/reports/${report.id}`)}
-                        className="text-sm font-medium text-emerald-600 hover:text-emerald-700"
-                      >
-                        View
-                      </button>
-                    </td>
+                      <p className="mt-1 text-xs text-slate-400">
+                        {formatDate(report.createdAt)}
+                      </p>
+                    </div>
+                    <span
+                      className={`shrink-0 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                        report.status === "COMPLETED"
+                          ? "bg-emerald-50 text-emerald-700"
+                          : report.status === "GENERATING"
+                          ? "bg-yellow-50 text-yellow-700"
+                          : "bg-red-50 text-red-700"
+                      }`}
+                    >
+                      {report.status}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => router.push(`/reports/${report.id}`)}
+                    className="mt-3 w-full py-2 text-sm font-medium text-emerald-600 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition-colors"
+                  >
+                    View Report
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop table layout */}
+            <div className="hidden sm:block overflow-hidden rounded-xl border border-slate-200 bg-white">
+              <table className="w-full">
+                <thead className="border-b border-slate-200 bg-slate-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wide">
+                      Report
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wide">
+                      Status
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wide">
+                      Created
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wide">
+                      Actions
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-slate-200">
+                  {reports.map((report) => (
+                    <tr key={report.id} className="hover:bg-slate-50">
+                      <td className="px-4 py-3">
+                        <p className="font-medium text-slate-900">{report.title}</p>
+                        <p className="text-sm text-slate-500">
+                          {report.type.replace(/_/g, " ")}
+                        </p>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                            report.status === "COMPLETED"
+                              ? "bg-emerald-50 text-emerald-700"
+                              : report.status === "GENERATING"
+                              ? "bg-yellow-50 text-yellow-700"
+                              : "bg-red-50 text-red-700"
+                          }`}
+                        >
+                          {report.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-slate-500">
+                        {formatDate(report.createdAt)}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <button
+                          onClick={() => router.push(`/reports/${report.id}`)}
+                          className="text-sm font-medium text-emerald-600 hover:text-emerald-700"
+                        >
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </section>
     </div>
