@@ -57,7 +57,7 @@ export function Navbar() {
             className="transition-transform duration-200 group-hover:scale-105"
             priority
           />
-          <span className="frax-wordmark text-[2.1rem] sm:text-[2.3rem]">
+          <span className="frax-wordmark text-[2.5rem] sm:text-[2.8rem]">
             FRAX
           </span>
         </Link>

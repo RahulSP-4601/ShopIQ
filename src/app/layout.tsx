@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
+import { Eagle_Lake } from "next/font/google";
 import "./globals.css";
 import { CookieConsentProvider } from "@/components/cookie-consent";
+
+const eagleLake = Eagle_Lake({
+  variable: "--font-eagle-lake",
+  weight: "400",
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
   title: "FRAX — Get all your marketplaces in 1 FRAX",
@@ -14,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className="font-sans antialiased">
+      <body className={`${eagleLake.variable} font-sans antialiased`}>
         <CookieConsentProvider>{children}</CookieConsentProvider>
       </body>
     </html>
